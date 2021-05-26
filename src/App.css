@@ -11,13 +11,11 @@
     color: white;
   }
 
-
-
 /* Bits */
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
-    height: 40vmin;
+    height: 20vmin;
   }
 }
 @keyframes App-logo-spin {

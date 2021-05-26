@@ -1,8 +1,16 @@
 // Libs
 import {ButtonGroup, Button, Grid} from '@material-ui/core';
 
-// RENDER
-export default function Header() {
+// Definitions
+type tabOptions = 0 | 1 | 2;
+
+interface tabsControlers {
+  tabSwitchFn: (tab: tabOptions) => void
+}
+
+export default function Header({tabSwitchFn} : tabsControlers) {
+
+  // RENDER
   return (
     <header className="App-header">
       <Grid container>
@@ -11,9 +19,9 @@ export default function Header() {
         </Grid>
         <Grid item xs={6}>
           <ButtonGroup variant="contained" color="primary">
-            <Button>Charts</Button>
-            <Button>Grid</Button>
-            <Button>Transactions</Button>
+            <Button onClick={() => {tabSwitchFn(0)}}>Charts</Button>
+            <Button onClick={() => {tabSwitchFn(1)}}>Grid</Button>
+            <Button onClick={() => {tabSwitchFn(2)}}>Transactions</Button>
           </ButtonGroup>
         </Grid>
       </Grid>
