@@ -9,9 +9,9 @@ export default function Transactions({rawFinancials}: {rawFinancials: [ string |
   // RENDER
   return (
     <div className="Transactions">
-      Transactions:
+      <h2>Transactions</h2>
       <TableContainer>
-        <Table>
+        <Table size="small">
           <TableHead>
             <TableRow>
               {rawFinancials[0].map(transactionHeadCell =>(

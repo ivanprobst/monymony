@@ -1,7 +1,7 @@
 /* Structure */
 .App-header {
   background-color: #AC3931;
-  padding: 10px;
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
 }
@@ -10,6 +10,21 @@
     font-size: calc(10px + 2vmin);
     color: white;
   }
+
+  .App-header div div:nth-child(2) {
+    padding-top: 20px;
+    text-align: right;
+    margin: 0;
+  }
+
+    .App-header button {
+      background: #537D8D;
+    }
+
+.App-body {
+  padding: 20px;
+  color: #482C3D;
+}
 
 /* Bits */
 @media (prefers-reduced-motion: no-preference) {
