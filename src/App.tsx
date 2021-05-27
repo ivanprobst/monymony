@@ -29,7 +29,7 @@ export default function App() {
 
   // LOADING
   React.useEffect(() => {
-    fetch('https://sheets.googleapis.com/v4/spreadsheets/1IZl_O6hXXfc03Suu3_lA2J5h4g29GqjaNHok0ST31yM/values/A:G?key=AIzaSyCnKMBNtZvvhvC1EHJxGuHVA9uAzxLClk0')
+    fetch('https://sheets.googleapis.com/v4/spreadsheets/1IZl_O6hXXfc03Suu3_lA2J5h4g29GqjaNHok0ST31yM/values/A:H?key=AIzaSyCnKMBNtZvvhvC1EHJxGuHVA9uAzxLClk0')
       .then(res => res.json())
       .then((data) => {
         setRawFinancials(data.values);
