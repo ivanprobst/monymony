@@ -1,8 +1,8 @@
 // Libs
 import * as React from 'react';
+import {Grid, ButtonGroup, Button} from '@material-ui/core';
 
 // Components
-import Header from './components/Header/Header';
 import Charts from './components/Charts/Charts';
 import Grids from './components/Grids/Grids';
 import Transactions from './components/Transactions/Transactions';
@@ -33,8 +33,6 @@ export default function App() {
 
   const [currentTab, setCurrentTab] = React.useState<tabOptions>(2);
 
-  const switchTab = (tab: tabOptions) => setCurrentTab(tab);
-
   // LOADING
   React.useEffect(() => {
     fetch(process.env.REACT_APP_GSHEET_URL + '?key=' + process.env.REACT_APP_GAPI_KEY)
@@ -61,7 +59,20 @@ export default function App() {
   // RENDER
   return (
     <div className="App">
-      <Header tabSwitchFn={switchTab}></Header>
+      <header className="App-header">
+        <Grid container>
+          <Grid item xs={6}>
+            <h1>Mony mony</h1>
+          </Grid>
+          <Grid item xs={6}>
+            <ButtonGroup variant="contained" color="primary">
+              <Button onClick={() => {setCurrentTab(0)}}>Charts</Button>
+              <Button onClick={() => {setCurrentTab(1)}}>Grid</Button>
+              <Button onClick={() => {setCurrentTab(2)}}>Transactions</Button>
+            </ButtonGroup>
+          </Grid>
+        </Grid>
+      </header>
       <div className="App-body">
         {tabs[currentTab]}
       </div>
