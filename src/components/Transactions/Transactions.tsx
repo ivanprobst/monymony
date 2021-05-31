@@ -1,10 +1,8 @@
 // Libs
 import {TableContainer, Table, TableHead, TableBody, TableRow, TableCell} from '@material-ui/core';
+import { iTransaction } from '../../types';
 
-// Components
-import TransactionRow from "./TransactionRow";
-
-export default function Transactions({rawFinancials}: {rawFinancials: [ string | number ][]}) {
+export default function Transactions({cleanTransactions}: {cleanTransactions: iTransaction[]}) {
 
   // RENDER
   return (
@@ -13,15 +11,23 @@ export default function Transactions({rawFinancials}: {rawFinancials: [ string |
       <TableContainer>
         <Table size="small">
           <TableHead>
-            <TableRow>
-              {rawFinancials[0].map(transactionHeadCell =>(
-                <TableCell key={transactionHeadCell}>{transactionHeadCell}</TableCell>
-              ))}
+            <TableRow className="TransactionsRow">
+              <TableCell>Index</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Amount</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rawFinancials.slice(1).map(transactionData => (
-              <TransactionRow key={transactionData[0]} transactionData={transactionData}></TransactionRow>
+            {cleanTransactions.map(transactionData => (
+              <TableRow key={transactionData.index} className="TransactionsRow">
+                <TableCell>{transactionData.index}</TableCell>
+                <TableCell>{transactionData.date}</TableCell>
+                <TableCell>{transactionData.description}</TableCell>
+                <TableCell>{transactionData.category}</TableCell>
+                <TableCell>{transactionData.amount}</TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>

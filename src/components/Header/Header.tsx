@@ -15,7 +15,7 @@ export default function Header({tabSwitchFn} : tabsControlers) {
     <header className="App-header">
       <Grid container>
         <Grid item xs={6}>
-          <h1>MonyMony</h1>
+          <h1>Mony mony</h1>
         </Grid>
         <Grid item xs={6}>
           <ButtonGroup variant="contained" color="primary">
