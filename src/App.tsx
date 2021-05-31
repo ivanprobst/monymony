@@ -14,14 +14,7 @@ import './App.css';
 export default function App() {
 
   // Definitions
-  const [cleanTransactions, setCleanTransactions] = React.useState<iTransaction[]>(
-    [{
-      index: 0,
-      date: '',
-      description: '',
-      category: '',
-      amount: 0
-    }]);
+  const [cleanTransactions, setCleanTransactions] = React.useState<iTransaction[]>([]);
 
   const tabs = {
     0: <Charts></Charts>,
