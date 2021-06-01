@@ -1,9 +1,4 @@
 export default function Charts() {
-
   // RENDER
-  return (
-    <div className="Charts">
-      Charts
-    </div>
-  )
+  return <div className="Charts">Charts</div>;
 }

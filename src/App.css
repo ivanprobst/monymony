@@ -1,29 +1,29 @@
 /* Structure */
 .App-header {
-  background-color: #AC3931;
+  background-color: #ac3931;
   padding: 0 20px;
   display: flex;
   flex-direction: column;
 }
 
-  .App-header h1 {
-    font-size: calc(10px + 2vmin);
-    color: white;
-  }
+.App-header h1 {
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
 
-  .App-header div div:nth-child(2) {
-    padding-top: 20px;
-    text-align: right;
-    margin: 0;
-  }
+.App-header div div:nth-child(2) {
+  padding-top: 20px;
+  text-align: right;
+  margin: 0;
+}
 
-    .App-header button {
-      background: #537D8D;
-    }
+.App-header button {
+  background: #537d8d;
+}
 
 .App-body {
   padding: 20px;
-  color: #482C3D;
+  color: #482c3d;
 }
 
 /* Bits */
@@ -41,6 +41,3 @@
     transform: rotate(360deg);
   }
 }
-
-
-

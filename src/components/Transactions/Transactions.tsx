@@ -1,9 +1,19 @@
 // Libs
-import {TableContainer, Table, TableHead, TableBody, TableRow, TableCell} from '@material-ui/core';
-import { iTransaction } from '../../types';
+import {
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@material-ui/core";
+import { iTransaction } from "../../types";
 
-export default function Transactions({cleanTransactions}: {cleanTransactions: iTransaction[]}) {
-
+export default function Transactions({
+  cleanTransactions,
+}: {
+  cleanTransactions: iTransaction[];
+}) {
   // RENDER
   return (
     <div className="Transactions">
@@ -20,7 +30,7 @@ export default function Transactions({cleanTransactions}: {cleanTransactions: iT
             </TableRow>
           </TableHead>
           <TableBody>
-            {cleanTransactions.map(transactionData => (
+            {cleanTransactions.map((transactionData) => (
               <TableRow key={transactionData.index} className="TransactionsRow">
                 <TableCell>{transactionData.index}</TableCell>
                 <TableCell>{transactionData.date}</TableCell>
@@ -33,5 +43,5 @@ export default function Transactions({cleanTransactions}: {cleanTransactions: iT
         </Table>
       </TableContainer>
     </div>
-  )
+  );
 }

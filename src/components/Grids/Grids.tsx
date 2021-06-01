@@ -1,9 +1,4 @@
 export default function Grids() {
-
   // RENDER
-  return (
-    <div className="Grids">
-      Grids
-    </div>
-  )
+  return <div className="Grids">Grids</div>;
 }
