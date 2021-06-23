@@ -1,6 +1,8 @@
 // Libs
 import * as React from "react";
 import { Grid, ButtonGroup, Button } from "@material-ui/core";
+import "@fontsource/roboto";
+import "@fontsource/material-icons";
 
 // Components
 import Charts from "./components/Charts/Charts";
