@@ -30,13 +30,13 @@ export default function Transactions({
             </TableRow>
           </TableHead>
           <TableBody>
-            {cleanTransactions.map((transactionData) => (
-              <TableRow key={transactionData.index} className="TransactionsRow">
-                <TableCell>{transactionData.index}</TableCell>
-                <TableCell>{transactionData.date}</TableCell>
-                <TableCell>{transactionData.description}</TableCell>
-                <TableCell>{transactionData.category}</TableCell>
-                <TableCell>{transactionData.amount}</TableCell>
+            {cleanTransactions.map(({index, date, description, category, amount}) => (
+              <TableRow key={index} className="TransactionsRow">
+                <TableCell>{index}</TableCell>
+                <TableCell>{date}</TableCell>
+                <TableCell>{description}</TableCell>
+                <TableCell>{category}</TableCell>
+                <TableCell>{amount}</TableCell>
               </TableRow>
             ))}
           </TableBody>

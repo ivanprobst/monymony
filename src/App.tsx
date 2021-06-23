@@ -38,16 +38,10 @@ export default function App() {
         setCleanTransactions(
           data.values
             .slice(1)
-            .map((rawTransaction: Array<string | number | category>) => {
-              return {
-                index: rawTransaction[0],
-                date: rawTransaction[1],
-                description: rawTransaction[2],
-                category: rawTransaction[6],
-                amount: rawTransaction[5],
-              };
-            })
-        );
+            .map(([index, date, description, , , amount, category]: [number, string, string, any, any, number, category]) =>
+              {return {index, date, description, category, amount};}
+            )
+        )
       })
       .catch((err) => {
         console.log("error");
