@@ -1,5 +1,6 @@
 // Libs
 import * as React from "react";
+import axios from 'axios';
 import { Grid, ButtonGroup, Button } from "@material-ui/core";
 import "@fontsource/roboto";
 import "@fontsource/material-icons";
@@ -31,13 +32,9 @@ export default function App() {
 
   // LOADING
   React.useEffect(() => {
-    fetch(
-      process.env.REACT_APP_GSHEET_URL +
-        "?key=" +
-        process.env.REACT_APP_GAPI_KEY
-    )
-      .then((res) => res.json())
-      .then((data) => {
+    axios.get(`${process.env.REACT_APP_GSHEET_URL}?key=${process.env.REACT_APP_GAPI_KEY}`)
+      .then(res => {
+        const data = res.data;
         setCleanTransactions(
           data.values
             .slice(1)
