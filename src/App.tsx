@@ -22,30 +22,17 @@ export default function App() {
 
   const tabs = {
     0: <Charts></Charts>,
-    1: <Grids></Grids>,
+    1: <Grids cleanTransactions={cleanTransactions}></Grids>,
     2: <Transactions cleanTransactions={cleanTransactions}></Transactions>,
   };
 
   type tabOptions = keyof typeof tabs;
 
-  const [currentTab, setCurrentTab] = React.useState<tabOptions>(2);
+  const [currentTab, setCurrentTab] = React.useState<tabOptions>(1);
 
   // LOADING
   React.useEffect(() => {
-    axios.get(`${process.env.REACT_APP_GSHEET_URL}?key=${process.env.REACT_APP_GAPI_KEY}`)
-      .then(res => {
-        const data = res.data;
-        setCleanTransactions(
-          data.values
-            .slice(1)
-            .map(([index, date, description, , , amount, category]: [number, string, string, any, any, number, category]) =>
-              {return {index, date, description, category, amount};}
-            )
-        )
-      })
-      .catch((err) => {
-        console.log("error");
-      });
+    getGSheetData();
   }, []);
 
   console.log("Clean transactions: ", cleanTransactions);
@@ -61,24 +48,31 @@ export default function App() {
             <ButtonGroup variant="contained" color="primary">
               <Button
                 onClick={() => {
+                  getGSheetData();
+                }}
+              >
+                <span className="material-icons">refresh</span>
+              </Button>
+              <Button
+                onClick={() => {
                   setCurrentTab(0);
                 }}
               >
-                Charts
+                <span className="material-icons">insights</span>&nbsp;&nbsp;Chart
               </Button>
               <Button
                 onClick={() => {
                   setCurrentTab(1);
                 }}
               >
-                Grid
+                <span className="material-icons">apps</span>&nbsp;&nbsp;Grid
               </Button>
               <Button
                 onClick={() => {
                   setCurrentTab(2);
                 }}
               >
-                Transactions
+                <span className="material-icons">segment</span>&nbsp;&nbsp;Transactions
               </Button>
             </ButtonGroup>
           </Grid>
@@ -87,4 +81,22 @@ export default function App() {
       <div className="App-body">{tabs[currentTab]}</div>
     </div>
   );
+
+  // HELPERS
+  function getGSheetData() {
+    axios.get(`${process.env.REACT_APP_GSHEET_URL}?key=${process.env.REACT_APP_GAPI_KEY}`)
+    .then(res => {
+      const data = res.data;
+      setCleanTransactions(
+        data.values
+          .slice(1)
+          .map(([index, date, description, , , amount, category]: [number, string, string, any, any, string, category]) =>
+            {return {index, date, description, category, amount: parseInt(amount)};}
+          )
+      )
+    })
+    .catch((err) => {
+      console.log("error");
+    });
+  }
 }
