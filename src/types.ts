@@ -46,12 +46,11 @@ export const gridRowModel: iGridRowModel = {
     'Other revenue': []
   },
   'Costs of living': {
-    'Interests': [],
-    'Depreciation': [],
     'Home': [],
     'Health': [],
     'Meal': [],
     'Transport': [],
+    'Interests': [],
     'Other living': []
   },
   'Costs of fun': {
@@ -61,5 +60,10 @@ export const gridRowModel: iGridRowModel = {
     'Holiday': [],
     'Stuff': [],
     'Other fun': []
+  },
+  'Investments': {
+    '3a': [],
+    'Home investments': [],
+    'Other investments': []
   }
 }
