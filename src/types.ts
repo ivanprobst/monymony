@@ -4,19 +4,21 @@ export type category =
   | 'Revenue Alice'
   | 'Revenue Ivan'
   | 'Other revenue'
-  | 'Interests'
-  | 'Depreciation'
   | 'Home'
   | 'Health'
   | 'Meal'
   | 'Transport'
+  | 'Interests'
   | 'Other living'
   | 'Restaurants and bars'
   | 'Media'
   | 'Gift'
   | 'Holiday'
   | 'Stuff'
-  | 'Other fun';
+  | 'Other fun'
+  | '3a'
+  | 'Home investments'
+  | 'Other investments';
 
 export interface iTransaction {
   index: number;

@@ -12,13 +12,36 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
   // LOADING
   React.useEffect(() => {
     const newGrid: iGridData = {};
+    for (const group of Object.keys(gridRowModel)) {
+      newGrid[`Total ${group}`] = new Array(12).fill(0);
+      newGrid[`Profit ${group}`] = new Array(12).fill(0);;
+      for (const category of Object.keys(gridRowModel[group])) {
+        newGrid[category] = new Array(12).fill(0);
+      }
+    }
+
     for (const transactionItem of cleanTransactions) {
       if (newGrid[transactionItem.category] === undefined) {
-        newGrid[transactionItem.category] = new Array(12).fill(0);
+        throw new Error(`Missing category: ${transactionItem.category}`);
       }
       newGrid[transactionItem.category][parseInt(transactionItem.date.split('.')[1]) - 1] += transactionItem.amount;
     }
-    console.log(newGrid);
+
+    const currentProfits = [...newGrid['Total Revenues']];
+    for (const group of Object.keys(gridRowModel)) {
+      for(const month of monthModel) {
+        let currentTot = 0;
+        for (const category of Object.keys(gridRowModel[group])) {
+          currentTot += newGrid[category][month - 1];
+        }
+        currentProfits[month - 1] += currentTot;
+        newGrid[`Total ${group}`][month - 1] = currentTot;
+        newGrid[`Profit ${group}`][month - 1] = currentProfits[month - 1];
+      }
+    }
+
+    console.log('griddata: ', newGrid);
+
     setGridData(newGrid);
   }, [cleanTransactions]);
 
@@ -65,11 +88,19 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
                     <TableCell>Total: {groupItem}</TableCell>
                     <TotalCells group={groupItem}></TotalCells>
                   </TableRow>
+                  <TableRow >
+                    <TableCell>Profit after {groupItem}</TableCell>
+                    <ProfitCells group={groupItem}></ProfitCells>
+                  </TableRow>
                   <TableRow ><TableCell>---</TableCell></TableRow>
                 </>
               )
             })
           }
+            <TableRow>
+              <TableCell>Final income</TableCell>
+              <ProfitCells group="Investments"></ProfitCells>
+            </TableRow>
           </TableBody>
         </Table>
       </TableContainer>
@@ -93,20 +124,32 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
   }
 
   function TotalCells({group}: {group: string}) {
-    const catList = Object.keys(gridRowModel[group]);
+    if(gridData[`Total ${group}`] === undefined) {
+      return <></>;
+    }
+    else {
+      return (
+        <>
+        {
+          gridData[`Total ${group}`].map(amount =>  <TableCell>{amount}</TableCell>)
+        }
+        </>
+      );
+    }
+  }
 
-    return (
-      <>
-      {
-        monthModel.map(month => {
-          let currentTot = 0;
-          for(const cat of catList) {
-            currentTot += gridData[cat] === undefined ? 0 : gridData[cat][month - 1];
-          }
-          return <TableCell>{currentTot}</TableCell>;
-        })
-      }
-      </>
-    );
+  function ProfitCells({group}: {group: string}) {
+    if(gridData[`Profit ${group}`] === undefined) {
+      return <></>;
+    }
+    else {
+      return (
+        <>
+        {
+          gridData[`Profit ${group}`].map(amount => <TableCell>{amount}</TableCell>)
+        }
+        </>
+      );
+    }
   }
 }
