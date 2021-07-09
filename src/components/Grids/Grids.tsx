@@ -12,14 +12,16 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
   // LOADING
   React.useEffect(() => {
     const newGrid: iGridData = {};
+    // Build empty grid
     for (const group of Object.keys(gridRowModel)) {
-      newGrid[`Total ${group}`] = new Array(12).fill(0);
-      newGrid[`Profit ${group}`] = new Array(12).fill(0);;
+      newGrid[`Total ${group}`] = new Array(13).fill(0);
+      newGrid[`Profit ${group}`] = new Array(13).fill(0);;
       for (const category of Object.keys(gridRowModel[group])) {
-        newGrid[category] = new Array(12).fill(0);
+        newGrid[category] = new Array(13).fill(0);
       }
     }
 
+    // Add category data
     for (const transactionItem of cleanTransactions) {
       if (newGrid[transactionItem.category] === undefined) {
         throw new Error(`Missing category: ${transactionItem.category}`);
@@ -27,6 +29,7 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
       newGrid[transactionItem.category][parseInt(transactionItem.date.split('.')[1]) - 1] += transactionItem.amount;
     }
 
+    // Add total and profit for each group
     const currentProfits = [...newGrid['Total Revenues']];
     for (const group of Object.keys(gridRowModel)) {
       for(const month of monthModel) {
@@ -38,6 +41,15 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
         newGrid[`Total ${group}`][month - 1] = currentTot;
         newGrid[`Profit ${group}`][month - 1] = currentProfits[month - 1];
       }
+    }
+
+    // Add total for each row
+    for (const rowKey of Object.keys(newGrid)) {
+      let totalRow = 0;
+      for(let i = 0; i < 12; i++) {
+        totalRow += newGrid[rowKey][i];
+      }
+      newGrid[rowKey][12] = totalRow;
     }
 
     console.log('griddata: ', newGrid);
@@ -66,6 +78,7 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
               <TableCell>October</TableCell>
               <TableCell>November</TableCell>
               <TableCell>December</TableCell>
+              <TableCell>TOTAL</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
