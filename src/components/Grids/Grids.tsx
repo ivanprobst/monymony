@@ -8,7 +8,8 @@ import {
 	TableRow,
 	TableCell,
 } from "@material-ui/core";
-import { iTransaction, gridRowModel, iGridData, monthModel } from "../../types";
+import { iTransaction, gridRowModel, iGridData } from "../../types";
+import { configColumns } from "../../types";
 
 // Components
 import GridCell from "./GridCell";
@@ -26,10 +27,10 @@ export default function Grids({
 		const newGrid: iGridData = {};
 		// Build empty grid
 		for (const group of Object.keys(gridRowModel)) {
-			newGrid[`Total ${group}`] = new Array(13).fill(0);
-			newGrid[`Profit ${group}`] = new Array(13).fill(0);
+			newGrid[`Total ${group}`] = new Array(configColumns.length + 1).fill(0);
+			newGrid[`Profit ${group}`] = new Array(configColumns.length + 1).fill(0);
 			for (const category of Object.keys(gridRowModel[group])) {
-				newGrid[category] = new Array(13).fill(0);
+				newGrid[category] = new Array(configColumns.length + 1).fill(0);
 			}
 		}
 
@@ -46,24 +47,28 @@ export default function Grids({
 		// Add total and profit for each group
 		const currentProfits = [...newGrid["Total Revenues"]];
 		for (const group of Object.keys(gridRowModel)) {
-			for (const month of monthModel) {
+			for (
+				let columnIndex = 0;
+				columnIndex < configColumns.length;
+				columnIndex++
+			) {
 				let currentTot = 0;
 				for (const category of Object.keys(gridRowModel[group])) {
-					currentTot += newGrid[category][month - 1];
+					currentTot += newGrid[category][columnIndex];
 				}
-				currentProfits[month - 1] += currentTot;
-				newGrid[`Total ${group}`][month - 1] = currentTot;
-				newGrid[`Profit ${group}`][month - 1] = currentProfits[month - 1];
+				currentProfits[columnIndex] += currentTot;
+				newGrid[`Total ${group}`][columnIndex] = currentTot;
+				newGrid[`Profit ${group}`][columnIndex] = currentProfits[columnIndex];
 			}
 		}
 
 		// Add total for each row
 		for (const rowKey of Object.keys(newGrid)) {
 			let totalRow = 0;
-			for (let i = 0; i < 12; i++) {
+			for (let i = 0; i < configColumns.length; i++) {
 				totalRow += newGrid[rowKey][i];
 			}
-			newGrid[rowKey][12] = totalRow;
+			newGrid[rowKey][configColumns.length] = totalRow;
 		}
 
 		console.log("griddata: ", newGrid);
@@ -73,26 +78,17 @@ export default function Grids({
 
 	// RENDER
 	return (
-		<div className="Grids">
+		<>
 			<h2>Grid</h2>
 			<TableContainer>
 				<Table size="small">
 					<TableHead>
 						<TableRow>
 							<TableCell></TableCell>
-							<TableCell align="right">January</TableCell>
-							<TableCell align="right">February</TableCell>
-							<TableCell align="right">March</TableCell>
-							<TableCell align="right">April</TableCell>
-							<TableCell align="right">May</TableCell>
-							<TableCell align="right">June</TableCell>
-							<TableCell align="right">July</TableCell>
-							<TableCell align="right">August</TableCell>
-							<TableCell align="right">September</TableCell>
-							<TableCell align="right">October</TableCell>
-							<TableCell align="right">November</TableCell>
-							<TableCell align="right">December</TableCell>
-							<TableCell align="right">TOTAL</TableCell>
+							{configColumns.map((columnValue) => (
+								<TableCell align="right">{columnValue}</TableCell>
+							))}
+							<TableCell>Total</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -119,7 +115,7 @@ export default function Grids({
 										<ProfitCells group={groupItem}></ProfitCells>
 									</TableRow>
 									<TableRow>
-										<TableCell>---</TableCell>
+										<TableCell>&nbsp;</TableCell>
 									</TableRow>
 								</>
 							);
@@ -131,7 +127,7 @@ export default function Grids({
 					</TableBody>
 				</Table>
 			</TableContainer>
-		</div>
+		</>
 	);
 
 	// HELPER COMPS
