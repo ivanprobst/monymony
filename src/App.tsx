@@ -1,6 +1,7 @@
 // Libs
 import * as React from "react";
 import axios from 'axios';
+import { ThemeProvider } from '@material-ui/core/styles';
 import { Grid, ButtonGroup, Button } from "@material-ui/core";
 import "@fontsource/roboto";
 import "@fontsource/material-icons";
@@ -13,6 +14,7 @@ import Transactions from "./components/Transactions/Transactions";
 // Assets
 import { iTransaction, category } from "./types";
 import "./App.css";
+import { theme } from "./theme";
 
 export default function App() {
   // Definitions
@@ -30,6 +32,8 @@ export default function App() {
 
   const [currentTab, setCurrentTab] = React.useState<tabOptions>(1);
 
+
+
   // LOADING
   React.useEffect(() => {
     getGSheetData();
@@ -38,6 +42,7 @@ export default function App() {
   console.log("Clean transactions: ", cleanTransactions);
   // RENDER
   return (
+    <ThemeProvider theme={theme}>
     <div className="App">
       <header className="App-header">
         <Grid container>
@@ -80,6 +85,7 @@ export default function App() {
       </header>
       <div className="App-body">{tabs[currentTab]}</div>
     </div>
+    </ThemeProvider>
   );
 
   // HELPERS

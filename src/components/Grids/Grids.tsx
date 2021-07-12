@@ -3,6 +3,9 @@ import * as React from "react";
 import {TableContainer, Table, TableHead, TableBody, TableRow, TableCell} from '@material-ui/core';
 import {iTransaction, gridRowModel, iGridData, monthModel} from '../../types';
 
+// Components
+import GridCell from "./GridCell";
+
 export default function Grids({cleanTransactions}: {cleanTransactions: iTransaction[]}) {
   // Definitions
   const [gridData, setGridData] = React.useState<
@@ -66,19 +69,19 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
           <TableHead>
             <TableRow>
               <TableCell></TableCell>
-              <TableCell>January</TableCell>
-              <TableCell>February</TableCell>
-              <TableCell>March</TableCell>
-              <TableCell>April</TableCell>
-              <TableCell>May</TableCell>
-              <TableCell>June</TableCell>
-              <TableCell>July</TableCell>
-              <TableCell>August</TableCell>
-              <TableCell>September</TableCell>
-              <TableCell>October</TableCell>
-              <TableCell>November</TableCell>
-              <TableCell>December</TableCell>
-              <TableCell>TOTAL</TableCell>
+              <TableCell align="right">January</TableCell>
+              <TableCell align="right">February</TableCell>
+              <TableCell align="right">March</TableCell>
+              <TableCell align="right">April</TableCell>
+              <TableCell align="right">May</TableCell>
+              <TableCell align="right">June</TableCell>
+              <TableCell align="right">July</TableCell>
+              <TableCell align="right">August</TableCell>
+              <TableCell align="right">September</TableCell>
+              <TableCell align="right">October</TableCell>
+              <TableCell align="right">November</TableCell>
+              <TableCell align="right">December</TableCell>
+              <TableCell align="right">TOTAL</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -86,7 +89,7 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
             Object.keys(gridRowModel).map(groupItem => {
               return(
                 <>
-                  <TableRow ><TableCell>{groupItem}</TableCell></TableRow>
+                  <TableRow><TableCell variant="head">{groupItem}</TableCell></TableRow>
                   {
                     Object.keys(gridRowModel[groupItem]).map((categoryItem) => {
                       return (
@@ -98,11 +101,11 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
                     })
                   }
                   <TableRow >
-                    <TableCell>Total: {groupItem}</TableCell>
+                    <TableCell variant="head">Total</TableCell>
                     <TotalCells group={groupItem}></TotalCells>
                   </TableRow>
                   <TableRow >
-                    <TableCell>Profit after {groupItem}</TableCell>
+                    <TableCell variant="head">Profit</TableCell>
                     <ProfitCells group={groupItem}></ProfitCells>
                   </TableRow>
                   <TableRow ><TableCell>---</TableCell></TableRow>
@@ -111,7 +114,7 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
             })
           }
             <TableRow>
-              <TableCell>Final income</TableCell>
+              <TableCell variant="head">Final income</TableCell>
               <ProfitCells group="Investments"></ProfitCells>
             </TableRow>
           </TableBody>
@@ -129,7 +132,7 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
       return (
         <>
         {
-          gridData[category].map(amountItem => <TableCell>{amountItem}</TableCell>)
+          gridData[category].map(amountItem => <GridCell value={amountItem} type="category"></GridCell>)
         }
         </>
       )
@@ -144,7 +147,7 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
       return (
         <>
         {
-          gridData[`Total ${group}`].map(amount =>  <TableCell>{amount}</TableCell>)
+          gridData[`Total ${group}`].map(amount =>  <GridCell value={amount} type="total"></GridCell>)
         }
         </>
       );
@@ -159,7 +162,7 @@ export default function Grids({cleanTransactions}: {cleanTransactions: iTransact
       return (
         <>
         {
-          gridData[`Profit ${group}`].map(amount => <TableCell>{amount}</TableCell>)
+          gridData[`Profit ${group}`].map(amount => <GridCell value={amount} type="profit"></GridCell>)
         }
         </>
       );
