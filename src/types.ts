@@ -1,6 +1,5 @@
 // TYPES
 export type category =
-	| ""
 	| "Revenue Alice"
 	| "Revenue Ivan"
 	| "Other revenue"
@@ -28,18 +27,18 @@ export interface iTransaction {
 	amount: number;
 }
 
-export interface iGridRowModel {
-	[group: string]: {
-		[category: string]: Array<number>;
-	};
-}
-
 export interface iGridData {
 	[category: string]: Array<number>;
 }
 
+export interface iGroupConfig {
+	name: string;
+	type: "revenues" | "costs";
+	categories: Array<category>;
+}
+
 // CONFIGURATION MODELS
-export const configColumns = [
+export const configMonths = [
 	"January",
 	"February",
 	"March",
@@ -54,31 +53,39 @@ export const configColumns = [
 	"December",
 ];
 
-export const gridRowModel: iGridRowModel = {
-	Revenues: {
-		"Revenue Alice": [],
-		"Revenue Ivan": [],
-		"Other revenue": [],
+export const configGroups: Array<iGroupConfig> = [
+	{
+		name: "Revenues",
+		type: "revenues",
+		categories: ["Revenue Alice", "Revenue Ivan", "Other revenue"],
 	},
-	"Costs of living": {
-		Home: [],
-		Health: [],
-		Meal: [],
-		Transport: [],
-		Interests: [],
-		"Other living": [],
+	{
+		name: "Costs of living",
+		type: "costs",
+		categories: [
+			"Home",
+			"Health",
+			"Meal",
+			"Transport",
+			"Interests",
+			"Other living",
+		],
 	},
-	"Costs of fun": {
-		"Restaurants and bars": [],
-		Media: [],
-		Gift: [],
-		Holiday: [],
-		Stuff: [],
-		"Other fun": [],
+	{
+		name: "Costs of fun",
+		type: "costs",
+		categories: [
+			"Restaurants and bars",
+			"Media",
+			"Gift",
+			"Holiday",
+			"Stuff",
+			"Other fun",
+		],
 	},
-	Investments: {
-		"3a": [],
-		"Home investments": [],
-		"Other investments": [],
+	{
+		name: "Investments",
+		type: "costs",
+		categories: ["3a", "Home investments", "Other investments"],
 	},
-};
+];

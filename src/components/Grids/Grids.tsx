@@ -8,72 +8,82 @@ import {
 	TableRow,
 	TableCell,
 } from "@material-ui/core";
-import { iTransaction, gridRowModel, iGridData } from "../../types";
-import { configColumns } from "../../types";
 
 // Components
 import GridCell from "./GridCell";
 
+// Assets
+import {
+	configMonths,
+	configGroups,
+	iTransaction,
+	iGridData,
+} from "../../types";
+
 export default function Grids({
 	cleanTransactions,
 }: {
-	cleanTransactions: iTransaction[];
+	cleanTransactions: Array<iTransaction>;
 }) {
 	// Definitions
 	const [gridData, setGridData] = React.useState<iGridData>({});
 
 	// LOADING
 	React.useEffect(() => {
-		const newGrid: iGridData = {};
+		const newGridData: iGridData = {};
+
 		// Build empty grid
-		for (const group of Object.keys(gridRowModel)) {
-			newGrid[`Total ${group}`] = new Array(configColumns.length + 1).fill(0);
-			newGrid[`Profit ${group}`] = new Array(configColumns.length + 1).fill(0);
-			for (const category of Object.keys(gridRowModel[group])) {
-				newGrid[category] = new Array(configColumns.length + 1).fill(0);
+		for (const group of configGroups) {
+			newGridData[`Total ${group.name}`] = new Array(
+				configMonths.length + 1
+			).fill(0);
+			newGridData[`Profit ${group.name}`] = new Array(
+				configMonths.length + 1
+			).fill(0);
+			for (const category of group.categories) {
+				newGridData[category] = new Array(configMonths.length + 1).fill(0);
 			}
 		}
 
-		// Add category data
-		for (const transactionItem of cleanTransactions) {
-			if (newGrid[transactionItem.category] === undefined) {
-				throw new Error(`Missing category: ${transactionItem.category}`);
+		// Fill in category rows
+		for (const transaction of cleanTransactions) {
+			if (newGridData[transaction.category] === undefined) {
+				throw new Error(
+					`Category not defined in configuration: ${transaction.category}`
+				);
 			}
-			newGrid[transactionItem.category][
-				parseInt(transactionItem.date.split(".")[1]) - 1
-			] += transactionItem.amount;
+			newGridData[transaction.category][
+				parseInt(transaction.date.split(".")[1]) - 1
+			] += transaction.amount;
 		}
 
-		// Add total and profit for each group
-		const currentProfits = [...newGrid["Total Revenues"]];
-		for (const group of Object.keys(gridRowModel)) {
-			for (
-				let columnIndex = 0;
-				columnIndex < configColumns.length;
-				columnIndex++
-			) {
-				let currentTot = 0;
-				for (const category of Object.keys(gridRowModel[group])) {
-					currentTot += newGrid[category][columnIndex];
+		// Fill in total and profit rows
+		for (let month = 0; month < configMonths.length; month++) {
+			let currentProfit = 0;
+			for (const group of configGroups) {
+				let currentTotal = 0;
+				for (const category of group.categories) {
+					currentTotal += newGridData[category][month];
 				}
-				currentProfits[columnIndex] += currentTot;
-				newGrid[`Total ${group}`][columnIndex] = currentTot;
-				newGrid[`Profit ${group}`][columnIndex] = currentProfits[columnIndex];
+				group.type === "revenues"
+					? (currentProfit += currentTotal)
+					: (currentProfit -= currentTotal);
+				newGridData[`Total ${group.name}`][month] = currentTotal;
+				newGridData[`Profit ${group.name}`][month] = currentProfit;
 			}
 		}
 
-		// Add total for each row
-		for (const rowKey of Object.keys(newGrid)) {
+		// Fill in row totals
+		for (const rowKey of Object.keys(newGridData)) {
 			let totalRow = 0;
-			for (let i = 0; i < configColumns.length; i++) {
-				totalRow += newGrid[rowKey][i];
+			for (let i = 0; i < configMonths.length; i++) {
+				totalRow += newGridData[rowKey][i];
 			}
-			newGrid[rowKey][configColumns.length] = totalRow;
+			newGridData[rowKey][configMonths.length] = totalRow;
 		}
 
-		console.log("griddata: ", newGrid);
-
-		setGridData(newGrid);
+		console.log("newest data: ", newGridData);
+		setGridData(newGridData);
 	}, [cleanTransactions]);
 
 	// RENDER
@@ -85,91 +95,47 @@ export default function Grids({
 					<TableHead>
 						<TableRow>
 							<TableCell></TableCell>
-							{configColumns.map((columnValue) => (
+							{configMonths.map((columnValue) => (
 								<TableCell align="right">{columnValue}</TableCell>
 							))}
 							<TableCell>Total</TableCell>
 						</TableRow>
 					</TableHead>
+
 					<TableBody>
-						{Object.keys(gridRowModel).map((groupItem) => {
-							return (
-								<>
+						{configGroups.map((group) => (
+							<>
+								<TableRow>
+									<TableCell variant="head">{group.name}</TableCell>
+								</TableRow>
+								{group.categories.map((category) => (
 									<TableRow>
-										<TableCell variant="head">{groupItem}</TableCell>
+										<TableCell>{category}</TableCell>
+										{gridData[category]?.map((amount) => (
+											<GridCell value={amount} type="category"></GridCell>
+										))}
 									</TableRow>
-									{Object.keys(gridRowModel[groupItem]).map((categoryItem) => {
-										return (
-											<TableRow>
-												<TableCell>{categoryItem}</TableCell>
-												<AmountCells category={categoryItem}></AmountCells>
-											</TableRow>
-										);
-									})}
-									<TableRow>
-										<TableCell variant="head">Total</TableCell>
-										<TotalCells group={groupItem}></TotalCells>
-									</TableRow>
-									<TableRow>
-										<TableCell variant="head">Profit</TableCell>
-										<ProfitCells group={groupItem}></ProfitCells>
-									</TableRow>
-									<TableRow>
-										<TableCell>&nbsp;</TableCell>
-									</TableRow>
-								</>
-							);
-						})}
-						<TableRow>
-							<TableCell variant="head">Final income</TableCell>
-							<ProfitCells group="Investments"></ProfitCells>
-						</TableRow>
+								))}
+								<TableRow>
+									<TableCell>Total</TableCell>
+									{gridData[`Total ${group.name}`]?.map((amount) => (
+										<GridCell value={amount} type="total"></GridCell>
+									))}
+								</TableRow>
+								<TableRow>
+									<TableCell>Profit</TableCell>
+									{gridData[`Profit ${group.name}`]?.map((amount) => (
+										<GridCell value={amount} type="profit"></GridCell>
+									))}
+								</TableRow>
+								<TableRow>
+									<TableCell>&nbsp;</TableCell>
+								</TableRow>
+							</>
+						))}
 					</TableBody>
 				</Table>
 			</TableContainer>
 		</>
 	);
-
-	// HELPER COMPS
-	function AmountCells({ category }: { category: string }) {
-		if (gridData[category] === undefined) {
-			return <></>;
-		} else {
-			return (
-				<>
-					{gridData[category].map((amountItem) => (
-						<GridCell value={amountItem} type="category"></GridCell>
-					))}
-				</>
-			);
-		}
-	}
-
-	function TotalCells({ group }: { group: string }) {
-		if (gridData[`Total ${group}`] === undefined) {
-			return <></>;
-		} else {
-			return (
-				<>
-					{gridData[`Total ${group}`].map((amount) => (
-						<GridCell value={amount} type="total"></GridCell>
-					))}
-				</>
-			);
-		}
-	}
-
-	function ProfitCells({ group }: { group: string }) {
-		if (gridData[`Profit ${group}`] === undefined) {
-			return <></>;
-		} else {
-			return (
-				<>
-					{gridData[`Profit ${group}`].map((amount) => (
-						<GridCell value={amount} type="profit"></GridCell>
-					))}
-				</>
-			);
-		}
-	}
 }
