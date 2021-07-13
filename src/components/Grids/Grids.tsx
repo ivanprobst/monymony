@@ -96,7 +96,9 @@ export default function Grids({
 						<TableRow>
 							<TableCell></TableCell>
 							{configMonths.map((columnValue) => (
-								<TableCell align="right">{columnValue}</TableCell>
+								<TableCell key={columnValue} align="right">
+									{columnValue}
+								</TableCell>
 							))}
 							<TableCell>Total</TableCell>
 						</TableRow>
@@ -105,27 +107,39 @@ export default function Grids({
 					<TableBody>
 						{configGroups.map((group) => (
 							<>
-								<TableRow>
+								<TableRow key={group.name}>
 									<TableCell variant="head">{group.name}</TableCell>
 								</TableRow>
 								{group.categories.map((category) => (
-									<TableRow>
+									<TableRow key={category}>
 										<TableCell>{category}</TableCell>
-										{gridData[category]?.map((amount) => (
-											<GridCell value={amount} type="category"></GridCell>
+										{gridData[category]?.map((amount, index) => (
+											<GridCell
+												key={`${category}_${index}`}
+												value={amount}
+												type="category"
+											></GridCell>
 										))}
 									</TableRow>
 								))}
 								<TableRow>
 									<TableCell>Total</TableCell>
-									{gridData[`Total ${group.name}`]?.map((amount) => (
-										<GridCell value={amount} type="total"></GridCell>
+									{gridData[`Total ${group.name}`]?.map((amount, index) => (
+										<GridCell
+											key={`${group.name}_${index}`}
+											value={amount}
+											type="total"
+										></GridCell>
 									))}
 								</TableRow>
 								<TableRow>
 									<TableCell>Profit</TableCell>
-									{gridData[`Profit ${group.name}`]?.map((amount) => (
-										<GridCell value={amount} type="profit"></GridCell>
+									{gridData[`Profit ${group.name}`]?.map((amount, index) => (
+										<GridCell
+											key={`${group.name}_${index}`}
+											value={amount}
+											type="profit"
+										></GridCell>
 									))}
 								</TableRow>
 								<TableRow>
