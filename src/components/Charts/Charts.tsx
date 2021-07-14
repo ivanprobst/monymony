@@ -1,6 +1,6 @@
 // Libs
 import * as React from "react";
-import { Container } from "@material-ui/core";
+import { Container, Grid, FormControlLabel, Checkbox } from "@material-ui/core";
 import {
 	ResponsiveContainer,
 	CartesianGrid,
@@ -9,7 +9,6 @@ import {
 	LineChart,
 	Line,
 	Tooltip,
-	Legend,
 } from "recharts";
 
 // Assets
@@ -22,8 +21,20 @@ export default function Charts({
 }) {
 	// Definitions
 	const [chartData, setChartData] = React.useState<Array<{}>>([{}]);
+	const [dataToDisplay, setDataToDisplay] = React.useState<{
+		[group: string]: boolean;
+	}>({
+		...configGroups.reduce(
+			(passed: { [group: string]: boolean }, group) => {
+				passed[group.name] = true;
+				return passed;
+			},
+			{ Income: true }
+		),
+	});
 
 	React.useEffect(() => {
+		// Build empty data
 		const groupsObj = configGroups.reduce(
 			(passed: { [group: string]: number }, group) => {
 				passed[group.name] = 0;
@@ -31,8 +42,6 @@ export default function Charts({
 			},
 			{}
 		);
-
-		// Build empty data
 		const newChartData: Array<{
 			month: string;
 			[group: string]: number | string;
@@ -42,6 +51,7 @@ export default function Charts({
 			...groupsObj,
 		}));
 
+		// Cat > group map
 		const catGroupMap: { [category: string]: string } = {};
 		for (const group of configGroups) {
 			for (const category of group.categories) {
@@ -49,6 +59,7 @@ export default function Charts({
 			}
 		}
 
+		// Build totals
 		for (const transaction of cleanTransactions) {
 			const monthIndex = parseInt(transaction.date.split(".")[1]) - 1;
 			newChartData[monthIndex][catGroupMap[transaction.category]] =
@@ -57,6 +68,7 @@ export default function Charts({
 				] as number) + transaction.amount;
 		}
 
+		// Build income
 		for (const monthIndex in configMonths) {
 			for (const group of configGroups) {
 				let newIncome =
@@ -67,47 +79,67 @@ export default function Charts({
 			}
 		}
 
-		setChartData(newChartData);
 		console.log("Chart data: ", newChartData);
+		setChartData(newChartData);
 	}, [cleanTransactions]);
 
-	const renderChart = (
-		<ResponsiveContainer width="90%" height={500}>
-			<LineChart
-				margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-				data={chartData}
-			>
-				<CartesianGrid stroke="#C1D2D9" strokeDasharray="5 5" />
-				<XAxis dataKey="month" />
-				<YAxis />
-				<Legend />
-				<Tooltip />
-				{configGroups.map((group) => {
-					if (chartData[0] === undefined) return <></>;
-					return (
-						<Line
-							type="monotone"
-							dataKey={group.name}
-							stroke="#AC3931"
-							dot={{ stroke: "#AC3931", strokeWidth: 1 }}
-						></Line>
-					);
-				})}
-				<Line
-					type="monotone"
-					dataKey="Income"
-					stroke="#537D8D"
-					dot={{ stroke: "#537D8D", strokeWidth: 1 }}
-				></Line>
-			</LineChart>
-		</ResponsiveContainer>
-	);
+	const checkboxTicked = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setDataToDisplay({
+			...dataToDisplay,
+			[event.target.name]: event.target.checked,
+		});
+	};
 
 	// RENDER
 	return (
 		<Container>
 			<h2>Chart</h2>
-			{renderChart}
+			<Grid container spacing={3}>
+				<Grid item xs={10}>
+					<ResponsiveContainer width="95%" height={500}>
+						<LineChart
+							margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+							data={chartData}
+						>
+							<CartesianGrid stroke="#C1D2D9" strokeDasharray="5 5" />
+							<XAxis dataKey="month" />
+							<YAxis />
+							<Tooltip />
+							{Object.keys(dataToDisplay).reduce(
+								(passed: Array<JSX.Element>, current) => {
+									if (dataToDisplay[current]) {
+										return passed.concat([
+											<Line
+												type="monotone"
+												dataKey={current}
+												stroke="#AC3931"
+												dot={{ stroke: "#AC3931", strokeWidth: 1 }}
+											></Line>,
+										]);
+									}
+									return passed;
+								},
+								[]
+							)}
+						</LineChart>
+					</ResponsiveContainer>
+				</Grid>
+				<Grid item xs={2}>
+					{Object.keys(dataToDisplay).map((group) => (
+						<FormControlLabel
+							control={
+								<Checkbox
+									checked={dataToDisplay[group]}
+									onChange={checkboxTicked}
+									name={group}
+									color="primary"
+								/>
+							}
+							label={group}
+						/>
+					))}
+				</Grid>
+			</Grid>
 		</Container>
 	);
 }
