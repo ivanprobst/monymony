@@ -38,20 +38,7 @@ export interface iGroupConfig {
 }
 
 // CONFIGURATION MODELS
-export const configMonths = [
-	"January",
-	"February",
-	"March",
-	"April",
-	"May",
-	"June",
-	"July",
-	"August",
-	"September",
-	"October",
-	"November",
-	"December",
-];
+export const configMonths = ["January", "February", "March", "April", "May"];
 
 export const configGroups: Array<iGroupConfig> = [
 	{
