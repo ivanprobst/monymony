@@ -31,11 +31,14 @@ export default function Charts({
 			},
 			{}
 		);
+
+		// Build empty data
 		const newChartData: Array<{
 			month: string;
 			[group: string]: number | string;
 		}> = configMonths.map((monthKey) => ({
 			month: monthKey,
+			Income: 0,
 			...groupsObj,
 		}));
 
@@ -48,11 +51,20 @@ export default function Charts({
 
 		for (const transaction of cleanTransactions) {
 			const monthIndex = parseInt(transaction.date.split(".")[1]) - 1;
-			const currentVal = newChartData[monthIndex][
-				catGroupMap[transaction.category]
-			] as number;
 			newChartData[monthIndex][catGroupMap[transaction.category]] =
-				currentVal + transaction.amount;
+				(newChartData[monthIndex][
+					catGroupMap[transaction.category]
+				] as number) + transaction.amount;
+		}
+
+		for (const monthIndex in configMonths) {
+			for (const group of configGroups) {
+				let newIncome =
+					(newChartData[monthIndex][group.name] as number) *
+					(group.type === "revenues" ? 1 : -1);
+				newChartData[monthIndex]["Income"] =
+					(newChartData[monthIndex]["Income"] as number) + newIncome;
+			}
 		}
 
 		setChartData(newChartData);
@@ -60,7 +72,7 @@ export default function Charts({
 	}, [cleanTransactions]);
 
 	const renderChart = (
-		<ResponsiveContainer width="80%" height={400}>
+		<ResponsiveContainer width="90%" height={500}>
 			<LineChart
 				margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
 				data={chartData}
@@ -81,6 +93,12 @@ export default function Charts({
 						></Line>
 					);
 				})}
+				<Line
+					type="monotone"
+					dataKey="Income"
+					stroke="#537D8D"
+					dot={{ stroke: "#537D8D", strokeWidth: 1 }}
+				></Line>
 			</LineChart>
 		</ResponsiveContainer>
 	);
