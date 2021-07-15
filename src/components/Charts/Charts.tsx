@@ -9,6 +9,7 @@ import {
 	LineChart,
 	Line,
 	Tooltip,
+	ReferenceLine,
 } from "recharts";
 
 // Assets
@@ -20,16 +21,22 @@ export default function Charts({
 	cleanTransactions: Array<iTransaction>;
 }) {
 	// Definitions
-	const [chartData, setChartData] = React.useState<Array<{}>>([{}]);
+	const averageData: { [group: string]: number } = {};
+	const [chartData, setChartData] = React.useState<
+		Array<{
+			month: string;
+			[group: string]: number | string;
+		}>
+	>([]);
 	const [dataToDisplay, setDataToDisplay] = React.useState<{
 		[group: string]: boolean;
 	}>({
 		...configGroups.reduce(
 			(passed: { [group: string]: boolean }, group) => {
-				passed[group.name] = true;
+				passed[group.name] = false;
 				return passed;
 			},
-			{ Income: true }
+			{ Income: true },
 		),
 	});
 
@@ -40,7 +47,7 @@ export default function Charts({
 				passed[group.name] = 0;
 				return passed;
 			},
-			{}
+			{},
 		);
 		const newChartData: Array<{
 			month: string;
@@ -83,6 +90,17 @@ export default function Charts({
 		setChartData(newChartData);
 	}, [cleanTransactions]);
 
+	// Build averages
+	const groupList = configGroups.map((group) => group.name).concat(["Income"]);
+	for (const group of groupList) {
+		let sum = 0;
+		for (let i = 0; i < configMonths.length; i++) {
+			if (chartData[i] !== undefined) sum += chartData[i][group] as number;
+		}
+		averageData[group] = sum / configMonths.length;
+	}
+	console.log("Average data: ", averageData);
+
 	const checkboxTicked = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setDataToDisplay({
 			...dataToDisplay,
@@ -108,18 +126,29 @@ export default function Charts({
 							{Object.keys(dataToDisplay).reduce(
 								(passed: Array<JSX.Element>, current) => {
 									if (dataToDisplay[current]) {
-										return passed.concat([
-											<Line
-												type="monotone"
-												dataKey={current}
-												stroke="#AC3931"
-												dot={{ stroke: "#AC3931", strokeWidth: 1 }}
-											></Line>,
-										]);
+										return passed
+											.concat([
+												<Line
+													key={`amount_${current}`}
+													type="monotone"
+													dataKey={current}
+													stroke="#AC3931"
+													dot={{ stroke: "#AC3931", strokeWidth: 1 }}
+												></Line>,
+											])
+											.concat([
+												<ReferenceLine
+													key={`average_${current}`}
+													y={averageData[current]}
+													label="Average"
+													stroke="#AC3931"
+													strokeDasharray="3 3"
+												/>,
+											]);
 									}
 									return passed;
 								},
-								[]
+								[],
 							)}
 						</LineChart>
 					</ResponsiveContainer>
@@ -127,6 +156,7 @@ export default function Charts({
 				<Grid item xs={2}>
 					{Object.keys(dataToDisplay).map((group) => (
 						<FormControlLabel
+							key={group}
 							control={
 								<Checkbox
 									checked={dataToDisplay[group]}
