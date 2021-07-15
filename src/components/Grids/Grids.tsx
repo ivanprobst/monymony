@@ -26,65 +26,60 @@ export default function Grids({
 	cleanTransactions: Array<iTransaction>;
 }) {
 	// Definitions
-	const [gridData, setGridData] = React.useState<iGridData>({});
+	let gridData: iGridData = {};
 
 	// LOADING
-	React.useEffect(() => {
-		const newGridData: iGridData = {};
+	// Build empty grid
+	for (const group of configGroups) {
+		gridData[`Total ${group.name}`] = new Array(configMonths.length + 1).fill(
+			0,
+		);
+		gridData[`Profit ${group.name}`] = new Array(configMonths.length + 1).fill(
+			0,
+		);
+		for (const category of group.categories) {
+			gridData[category] = new Array(configMonths.length + 1).fill(0);
+		}
+	}
 
-		// Build empty grid
+	// Fill in category rows
+	for (const transaction of cleanTransactions) {
+		if (gridData[transaction.category] === undefined) {
+			throw new Error(
+				`Category not defined in configuration: ${transaction.category}`,
+			);
+		}
+		gridData[transaction.category][
+			parseInt(transaction.date.split(".")[1]) - 1
+		] += transaction.amount;
+	}
+
+	// Fill in total and profit rows
+	for (let month = 0; month < configMonths.length; month++) {
+		let currentProfit = 0;
 		for (const group of configGroups) {
-			newGridData[`Total ${group.name}`] = new Array(
-				configMonths.length + 1
-			).fill(0);
-			newGridData[`Profit ${group.name}`] = new Array(
-				configMonths.length + 1
-			).fill(0);
+			let currentTotal = 0;
 			for (const category of group.categories) {
-				newGridData[category] = new Array(configMonths.length + 1).fill(0);
+				currentTotal += gridData[category][month];
 			}
+			group.type === "revenues"
+				? (currentProfit += currentTotal)
+				: (currentProfit -= currentTotal);
+			gridData[`Total ${group.name}`][month] = currentTotal;
+			gridData[`Profit ${group.name}`][month] = currentProfit;
 		}
+	}
 
-		// Fill in category rows
-		for (const transaction of cleanTransactions) {
-			if (newGridData[transaction.category] === undefined) {
-				throw new Error(
-					`Category not defined in configuration: ${transaction.category}`
-				);
-			}
-			newGridData[transaction.category][
-				parseInt(transaction.date.split(".")[1]) - 1
-			] += transaction.amount;
+	// Fill in row totals
+	for (const rowKey of Object.keys(gridData)) {
+		let totalRow = 0;
+		for (let i = 0; i < configMonths.length; i++) {
+			totalRow += gridData[rowKey][i];
 		}
+		gridData[rowKey][configMonths.length] = totalRow;
+	}
 
-		// Fill in total and profit rows
-		for (let month = 0; month < configMonths.length; month++) {
-			let currentProfit = 0;
-			for (const group of configGroups) {
-				let currentTotal = 0;
-				for (const category of group.categories) {
-					currentTotal += newGridData[category][month];
-				}
-				group.type === "revenues"
-					? (currentProfit += currentTotal)
-					: (currentProfit -= currentTotal);
-				newGridData[`Total ${group.name}`][month] = currentTotal;
-				newGridData[`Profit ${group.name}`][month] = currentProfit;
-			}
-		}
-
-		// Fill in row totals
-		for (const rowKey of Object.keys(newGridData)) {
-			let totalRow = 0;
-			for (let i = 0; i < configMonths.length; i++) {
-				totalRow += newGridData[rowKey][i];
-			}
-			newGridData[rowKey][configMonths.length] = totalRow;
-		}
-
-		console.log("newest data: ", newGridData);
-		setGridData(newGridData);
-	}, [cleanTransactions]);
+	console.log("newest data: ", gridData);
 
 	// RENDER
 	return (
