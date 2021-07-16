@@ -76,3 +76,11 @@ export const configGroups: Array<iGroupConfig> = [
 		categories: ["3a", "Home investments", "Other investments"],
 	},
 ];
+
+export const CONFIG_CHART_COLOR: { [group: string]: string } = {
+	Revenues: "#E5D352",
+	"Costs of living": "#AC3931",
+	"Costs of fun": "#AC3931",
+	Investments: "#AC3931",
+	Income: "#537D8D",
+};

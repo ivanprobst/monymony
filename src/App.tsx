@@ -30,7 +30,7 @@ export default function App() {
 
 	type tabOptions = keyof typeof tabs;
 
-	const [currentTab, setCurrentTab] = React.useState<tabOptions>(1);
+	const [currentTab, setCurrentTab] = React.useState<tabOptions>(0);
 
 	// LOADING
 	React.useEffect(() => {

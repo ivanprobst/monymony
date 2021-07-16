@@ -13,7 +13,12 @@ import {
 } from "recharts";
 
 // Assets
-import { configMonths, configGroups, iTransaction } from "../../types";
+import {
+	configMonths,
+	configGroups,
+	CONFIG_CHART_COLOR,
+	iTransaction,
+} from "../../types";
 
 export default function Charts({
 	cleanTransactions,
@@ -132,8 +137,11 @@ export default function Charts({
 													key={`amount_${current}`}
 													type="monotone"
 													dataKey={current}
-													stroke="#AC3931"
-													dot={{ stroke: "#AC3931", strokeWidth: 1 }}
+													stroke={CONFIG_CHART_COLOR[current]}
+													dot={{
+														stroke: CONFIG_CHART_COLOR[current],
+														strokeWidth: 1,
+													}}
 												></Line>,
 											])
 											.concat([
@@ -141,7 +149,7 @@ export default function Charts({
 													key={`average_${current}`}
 													y={averageData[current]}
 													label="Average"
-													stroke="#AC3931"
+													stroke={CONFIG_CHART_COLOR[current]}
 													strokeDasharray="3 3"
 												/>,
 											]);
