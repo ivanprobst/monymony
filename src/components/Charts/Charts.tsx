@@ -157,9 +157,9 @@ export default function Charts({
 													key={`amount_${current}`}
 													type="monotone"
 													dataKey={current}
-													stroke={CONFIG_CHART_COLOR[current]}
+													stroke={CONFIG_CHART_COLOR[current]["colorCode"]}
 													dot={{
-														stroke: CONFIG_CHART_COLOR[current],
+														stroke: CONFIG_CHART_COLOR[current]["colorCode"],
 														strokeWidth: 1,
 													}}
 												></Line>,
@@ -168,7 +168,7 @@ export default function Charts({
 												<ReferenceLine
 													label="Average"
 													key={`average_${current}`}
-													stroke={CONFIG_CHART_COLOR[current]}
+													stroke={CONFIG_CHART_COLOR[current]["colorCode"]}
 													strokeDasharray="1 5"
 													y={averageData[current]}
 												/>,
@@ -177,7 +177,7 @@ export default function Charts({
 												<ReferenceLine
 													label="Trend"
 													key={`trend_${current}`}
-													stroke={CONFIG_CHART_COLOR[current]}
+													stroke={CONFIG_CHART_COLOR[current]["colorCode"]}
 													strokeDasharray="4 4"
 													segment={[
 														{
@@ -212,6 +212,9 @@ export default function Charts({
 									onChange={checkboxTicked}
 									name={group}
 									color="primary"
+									classes={{
+										colorPrimary: CONFIG_CHART_COLOR[group]["class"],
+									}}
 								/>
 							}
 							label={group}

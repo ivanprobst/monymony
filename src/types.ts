@@ -77,10 +77,12 @@ export const configGroups: Array<iGroupConfig> = [
 	},
 ];
 
-export const CONFIG_CHART_COLOR: { [group: string]: string } = {
-	Revenues: "#E5D352",
-	"Costs of living": "#AC3931",
-	"Costs of fun": "#AC3931",
-	Investments: "#AC3931",
-	Income: "#537D8D",
+export const CONFIG_CHART_COLOR: {
+	[group: string]: { [type: string]: string };
+} = {
+	Revenues: { class: "revenues-color", colorCode: "#E5D352" },
+	"Costs of living": { class: "costs-color", colorCode: "#AC3931" },
+	"Costs of fun": { class: "costs-color", colorCode: "#AC3931" },
+	Investments: { class: "costs-color", colorCode: "#AC3931" },
+	Income: { class: "income-color", colorCode: "#537D8D" },
 };
