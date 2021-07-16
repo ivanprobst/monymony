@@ -20,20 +20,12 @@ import {
 	iTransaction,
 } from "../../types";
 
+// RENDER
 export default function Charts({
 	cleanTransactions,
 }: {
 	cleanTransactions: Array<iTransaction>;
 }) {
-	// Definitions
-	const averageData: { [group: string]: number } = {};
-	const regressionData: { [group: string]: { [type: string]: number } } = {};
-	const [chartData, setChartData] = React.useState<
-		Array<{
-			month: string;
-			[group: string]: number | string;
-		}>
-	>([]);
 	const [dataToDisplay, setDataToDisplay] = React.useState<{
 		[group: string]: boolean;
 	}>({
@@ -46,75 +38,69 @@ export default function Charts({
 		),
 	});
 
-	React.useEffect(() => {
-		// Build empty data
-		const groupsObj = configGroups.reduce(
-			(passed: { [group: string]: number }, group) => {
-				passed[group.name] = 0;
-				return passed;
-			},
-			{},
-		);
-		const newChartData: Array<{
-			month: string;
-			[group: string]: number | string;
-		}> = configMonths.map((monthKey) => ({
-			month: monthKey,
-			Income: 0,
-			...groupsObj,
-		}));
+	// Build chart lines data
+	const groupsObj = configGroups.reduce(
+		(passed: { [group: string]: number }, group) => {
+			passed[group.name] = 0;
+			return passed;
+		},
+		{},
+	);
+	const chartData: Array<{
+		month: string;
+		[group: string]: number | string;
+	}> = configMonths.map((monthKey) => ({
+		month: monthKey,
+		Income: 0,
+		...groupsObj,
+	}));
 
-		// Cat > group map
-		const catGroupMap: { [category: string]: string } = {};
+	// Cat > group map
+	const catGroupMap: { [category: string]: string } = {};
+	for (const group of configGroups) {
+		for (const category of group.categories) {
+			catGroupMap[category] = group.name;
+		}
+	}
+
+	// Build totals
+	for (const transaction of cleanTransactions) {
+		const monthIndex = parseInt(transaction.date.split(".")[1]) - 1;
+		chartData[monthIndex][catGroupMap[transaction.category]] =
+			(chartData[monthIndex][catGroupMap[transaction.category]] as number) +
+			transaction.amount;
+	}
+
+	// Build income
+	for (const monthIndex in configMonths) {
 		for (const group of configGroups) {
-			for (const category of group.categories) {
-				catGroupMap[category] = group.name;
-			}
+			let newIncome =
+				(chartData[monthIndex][group.name] as number) *
+				(group.type === "revenues" ? 1 : -1);
+			chartData[monthIndex]["Income"] =
+				(chartData[monthIndex]["Income"] as number) + newIncome;
 		}
+	}
 
-		// Build totals
-		for (const transaction of cleanTransactions) {
-			const monthIndex = parseInt(transaction.date.split(".")[1]) - 1;
-			newChartData[monthIndex][catGroupMap[transaction.category]] =
-				(newChartData[monthIndex][
-					catGroupMap[transaction.category]
-				] as number) + transaction.amount;
-		}
-
-		// Build income
-		for (const monthIndex in configMonths) {
-			for (const group of configGroups) {
-				let newIncome =
-					(newChartData[monthIndex][group.name] as number) *
-					(group.type === "revenues" ? 1 : -1);
-				newChartData[monthIndex]["Income"] =
-					(newChartData[monthIndex]["Income"] as number) + newIncome;
-			}
-		}
-
-		console.log("Chart data: ", newChartData);
-		setChartData(newChartData);
-	}, [cleanTransactions]);
-
-	// Build averages and linear regression
+	// Build references lines: averages and linear regression
+	const chartReferenceData: { [group: string]: { [type: string]: number } } =
+		{};
 	const groupList = configGroups.map((group) => group.name).concat(["Income"]);
 	for (const group of groupList) {
-		//let sum = 0;
 		let sumX = 0;
 		let sumY = 0;
 		let sumX2 = 0;
 		let sumXY = 0;
 		for (let i = 0; i < configMonths.length; i++) {
 			if (chartData[i] !== undefined) {
-				//sum += chartData[i][group] as number;
 				sumX += i;
 				sumX2 += i * i;
 				sumY += chartData[i][group] as number;
 				sumXY += (chartData[i][group] as number) * i;
 			}
 		}
-		averageData[group] = sumY / configMonths.length;
-		regressionData[group] = {
+		chartReferenceData[group] = {
+			average: sumY / configMonths.length,
 			a:
 				(sumY * sumX2 - sumX * sumXY) /
 				(configMonths.length * sumX2 - sumX * sumX),
@@ -123,7 +109,6 @@ export default function Charts({
 				(configMonths.length * sumX2 - sumX * sumX),
 		};
 	}
-	console.log("reg: ", regressionData);
 
 	// Checkbox controler
 	const checkboxTicked = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,7 +118,6 @@ export default function Charts({
 		});
 	};
 
-	// RENDER
 	return (
 		<Container>
 			<h2>Chart</h2>
@@ -170,7 +154,7 @@ export default function Charts({
 													key={`average_${current}`}
 													stroke={CONFIG_CHART_COLOR[current]["colorCode"]}
 													strokeDasharray="1 5"
-													y={averageData[current]}
+													y={chartReferenceData[current]["average"]}
 												/>,
 											])
 											.concat([
@@ -182,14 +166,14 @@ export default function Charts({
 													segment={[
 														{
 															x: configMonths[0],
-															y: regressionData[current]["a"],
+															y: chartReferenceData[current]["a"],
 														},
 														{
 															x: configMonths[configMonths.length - 1],
 															y:
 																configMonths.length *
-																	regressionData[current]["b"] +
-																regressionData[current]["a"],
+																	chartReferenceData[current]["b"] +
+																chartReferenceData[current]["a"],
 														},
 													]}
 												/>,
