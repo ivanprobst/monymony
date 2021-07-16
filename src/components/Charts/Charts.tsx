@@ -27,6 +27,7 @@ export default function Charts({
 }) {
 	// Definitions
 	const averageData: { [group: string]: number } = {};
+	const regressionData: { [group: string]: { [type: string]: number } } = {};
 	const [chartData, setChartData] = React.useState<
 		Array<{
 			month: string;
@@ -95,17 +96,36 @@ export default function Charts({
 		setChartData(newChartData);
 	}, [cleanTransactions]);
 
-	// Build averages
+	// Build averages and linear regression
 	const groupList = configGroups.map((group) => group.name).concat(["Income"]);
 	for (const group of groupList) {
-		let sum = 0;
+		//let sum = 0;
+		let sumX = 0;
+		let sumY = 0;
+		let sumX2 = 0;
+		let sumXY = 0;
 		for (let i = 0; i < configMonths.length; i++) {
-			if (chartData[i] !== undefined) sum += chartData[i][group] as number;
+			if (chartData[i] !== undefined) {
+				//sum += chartData[i][group] as number;
+				sumX += i;
+				sumX2 += i * i;
+				sumY += chartData[i][group] as number;
+				sumXY += (chartData[i][group] as number) * i;
+			}
 		}
-		averageData[group] = sum / configMonths.length;
+		averageData[group] = sumY / configMonths.length;
+		regressionData[group] = {
+			a:
+				(sumY * sumX2 - sumX * sumXY) /
+				(configMonths.length * sumX2 - sumX * sumX),
+			b:
+				(configMonths.length * sumXY - sumX * sumY) /
+				(configMonths.length * sumX2 - sumX * sumX),
+		};
 	}
-	console.log("Average data: ", averageData);
+	console.log("reg: ", regressionData);
 
+	// Checkbox controler
 	const checkboxTicked = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setDataToDisplay({
 			...dataToDisplay,
@@ -124,7 +144,7 @@ export default function Charts({
 							margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
 							data={chartData}
 						>
-							<CartesianGrid stroke="#C1D2D9" strokeDasharray="5 5" />
+							<CartesianGrid stroke="#eee" strokeDasharray="5 5" />
 							<XAxis dataKey="month" />
 							<YAxis />
 							<Tooltip />
@@ -146,11 +166,32 @@ export default function Charts({
 											])
 											.concat([
 												<ReferenceLine
-													key={`average_${current}`}
-													y={averageData[current]}
 													label="Average"
+													key={`average_${current}`}
 													stroke={CONFIG_CHART_COLOR[current]}
-													strokeDasharray="3 3"
+													strokeDasharray="1 5"
+													y={averageData[current]}
+												/>,
+											])
+											.concat([
+												<ReferenceLine
+													label="Trend"
+													key={`trend_${current}`}
+													stroke={CONFIG_CHART_COLOR[current]}
+													strokeDasharray="4 4"
+													segment={[
+														{
+															x: configMonths[0],
+															y: regressionData[current]["a"],
+														},
+														{
+															x: configMonths[configMonths.length - 1],
+															y:
+																configMonths.length *
+																	regressionData[current]["b"] +
+																regressionData[current]["a"],
+														},
+													]}
 												/>,
 											]);
 									}
