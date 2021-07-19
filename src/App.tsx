@@ -9,7 +9,7 @@ import "@fontsource/material-icons";
 // Components
 import Charts from "./components/Charts/Charts";
 import Grids from "./components/Grids/Grids";
-import Transactions from "./components/Transactions/Transactions";
+import TransactionsList from "./components/Transactions/Transactions";
 
 // Assets
 import { iTransaction, category } from "./utils/types";
@@ -25,12 +25,16 @@ export default function App() {
   const tabs = {
     0: <Charts cleanTransactions={cleanTransactions}></Charts>,
     1: <Grids cleanTransactions={cleanTransactions}></Grids>,
-    2: <Transactions cleanTransactions={cleanTransactions}></Transactions>,
+    2: (
+      <TransactionsList
+        cleanTransactions={cleanTransactions}
+      ></TransactionsList>
+    ),
   };
 
   type tabOptions = keyof typeof tabs;
 
-  const [currentTab, setCurrentTab] = React.useState<tabOptions>(0);
+  const [currentTab, setCurrentTab] = React.useState<tabOptions>(2);
 
   // LOADING
   React.useEffect(() => {

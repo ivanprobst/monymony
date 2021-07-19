@@ -9,41 +9,46 @@ import {
 } from "@material-ui/core";
 import { iTransaction } from "../../utils/types";
 
-export default function Transactions({
+// COMP: Transaction
+function Transaction({ transaction }: { transaction: iTransaction }) {
+  return (
+    <TableRow className="TransactionsRow">
+      <TableCell>{transaction.index}</TableCell>
+      <TableCell>{transaction.date}</TableCell>
+      <TableCell>{transaction.description}</TableCell>
+      <TableCell>{transaction.category}</TableCell>
+      <TableCell>{transaction.amount}</TableCell>
+    </TableRow>
+  );
+}
+
+// RENDER: TransactionsList
+export default function TransactionsList({
   cleanTransactions,
 }: {
   cleanTransactions: iTransaction[];
 }) {
-  // RENDER
   return (
-    <div className="Transactions">
-      <h2>Transactions</h2>
-      <TableContainer>
-        <Table size="small">
-          <TableHead>
-            <TableRow className="TransactionsRow">
-              <TableCell>Index</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Amount</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {cleanTransactions.map(
-              ({ index, date, description, category, amount }) => (
-                <TableRow key={index} className="TransactionsRow">
-                  <TableCell>{index}</TableCell>
-                  <TableCell>{date}</TableCell>
-                  <TableCell>{description}</TableCell>
-                  <TableCell>{category}</TableCell>
-                  <TableCell>{amount}</TableCell>
-                </TableRow>
-              ),
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+    <TableContainer>
+      <Table size="small">
+        <TableHead>
+          <TableRow className="TransactionsRow">
+            <TableCell>Index</TableCell>
+            <TableCell>Date</TableCell>
+            <TableCell>Description</TableCell>
+            <TableCell>Category</TableCell>
+            <TableCell>Amount</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {cleanTransactions.map((transaction) => (
+            <Transaction
+              key={transaction.index}
+              transaction={transaction}
+            ></Transaction>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
