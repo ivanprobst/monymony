@@ -12,7 +12,7 @@ import Grids from "./components/Grids/Grids";
 import Transactions from "./components/Transactions/Transactions";
 
 // Assets
-import { iTransaction, category } from "./types";
+import { iTransaction, category } from "./utils/types";
 import "./App.css";
 import { theme } from "./theme";
 

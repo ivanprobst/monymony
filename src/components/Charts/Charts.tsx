@@ -13,14 +13,14 @@ import {
 } from "recharts";
 
 // Assets
+import { iTransaction } from "../../utils/types";
 import {
   configMonths,
   configGroups,
   CONFIG_GROUP_LIST,
   CONFIG_CHART_COLOR,
   CONFIG_CATEGORY_TO_GROUP,
-  iTransaction,
-} from "../../types";
+} from "../../utils/configurations";
 
 // RENDER
 export default function Charts({

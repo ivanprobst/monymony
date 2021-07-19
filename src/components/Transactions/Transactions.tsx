@@ -7,7 +7,7 @@ import {
   TableRow,
   TableCell,
 } from "@material-ui/core";
-import { iTransaction } from "../../types";
+import { iTransaction } from "../../utils/types";
 
 export default function Transactions({
   cleanTransactions,

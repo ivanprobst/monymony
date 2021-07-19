@@ -13,12 +13,8 @@ import {
 import GridCell from "./GridCell";
 
 // Assets
-import {
-  configMonths,
-  configGroups,
-  iTransaction,
-  iGridData,
-} from "../../types";
+import { iTransaction, iGridData } from "../../utils/types";
+import { configMonths, configGroups } from "../../utils/configurations";
 
 export default function Grids({
   cleanTransactions,
