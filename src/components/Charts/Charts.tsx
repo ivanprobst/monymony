@@ -15,8 +15,8 @@ import {
 // Assets
 import { iTransaction } from "../../utils/types";
 import {
-  configMonths,
-  configGroups,
+  CONFIG_MONTHS,
+  CONFIG_GROUP_STRUCTURE,
   CONFIG_GROUP_LIST,
   CONFIG_CHART_COLOR,
   CONFIG_CATEGORY_TO_GROUP,
@@ -52,7 +52,7 @@ export default function Charts({
   const chartLinesDataset: Array<{
     month: string;
     dataset: { [group: string]: number };
-  }> = configMonths.map((monthKey) =>
+  }> = CONFIG_MONTHS.map((monthKey) =>
     CONFIG_GROUP_LIST.reduce(
       (
         accumulator: { month: string; dataset: { [group: string]: number } },
@@ -78,8 +78,8 @@ export default function Charts({
   }
 
   // Build income
-  for (const monthIndex in configMonths) {
-    for (const group of configGroups) {
+  for (const monthIndex in CONFIG_MONTHS) {
+    for (const group of CONFIG_GROUP_STRUCTURE) {
       let newIncome =
         chartLinesDataset[monthIndex]["dataset"][group.name] *
         (group.type === "revenues" ? 1 : -1);
@@ -91,13 +91,15 @@ export default function Charts({
   // Build references lines: averages and linear regression
   const chartReferenceData: { [group: string]: { [type: string]: number } } =
     {};
-  const groupList = configGroups.map((group) => group.name).concat(["Income"]);
+  const groupList = CONFIG_GROUP_STRUCTURE.map((group) => group.name).concat([
+    "Income",
+  ]);
   for (const group of groupList) {
     let sumX = 0;
     let sumY = 0;
     let sumX2 = 0;
     let sumXY = 0;
-    for (let i = 0; i < configMonths.length; i++) {
+    for (let i = 0; i < CONFIG_MONTHS.length; i++) {
       if (chartLinesDataset[i] !== undefined) {
         sumX += i;
         sumX2 += i * i;
@@ -106,13 +108,13 @@ export default function Charts({
       }
     }
     chartReferenceData[group] = {
-      average: sumY / configMonths.length,
+      average: sumY / CONFIG_MONTHS.length,
       a:
         (sumY * sumX2 - sumX * sumXY) /
-        (configMonths.length * sumX2 - sumX * sumX),
+        (CONFIG_MONTHS.length * sumX2 - sumX * sumX),
       b:
-        (configMonths.length * sumXY - sumX * sumY) /
-        (configMonths.length * sumX2 - sumX * sumX),
+        (CONFIG_MONTHS.length * sumXY - sumX * sumY) /
+        (CONFIG_MONTHS.length * sumX2 - sumX * sumX),
     };
   }
 
@@ -163,13 +165,13 @@ export default function Charts({
                           strokeDasharray="4 4"
                           segment={[
                             {
-                              x: configMonths[0],
+                              x: CONFIG_MONTHS[0],
                               y: chartReferenceData[curveName]["a"],
                             },
                             {
-                              x: configMonths[configMonths.length - 1],
+                              x: CONFIG_MONTHS[CONFIG_MONTHS.length - 1],
                               y:
-                                configMonths.length *
+                                CONFIG_MONTHS.length *
                                   chartReferenceData[curveName]["b"] +
                                 chartReferenceData[curveName]["a"],
                             },

@@ -2,9 +2,9 @@
 import { iGroupConfig } from "./types";
 
 // CONFIGURATION MODELS
-export const configMonths = ["Jan", "Feb", "Mar", "Apr", "May"];
+export const CONFIG_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May"];
 
-export const configGroups: Array<iGroupConfig> = [
+export const CONFIG_GROUP_STRUCTURE: Array<iGroupConfig> = [
   {
     name: "Revenues",
     type: "revenues",
@@ -41,9 +41,11 @@ export const configGroups: Array<iGroupConfig> = [
   },
 ];
 
-export const CONFIG_GROUP_LIST = configGroups.map((group) => group.name);
+export const CONFIG_GROUP_LIST = CONFIG_GROUP_STRUCTURE.map(
+  (group) => group.name,
+);
 export const CONFIG_CATEGORY_TO_GROUP: { [cat: string]: string } =
-  configGroups.reduce(
+  CONFIG_GROUP_STRUCTURE.reduce(
     (accumulator, group) => ({
       ...accumulator,
       ...group.categories.reduce(

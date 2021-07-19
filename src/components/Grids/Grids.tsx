@@ -14,7 +14,10 @@ import GridCell from "./GridCell";
 
 // Assets
 import { iTransaction, iGridData } from "../../utils/types";
-import { configMonths, configGroups } from "../../utils/configurations";
+import {
+  CONFIG_MONTHS,
+  CONFIG_GROUP_STRUCTURE,
+} from "../../utils/configurations";
 
 export default function Grids({
   cleanTransactions,
@@ -26,15 +29,15 @@ export default function Grids({
 
   // LOADING
   // Build empty grid
-  for (const group of configGroups) {
-    gridData[`Total ${group.name}`] = new Array(configMonths.length + 1).fill(
+  for (const group of CONFIG_GROUP_STRUCTURE) {
+    gridData[`Total ${group.name}`] = new Array(CONFIG_MONTHS.length + 1).fill(
       0,
     );
-    gridData[`Profit ${group.name}`] = new Array(configMonths.length + 1).fill(
+    gridData[`Profit ${group.name}`] = new Array(CONFIG_MONTHS.length + 1).fill(
       0,
     );
     for (const category of group.categories) {
-      gridData[category] = new Array(configMonths.length + 1).fill(0);
+      gridData[category] = new Array(CONFIG_MONTHS.length + 1).fill(0);
     }
   }
 
@@ -51,9 +54,9 @@ export default function Grids({
   }
 
   // Fill in total and profit rows
-  for (let month = 0; month < configMonths.length; month++) {
+  for (let month = 0; month < CONFIG_MONTHS.length; month++) {
     let currentProfit = 0;
-    for (const group of configGroups) {
+    for (const group of CONFIG_GROUP_STRUCTURE) {
       let currentTotal = 0;
       for (const category of group.categories) {
         currentTotal += gridData[category][month];
@@ -69,10 +72,10 @@ export default function Grids({
   // Fill in row totals
   for (const rowKey of Object.keys(gridData)) {
     let totalRow = 0;
-    for (let i = 0; i < configMonths.length; i++) {
+    for (let i = 0; i < CONFIG_MONTHS.length; i++) {
       totalRow += gridData[rowKey][i];
     }
-    gridData[rowKey][configMonths.length] = totalRow;
+    gridData[rowKey][CONFIG_MONTHS.length] = totalRow;
   }
 
   console.log("newest data: ", gridData);
@@ -86,9 +89,9 @@ export default function Grids({
           <TableHead>
             <TableRow>
               <TableCell></TableCell>
-              {configMonths.map((columnValue) => (
-                <TableCell key={columnValue} align="right">
-                  {columnValue}
+              {CONFIG_MONTHS.map((month) => (
+                <TableCell key={month} align="right">
+                  {month}
                 </TableCell>
               ))}
               <TableCell>Total</TableCell>
@@ -96,7 +99,7 @@ export default function Grids({
           </TableHead>
 
           <TableBody>
-            {configGroups.map((group) => (
+            {CONFIG_GROUP_STRUCTURE.map((group) => (
               <>
                 <TableRow key={group.name}>
                   <TableCell variant="head">{group.name}</TableCell>
