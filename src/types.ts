@@ -77,6 +77,22 @@ export const configGroups: Array<iGroupConfig> = [
 	},
 ];
 
+export const CONFIG_GROUP_LIST = configGroups.map((group) => group.name);
+export const CONFIG_CATEGORY_TO_GROUP: { [cat: string]: string } =
+	configGroups.reduce(
+		(accumulator, group) => ({
+			...accumulator,
+			...group.categories.reduce(
+				(accumulator2, category) => ({
+					...accumulator2,
+					[category]: group.name,
+				}),
+				{},
+			),
+		}),
+		{},
+	);
+
 export const CONFIG_CHART_COLOR: {
 	[group: string]: { [type: string]: string };
 } = {
