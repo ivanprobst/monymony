@@ -48,30 +48,31 @@ export default function Charts({
 		});
 	};
 
-	// Build chart lines dataset
+	// Build empty chart lines dataset
 	const chartLinesDataset: Array<{
 		month: string;
-		[group: string]: number | string;
+		dataset: { [group: string]: number };
 	}> = configMonths.map((monthKey) =>
 		CONFIG_GROUP_LIST.reduce(
 			(
-				accumulator: { month: string; [group: string]: number | string },
+				accumulator: { month: string; dataset: { [group: string]: number } },
 				groupName,
-			) => ({
-				...accumulator,
-				[groupName]: 0,
-			}),
-			{ month: monthKey, Income: 0 },
+			) => {
+				const test = { ...accumulator };
+				test.dataset[groupName] = 0;
+				return test;
+			},
+			{ month: monthKey, dataset: { Income: 0 } },
 		),
 	);
 
 	// Build totals
 	for (const transaction of cleanTransactions) {
 		const monthIndex = parseInt(transaction.date.split(".")[1]) - 1;
-		chartLinesDataset[monthIndex][
+		chartLinesDataset[monthIndex]["dataset"][
 			CONFIG_CATEGORY_TO_GROUP[transaction.category]
 		] =
-			(chartLinesDataset[monthIndex][
+			(chartLinesDataset[monthIndex]["dataset"][
 				CONFIG_CATEGORY_TO_GROUP[transaction.category]
 			] as number) + transaction.amount;
 	}
@@ -80,10 +81,10 @@ export default function Charts({
 	for (const monthIndex in configMonths) {
 		for (const group of configGroups) {
 			let newIncome =
-				(chartLinesDataset[monthIndex][group.name] as number) *
+				chartLinesDataset[monthIndex]["dataset"][group.name] *
 				(group.type === "revenues" ? 1 : -1);
-			chartLinesDataset[monthIndex]["Income"] =
-				(chartLinesDataset[monthIndex]["Income"] as number) + newIncome;
+			chartLinesDataset[monthIndex]["dataset"]["Income"] =
+				chartLinesDataset[monthIndex]["dataset"]["Income"] + newIncome;
 		}
 	}
 
@@ -100,8 +101,8 @@ export default function Charts({
 			if (chartLinesDataset[i] !== undefined) {
 				sumX += i;
 				sumX2 += i * i;
-				sumY += chartLinesDataset[i][group] as number;
-				sumXY += (chartLinesDataset[i][group] as number) * i;
+				sumY += chartLinesDataset[i]["dataset"][group];
+				sumXY += chartLinesDataset[i]["dataset"][group] * i;
 			}
 		}
 		chartReferenceData[group] = {
@@ -137,7 +138,7 @@ export default function Charts({
 												<Line
 													key={`amount_${curveName}`}
 													type="monotone"
-													dataKey={curveName}
+													dataKey={`dataset.${curveName}`}
 													stroke={CONFIG_CHART_COLOR[curveName]["colorCode"]}
 													dot={{
 														stroke: CONFIG_CHART_COLOR[curveName]["colorCode"],
