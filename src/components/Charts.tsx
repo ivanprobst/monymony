@@ -13,14 +13,14 @@ import {
 } from "recharts";
 
 // Assets
-import { iTransaction } from "../../utils/types";
+import { iTransaction } from "../utils/types";
 import {
   CONFIG_MONTHS,
   CONFIG_GROUP_STRUCTURE,
   CONFIG_GROUP_LIST,
   CONFIG_CHART_COLOR,
   CONFIG_CATEGORY_TO_GROUP,
-} from "../../utils/configurations";
+} from "../utils/configurations";
 
 // Types
 type CurveToDisplayMap = {

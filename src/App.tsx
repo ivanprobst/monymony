@@ -7,9 +7,9 @@ import "@fontsource/roboto";
 import "@fontsource/material-icons";
 
 // Components
-import ChartViewer from "./components/Charts/Charts";
-import GridViewer from "./components/Grids/Grids";
-import TransactionsList from "./components/Transactions/Transactions";
+import ChartViewer from "./components/Charts";
+import GridViewer from "./components/Grids";
+import TransactionsList from "./components/Transactions";
 
 // Assets
 import { iTransaction, category } from "./utils/types";

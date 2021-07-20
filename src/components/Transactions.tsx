@@ -7,7 +7,7 @@ import {
   TableRow,
   TableCell,
 } from "@material-ui/core";
-import { iTransaction } from "../../utils/types";
+import { iTransaction } from "../utils/types";
 
 // COMP: Transaction
 function Transaction({ transaction }: { transaction: iTransaction }) {
