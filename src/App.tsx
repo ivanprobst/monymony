@@ -1,8 +1,10 @@
 // Libs
 import * as React from "react";
+import { Switch, Route, Link } from "react-router-dom";
+
 import axios from "axios";
 import { ThemeProvider } from "@material-ui/core/styles";
-import { Grid, ButtonGroup, Button } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import "@fontsource/roboto";
 import "@fontsource/material-icons";
 
@@ -22,20 +24,6 @@ export default function App() {
     iTransaction[]
   >([]);
 
-  const tabs = {
-    0: <ChartViewer cleanTransactions={cleanTransactions}></ChartViewer>,
-    1: <GridViewer cleanTransactions={cleanTransactions}></GridViewer>,
-    2: (
-      <TransactionsList
-        cleanTransactions={cleanTransactions}
-      ></TransactionsList>
-    ),
-  };
-
-  type tabOptions = keyof typeof tabs;
-
-  const [currentTab, setCurrentTab] = React.useState<tabOptions>(2);
-
   // LOADING
   React.useEffect(() => {
     getGSheetData();
@@ -52,42 +40,43 @@ export default function App() {
               <h1>Mony mony</h1>
             </Grid>
             <Grid item xs={6}>
-              <ButtonGroup variant="contained" color="primary">
-                <Button
+              <nav>
+                <Link to="/transactions">Transactions</Link>
+                &nbsp;|&nbsp;
+                <Link to="/grid">Grid</Link>
+                &nbsp;|&nbsp;
+                <Link to="/chart">Chart</Link>
+                &nbsp;-&nbsp;
+                <button
                   onClick={() => {
                     getGSheetData();
                   }}
                 >
-                  <span className="material-icons">refresh</span>
-                </Button>
-                <Button
-                  onClick={() => {
-                    setCurrentTab(0);
-                  }}
-                >
-                  <span className="material-icons">insights</span>
-                  &nbsp;&nbsp;Chart
-                </Button>
-                <Button
-                  onClick={() => {
-                    setCurrentTab(1);
-                  }}
-                >
-                  <span className="material-icons">apps</span>&nbsp;&nbsp;Grid
-                </Button>
-                <Button
-                  onClick={() => {
-                    setCurrentTab(2);
-                  }}
-                >
-                  <span className="material-icons">segment</span>
-                  &nbsp;&nbsp;Transactions
-                </Button>
-              </ButtonGroup>
+                  Refresh
+                </button>
+              </nav>
             </Grid>
           </Grid>
         </header>
-        <div className="App-body">{tabs[currentTab]}</div>
+
+        <div className="App-body">
+          <Switch>
+            <Route path="/transactions">
+              <TransactionsList
+                cleanTransactions={cleanTransactions}
+              ></TransactionsList>
+            </Route>
+            <Route path="/grid">
+              <GridViewer cleanTransactions={cleanTransactions}></GridViewer>
+            </Route>
+            <Route path="/chart">
+              <ChartViewer cleanTransactions={cleanTransactions}></ChartViewer>
+            </Route>
+            <Route path="/">
+              <ChartViewer cleanTransactions={cleanTransactions}></ChartViewer>
+            </Route>
+          </Switch>
+        </div>
       </div>
     </ThemeProvider>
   );
