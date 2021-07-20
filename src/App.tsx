@@ -7,7 +7,7 @@ import "@fontsource/roboto";
 import "@fontsource/material-icons";
 
 // Components
-import Charts from "./components/Charts/Charts";
+import ChartViewer from "./components/Charts/Charts";
 import Grids from "./components/Grids/Grids";
 import TransactionsList from "./components/Transactions/Transactions";
 
@@ -23,7 +23,7 @@ export default function App() {
   >([]);
 
   const tabs = {
-    0: <Charts cleanTransactions={cleanTransactions}></Charts>,
+    0: <ChartViewer cleanTransactions={cleanTransactions}></ChartViewer>,
     1: <Grids cleanTransactions={cleanTransactions}></Grids>,
     2: (
       <TransactionsList

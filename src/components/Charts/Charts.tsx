@@ -22,25 +22,146 @@ import {
   CONFIG_CATEGORY_TO_GROUP,
 } from "../../utils/configurations";
 
+// Types
+type CurveToDisplayMap = {
+  [curveName: string]: boolean;
+};
+
+type ChartDataset = Array<{
+  month: string;
+  dataset: { [groupName: string]: number };
+}>;
+
+type ChartReferenceSet = {
+  [groupName: string]: { [referenceType: string]: number };
+};
+
+// COMP: Chart
+function Chart({
+  curvesToDisplay,
+  chartLinesDataset,
+  chartReferenceData,
+}: {
+  curvesToDisplay: CurveToDisplayMap;
+  chartLinesDataset: ChartDataset;
+  chartReferenceData: ChartReferenceSet;
+}) {
+  return (
+    <ResponsiveContainer width="95%" height={500}>
+      <LineChart
+        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+        data={chartLinesDataset}
+      >
+        <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+        <XAxis dataKey="month" />
+        <YAxis />
+        <Tooltip />
+        {Object.entries(curvesToDisplay).reduce(
+          (curveList: Array<JSX.Element>, [curveName, displayCurve]) => {
+            if (displayCurve) {
+              return curveList
+                .concat([
+                  <Line
+                    key={`amount_${curveName}`}
+                    type="monotone"
+                    dataKey={`dataset.${curveName}`}
+                    stroke={CONFIG_CHART_COLOR[curveName]["colorCode"]}
+                    dot={{
+                      stroke: CONFIG_CHART_COLOR[curveName]["colorCode"],
+                      strokeWidth: 1,
+                    }}
+                  ></Line>,
+                ])
+                .concat([
+                  <ReferenceLine
+                    label="Average"
+                    key={`average_${curveName}`}
+                    stroke={CONFIG_CHART_COLOR[curveName]["colorCode"]}
+                    strokeDasharray="1 5"
+                    y={chartReferenceData[curveName]["average"]}
+                  />,
+                ])
+                .concat([
+                  <ReferenceLine
+                    label="Trend"
+                    key={`trend_${curveName}`}
+                    stroke={CONFIG_CHART_COLOR[curveName]["colorCode"]}
+                    strokeDasharray="4 4"
+                    segment={[
+                      {
+                        x: CONFIG_MONTHS[0],
+                        y: chartReferenceData[curveName]["a"],
+                      },
+                      {
+                        x: CONFIG_MONTHS[CONFIG_MONTHS.length - 1],
+                        y:
+                          CONFIG_MONTHS.length *
+                            chartReferenceData[curveName]["b"] +
+                          chartReferenceData[curveName]["a"],
+                      },
+                    ]}
+                  />,
+                ]);
+            }
+            return curveList;
+          },
+          [],
+        )}
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
+// COMP: CurveSelector
+function CurveSelector({
+  curvesToDisplay,
+  curveToggler,
+}: {
+  curvesToDisplay: CurveToDisplayMap;
+  curveToggler: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <>
+      {Object.entries(curvesToDisplay).map(([curveName, displayCurve]) => (
+        <FormControlLabel
+          key={curveName}
+          control={
+            <Checkbox
+              checked={displayCurve}
+              onChange={curveToggler}
+              name={curveName}
+              color="primary"
+              classes={{
+                colorPrimary: CONFIG_CHART_COLOR[curveName]["class"],
+              }}
+            />
+          }
+          label={curveName}
+        />
+      ))}
+    </>
+  );
+}
+
 // RENDER
-export default function Charts({
+export default function ChartViewer({
   cleanTransactions,
 }: {
   cleanTransactions: Array<iTransaction>;
 }) {
-  // Curves display handling
-  const [curvesToDisplay, setCurvesToDisplay] = React.useState<{
-    [curve: string]: boolean;
-  }>({
-    ...CONFIG_GROUP_LIST.reduce(
-      (accumulator: { [group: string]: boolean }, groupName) => ({
-        ...accumulator,
-        [groupName]: false,
-      }),
-      { Income: true },
-    ),
-  });
+  // States
+  const [curvesToDisplay, setCurvesToDisplay] =
+    React.useState<CurveToDisplayMap>({
+      ...CONFIG_GROUP_LIST.reduce(
+        (accumulator: { [group: string]: boolean }, groupName) => ({
+          ...accumulator,
+          [groupName]: false,
+        }),
+        { Income: true },
+      ),
+    });
 
+  // Helpers
   const toggleCurveCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCurvesToDisplay({
       ...curvesToDisplay,
@@ -49,10 +170,7 @@ export default function Charts({
   };
 
   // Build empty chart lines dataset
-  const chartLinesDataset: Array<{
-    month: string;
-    dataset: { [group: string]: number };
-  }> = CONFIG_MONTHS.map((monthKey) =>
+  const chartLinesDataset: ChartDataset = CONFIG_MONTHS.map((monthKey) =>
     CONFIG_GROUP_LIST.reduce(
       (
         accumulator: { month: string; dataset: { [group: string]: number } },
@@ -66,7 +184,7 @@ export default function Charts({
     ),
   );
 
-  // Build totals
+  // Calculate dataset totals
   for (const transaction of cleanTransactions) {
     const monthIndex = parseInt(transaction.date.split(".")[1]) - 1;
     chartLinesDataset[monthIndex]["dataset"][
@@ -77,7 +195,7 @@ export default function Charts({
       ] as number) + transaction.amount;
   }
 
-  // Build income
+  // Calculate dataset income
   for (const monthIndex in CONFIG_MONTHS) {
     for (const group of CONFIG_GROUP_STRUCTURE) {
       let newIncome =
@@ -88,9 +206,8 @@ export default function Charts({
     }
   }
 
-  // Build references lines: averages and linear regression
-  const chartReferenceData: { [group: string]: { [type: string]: number } } =
-    {};
+  // Calculate references lines: averages and linear regression
+  const chartReferenceData: ChartReferenceSet = {};
   const groupList = CONFIG_GROUP_STRUCTURE.map((group) => group.name).concat([
     "Income",
   ]);
@@ -119,93 +236,20 @@ export default function Charts({
   }
 
   return (
-    <>
-      <h2>Chart</h2>
-      <Grid container spacing={3}>
-        <Grid item xs={10}>
-          <ResponsiveContainer width="95%" height={500}>
-            <LineChart
-              margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-              data={chartLinesDataset}
-            >
-              <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              {Object.entries(curvesToDisplay).reduce(
-                (curveList: Array<JSX.Element>, [curveName, displayCurve]) => {
-                  if (displayCurve) {
-                    return curveList
-                      .concat([
-                        <Line
-                          key={`amount_${curveName}`}
-                          type="monotone"
-                          dataKey={`dataset.${curveName}`}
-                          stroke={CONFIG_CHART_COLOR[curveName]["colorCode"]}
-                          dot={{
-                            stroke: CONFIG_CHART_COLOR[curveName]["colorCode"],
-                            strokeWidth: 1,
-                          }}
-                        ></Line>,
-                      ])
-                      .concat([
-                        <ReferenceLine
-                          label="Average"
-                          key={`average_${curveName}`}
-                          stroke={CONFIG_CHART_COLOR[curveName]["colorCode"]}
-                          strokeDasharray="1 5"
-                          y={chartReferenceData[curveName]["average"]}
-                        />,
-                      ])
-                      .concat([
-                        <ReferenceLine
-                          label="Trend"
-                          key={`trend_${curveName}`}
-                          stroke={CONFIG_CHART_COLOR[curveName]["colorCode"]}
-                          strokeDasharray="4 4"
-                          segment={[
-                            {
-                              x: CONFIG_MONTHS[0],
-                              y: chartReferenceData[curveName]["a"],
-                            },
-                            {
-                              x: CONFIG_MONTHS[CONFIG_MONTHS.length - 1],
-                              y:
-                                CONFIG_MONTHS.length *
-                                  chartReferenceData[curveName]["b"] +
-                                chartReferenceData[curveName]["a"],
-                            },
-                          ]}
-                        />,
-                      ]);
-                  }
-                  return curveList;
-                },
-                [],
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        </Grid>
-        <Grid item xs={2}>
-          {Object.entries(curvesToDisplay).map(([curveName, displayCurve]) => (
-            <FormControlLabel
-              key={curveName}
-              control={
-                <Checkbox
-                  checked={displayCurve}
-                  onChange={toggleCurveCheckbox}
-                  name={curveName}
-                  color="primary"
-                  classes={{
-                    colorPrimary: CONFIG_CHART_COLOR[curveName]["class"],
-                  }}
-                />
-              }
-              label={curveName}
-            />
-          ))}
-        </Grid>
+    <Grid container spacing={3}>
+      <Grid item xs={10}>
+        <Chart
+          curvesToDisplay={curvesToDisplay}
+          chartLinesDataset={chartLinesDataset}
+          chartReferenceData={chartReferenceData}
+        ></Chart>
       </Grid>
-    </>
+      <Grid item xs={2}>
+        <CurveSelector
+          curvesToDisplay={curvesToDisplay}
+          curveToggler={toggleCurveCheckbox}
+        ></CurveSelector>
+      </Grid>
+    </Grid>
   );
 }
