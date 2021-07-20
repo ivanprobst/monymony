@@ -8,7 +8,7 @@ import "@fontsource/material-icons";
 
 // Components
 import ChartViewer from "./components/Charts/Charts";
-import Grids from "./components/Grids/Grids";
+import GridViewer from "./components/Grids/Grids";
 import TransactionsList from "./components/Transactions/Transactions";
 
 // Assets
@@ -24,7 +24,7 @@ export default function App() {
 
   const tabs = {
     0: <ChartViewer cleanTransactions={cleanTransactions}></ChartViewer>,
-    1: <Grids cleanTransactions={cleanTransactions}></Grids>,
+    1: <GridViewer cleanTransactions={cleanTransactions}></GridViewer>,
     2: (
       <TransactionsList
         cleanTransactions={cleanTransactions}

@@ -27,10 +27,6 @@ export interface iTransaction {
   amount: number;
 }
 
-export interface iGridData {
-  [category: string]: Array<number>;
-}
-
 export interface iGroupConfig {
   name: string;
   type: "revenues" | "costs";
