@@ -70,7 +70,7 @@ export default function App() {
         <header className="App-header">
           <Grid container>
             <Grid item xs={6}>
-              <h1>Mony mony</h1>
+              <h1 className="text-2xl">Mony mony</h1>
             </Grid>
             <Grid item xs={6}>
               <nav>
