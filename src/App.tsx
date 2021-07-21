@@ -1,12 +1,9 @@
 // Libs
 import * as React from "react";
 import { Switch, Route, Link } from "react-router-dom";
-
 import axios from "axios";
 import { ThemeProvider } from "@material-ui/core/styles";
-import { Grid } from "@material-ui/core";
-import "@fontsource/roboto";
-import "@fontsource/material-icons";
+import { Grid, Container } from "@material-ui/core";
 
 // Components
 import ChartViewer from "./components/Charts";
@@ -18,70 +15,14 @@ import { iTransaction, category } from "./utils/types";
 import "./App.css";
 import { theme } from "./theme";
 
+// RENDER
 export default function App() {
-  // Definitions
+  // States
   const [cleanTransactions, setCleanTransactions] = React.useState<
     iTransaction[]
   >([]);
 
-  // LOADING
-  React.useEffect(() => {
-    getGSheetData();
-  }, []);
-
-  console.log("Clean transactions: ", cleanTransactions);
-  // RENDER
-  return (
-    <ThemeProvider theme={theme}>
-      <div className="App">
-        <header className="App-header">
-          <Grid container>
-            <Grid item xs={6}>
-              <h1>Mony mony</h1>
-            </Grid>
-            <Grid item xs={6}>
-              <nav>
-                <Link to="/transactions">Transactions</Link>
-                &nbsp;|&nbsp;
-                <Link to="/grid">Grid</Link>
-                &nbsp;|&nbsp;
-                <Link to="/chart">Chart</Link>
-                &nbsp;-&nbsp;
-                <button
-                  onClick={() => {
-                    getGSheetData();
-                  }}
-                >
-                  Refresh
-                </button>
-              </nav>
-            </Grid>
-          </Grid>
-        </header>
-
-        <div className="App-body">
-          <Switch>
-            <Route path="/transactions">
-              <TransactionsList
-                cleanTransactions={cleanTransactions}
-              ></TransactionsList>
-            </Route>
-            <Route path="/grid">
-              <GridViewer cleanTransactions={cleanTransactions}></GridViewer>
-            </Route>
-            <Route path="/chart">
-              <ChartViewer cleanTransactions={cleanTransactions}></ChartViewer>
-            </Route>
-            <Route path="/">
-              <ChartViewer cleanTransactions={cleanTransactions}></ChartViewer>
-            </Route>
-          </Switch>
-        </div>
-      </div>
-    </ThemeProvider>
-  );
-
-  // HELPERS
+  // Helpers
   function getGSheetData() {
     axios
       .get(
@@ -117,4 +58,69 @@ export default function App() {
         console.log("error");
       });
   }
+
+  // Loading
+  React.useEffect(() => {
+    getGSheetData();
+  }, []);
+
+  return (
+    <ThemeProvider theme={theme}>
+      <div className="App">
+        <header className="App-header">
+          <Grid container>
+            <Grid item xs={6}>
+              <h1>Mony mony</h1>
+            </Grid>
+            <Grid item xs={6}>
+              <nav>
+                <Link to="/transactions">Transactions</Link>
+                &nbsp;|&nbsp;
+                <Link to="/grid">Grid</Link>
+                &nbsp;|&nbsp;
+                <Link to="/chart">Chart</Link>
+                &nbsp;-&nbsp;
+                <button
+                  onClick={() => {
+                    getGSheetData();
+                  }}
+                >
+                  Refresh
+                </button>
+              </nav>
+            </Grid>
+          </Grid>
+        </header>
+
+        <div className="App-body">
+          <Container>
+            <Switch>
+              <Route path="/transactions">
+                <h2>Transactions</h2>
+                <TransactionsList
+                  cleanTransactions={cleanTransactions}
+                ></TransactionsList>
+              </Route>
+              <Route path="/grid">
+                <h2>Grid</h2>
+                <GridViewer cleanTransactions={cleanTransactions}></GridViewer>
+              </Route>
+              <Route path="/chart">
+                <h2>Chart</h2>
+                <ChartViewer
+                  cleanTransactions={cleanTransactions}
+                ></ChartViewer>
+              </Route>
+              <Route path="/">
+                <h2>Chart</h2>
+                <ChartViewer
+                  cleanTransactions={cleanTransactions}
+                ></ChartViewer>
+              </Route>
+            </Switch>
+          </Container>
+        </div>
+      </div>
+    </ThemeProvider>
+  );
 }
