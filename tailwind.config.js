@@ -18,12 +18,17 @@ module.exports = {
         },
         myellow: {
           DEFAULT: '#E5D352'
+        },
+        mpurple: {
+          DEFAULT: '#482C3D'
         }
       },
     },
   },
   variants: {
-    extend: {},
+    extend: {
+      backgroundColor: ['even'],
+    },
   },
   plugins: [],
 }

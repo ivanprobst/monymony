@@ -87,7 +87,7 @@ export default function App() {
         </nav>
       </header>
 
-      <section className="p-8">
+      <section className="p-8 text-sm text-gray-700">
         <Switch>
           <Route path="/transactions">
             <h2 className="section-title">Transactions</h2>

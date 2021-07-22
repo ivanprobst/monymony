@@ -59,6 +59,12 @@ export const CONFIG_CATEGORY_TO_GROUP: { [cat: string]: string } =
     {},
   );
 
+export const CONFIG_GROUP_TO_TYPE: { [groupName: string]: string } =
+  CONFIG_GROUP_STRUCTURE.reduce(
+    (acc, group) => ({ ...acc, [group.name]: group.type }),
+    {},
+  );
+
 export const CONFIG_CHART_COLOR: {
   [group: string]: { [type: string]: string };
 } = {
