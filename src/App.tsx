@@ -2,8 +2,6 @@
 import * as React from "react";
 import { Switch, Route, Link } from "react-router-dom";
 import axios from "axios";
-import { ThemeProvider } from "@material-ui/core/styles";
-import { Grid, Container } from "@material-ui/core";
 
 // Components
 import ChartViewer from "./components/Charts";
@@ -13,7 +11,6 @@ import TransactionsList from "./components/Transactions";
 // Assets
 import { iTransaction, category } from "./utils/types";
 import "./App.css";
-import { theme } from "./theme";
 
 // RENDER
 export default function App() {
@@ -65,62 +62,55 @@ export default function App() {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
-      <div className="App">
-        <header className="App-header">
-          <Grid container>
-            <Grid item xs={6}>
-              <h1 className="text-2xl">Mony mony</h1>
-            </Grid>
-            <Grid item xs={6}>
-              <nav>
-                <Link to="/transactions">Transactions</Link>
-                &nbsp;|&nbsp;
-                <Link to="/grid">Grid</Link>
-                &nbsp;|&nbsp;
-                <Link to="/chart">Chart</Link>
-                &nbsp;-&nbsp;
-                <button
-                  onClick={() => {
-                    getGSheetData();
-                  }}
-                >
-                  Refresh
-                </button>
-              </nav>
-            </Grid>
-          </Grid>
-        </header>
+    <>
+      <header className="grid grid-cols-2 p-4 bg-mred">
+        <h1 className="self-center text-3xl text-white">
+          <a href="/">Mony mony</a>
+        </h1>
+        <nav className="self-center text-right">
+          <Link className="nav-button" to="/transactions">
+            Transactions
+          </Link>
+          <Link className="nav-button" to="/grid">
+            Grid
+          </Link>
+          <Link className="nav-button" to="/chart">
+            Chart
+          </Link>
+          <a
+            href="/#"
+            className="p-2 mr-1 bg-myellow hover:bg-white"
+            onClick={getGSheetData}
+          >
+            Refresh
+          </a>
+        </nav>
+      </header>
 
-        <div className="App-body">
-          <Container>
-            <Switch>
-              <Route path="/transactions">
-                <h2>Transactions</h2>
-                <TransactionsList
-                  cleanTransactions={cleanTransactions}
-                ></TransactionsList>
-              </Route>
-              <Route path="/grid">
-                <h2>Grid</h2>
-                <GridViewer cleanTransactions={cleanTransactions}></GridViewer>
-              </Route>
-              <Route path="/chart">
-                <h2>Chart</h2>
-                <ChartViewer
-                  cleanTransactions={cleanTransactions}
-                ></ChartViewer>
-              </Route>
-              <Route path="/">
-                <h2>Chart</h2>
-                <ChartViewer
-                  cleanTransactions={cleanTransactions}
-                ></ChartViewer>
-              </Route>
-            </Switch>
-          </Container>
-        </div>
-      </div>
-    </ThemeProvider>
+      <section className="p-8">
+        <Switch>
+          <Route path="/transactions">
+            <h2 className="section-title">Transactions</h2>
+            <TransactionsList
+              cleanTransactions={cleanTransactions}
+            ></TransactionsList>
+          </Route>
+          <Route path="/grid">
+            <h2 className="section-title">Grid</h2>
+            <GridViewer cleanTransactions={cleanTransactions}></GridViewer>
+          </Route>
+          <Route path="/chart">
+            <h2 className="section-title">Chart</h2>
+            <ChartViewer cleanTransactions={cleanTransactions}></ChartViewer>
+          </Route>
+          <Route path="/">
+            <h2 className="section-title">Chart</h2>
+            <ChartViewer cleanTransactions={cleanTransactions}></ChartViewer>
+          </Route>
+        </Switch>
+      </section>
+
+      <footer className="p-4 text-white bg-mred">© 2021 by ivanprobst</footer>
+    </>
   );
 }

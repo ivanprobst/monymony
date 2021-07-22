@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .nav-button {
+    @apply p-2 mr-1 bg-mblue text-white hover:bg-white hover:text-mblue;
+  }
+  ,
+  .section-title {
+    @apply mb-4 text-2xl;
+  }
+}
