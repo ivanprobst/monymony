@@ -10,7 +10,6 @@ import TransactionsList from "./components/Transactions";
 
 // Assets
 import { iTransaction, category } from "./utils/types";
-import "./App.css";
 
 // RENDER
 export default function App() {
