@@ -6,6 +6,7 @@
     "@craco/craco": "^6.2.0",
     "@fontsource/material-icons": "^4.4.5",
     "@fontsource/roboto": "^4.4.5",
+    "@heroicons/react": "^1.0.2",
     "@tailwindcss/forms": "^0.3.3",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.7",

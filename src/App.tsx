@@ -2,6 +2,7 @@
 import * as React from "react";
 import { Switch, Route, NavLink } from "react-router-dom";
 import axios from "axios";
+import { RefreshIcon } from "@heroicons/react/solid";
 
 // Components
 import ChartViewer from "./components/Charts";
@@ -67,6 +68,13 @@ export default function App() {
           <a href="/">Mony mony</a>
         </h1>
         <nav className="self-center text-right">
+          <a
+            href="/#"
+            className="p-2 text-white hover:text-mred-light"
+            onClick={getGSheetData}
+          >
+            <RefreshIcon className="inline h-6 w-6" />
+          </a>
           <NavLink
             className="nav-button"
             activeClassName="bg-mred-light text-white"
@@ -88,9 +96,6 @@ export default function App() {
           >
             Chart
           </NavLink>
-          <a href="/#" className="nav-button" onClick={getGSheetData}>
-            Refresh
-          </a>
         </nav>
       </header>
 
