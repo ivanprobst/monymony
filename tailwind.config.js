@@ -21,7 +21,7 @@ module.exports = {
         },
         mpurple: {
           DEFAULT: '#482C3D'
-        }
+        },
       },
     },
   },
