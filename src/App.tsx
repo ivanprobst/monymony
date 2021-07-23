@@ -1,6 +1,6 @@
 // Libs
 import * as React from "react";
-import { Switch, Route, Link } from "react-router-dom";
+import { Switch, Route, NavLink } from "react-router-dom";
 import axios from "axios";
 
 // Components
@@ -67,20 +67,28 @@ export default function App() {
           <a href="/">Mony mony</a>
         </h1>
         <nav className="self-center text-right">
-          <Link className="nav-button" to="/transactions">
-            Transactions
-          </Link>
-          <Link className="nav-button" to="/grid">
-            Grid
-          </Link>
-          <Link className="nav-button" to="/chart">
-            Chart
-          </Link>
-          <a
-            href="/#"
-            className="p-2 mr-1 bg-myellow hover:bg-white"
-            onClick={getGSheetData}
+          <NavLink
+            className="nav-button"
+            activeClassName="bg-mred-light text-white"
+            to="/transactions"
           >
+            Transactions
+          </NavLink>
+          <NavLink
+            className="nav-button"
+            activeClassName="bg-mred-light text-white"
+            to="/grid"
+          >
+            Grid
+          </NavLink>
+          <NavLink
+            className="nav-button"
+            activeClassName="bg-mred-light text-white"
+            to="/chart"
+          >
+            Chart
+          </NavLink>
+          <a href="/#" className="nav-button" onClick={getGSheetData}>
             Refresh
           </a>
         </nav>
