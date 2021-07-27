@@ -21,6 +21,7 @@ export default function App() {
 
   // Helpers
   function getGSheetData() {
+    setCleanTransactions([]);
     axios
       .get(
         `${process.env.REACT_APP_GSHEET_URL}?key=${process.env.REACT_APP_GAPI_KEY}`,
@@ -68,13 +69,16 @@ export default function App() {
           <a href="/">Mony mony</a>
         </h1>
         <nav className="self-center text-right">
-          <a
-            href="/#"
+          <button
             className="p-2 text-white hover:text-mred-light"
             onClick={getGSheetData}
           >
-            <RefreshIcon className="inline h-6 w-6" />
-          </a>
+            <RefreshIcon
+              className={`inline h-6 w-6 ${
+                cleanTransactions.length === 0 ? "animate-spin-slow" : ""
+              }`}
+            />
+          </button>
           <NavLink
             className="nav-button"
             activeClassName="bg-mred-light text-white"

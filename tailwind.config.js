@@ -21,9 +21,22 @@ module.exports = {
         },
         mpurple: {
           DEFAULT: '#482C3D'
-        },
+        }
       },
-    },
+      animation: {
+        'spin-slow': 'spin-ccw 2s linear infinite'
+      },
+      keyframes: {
+        'spin-ccw': {
+          from: {
+            transform: 'rotate(360deg)'
+          },
+          to: {
+            transform: 'rotate(0deg)'
+          }
+        }
+      }
+    }
   },
   variants: {
     extend: {
@@ -31,6 +44,6 @@ module.exports = {
     },
   },
   plugins: [
-    require('@tailwindcss/forms'),
-  ],
+    require('@tailwindcss/forms')
+  ]
 }
