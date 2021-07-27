@@ -1,4 +1,10 @@
 // Libs
+import {
+  ChevronDoubleDownIcon,
+  ChevronDoubleUpIcon,
+} from "@heroicons/react/solid";
+
+// Assets
 import { iTransaction } from "../utils/types";
 import {
   CONFIG_CATEGORY_TO_GROUP,
@@ -13,12 +19,14 @@ function Transaction({ transaction }: { transaction: iTransaction }) {
       <td className="p-2">{transaction.date}</td>
       <td className="p-2">{transaction.description}</td>
       <td className="p-2">
-        {transaction.category}
         {CONFIG_GROUP_TO_TYPE[
           CONFIG_CATEGORY_TO_GROUP[transaction.category]
-        ] === "costs"
-          ? " (costs)"
-          : " (revenues)"}
+        ] === "costs" ? (
+          <ChevronDoubleDownIcon className="inline h-4 w-4 text-mred" />
+        ) : (
+          <ChevronDoubleUpIcon className="inline h-4 w-4 text-green-500" />
+        )}
+        &nbsp;{transaction.category}
       </td>
       <td className="p-2">{transaction.amount.toLocaleString("en")}</td>
     </tr>
