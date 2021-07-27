@@ -103,7 +103,7 @@ export default function App() {
         </nav>
       </header>
 
-      <section className="p-8 text-sm text-gray-700">
+      <main className="flex-auto p-8 text-sm text-gray-700">
         <Switch>
           <Route path="/transactions">
             <h2 className="section-title">Transactions</h2>
@@ -124,9 +124,20 @@ export default function App() {
             <ChartViewer cleanTransactions={cleanTransactions}></ChartViewer>
           </Route>
         </Switch>
-      </section>
+      </main>
 
-      <footer className="p-4 text-white bg-mred">© 2021 by ivanprobst</footer>
+      <footer className="p-4 text-white bg-mred">
+        © 2021 by ivanprobst (
+        <a
+          className="underline"
+          target="_blank"
+          href="https://github.com/ivanprobst/monymony"
+          rel="noopener noreferrer"
+        >
+          check out this project on GitHub
+        </a>
+        )
+      </footer>
     </>
   );
 }
