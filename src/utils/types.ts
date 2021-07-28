@@ -1,7 +1,7 @@
 // TYPES
 export type category =
-  | "Revenue Alice"
-  | "Revenue Ivan"
+  | "Revenue 1"
+  | "Revenue 2"
   | "Other revenue"
   | "Home"
   | "Health"

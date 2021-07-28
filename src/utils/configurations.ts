@@ -2,13 +2,26 @@
 import { iGroupConfig } from "./types";
 
 // CONFIGURATION MODELS
-export const CONFIG_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May"];
+export const CONFIG_MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 export const CONFIG_GROUP_STRUCTURE: Array<iGroupConfig> = [
   {
     name: "Revenues",
     type: "revenues",
-    categories: ["Revenue Alice", "Revenue Ivan", "Other revenue"],
+    categories: ["Revenue 1", "Revenue 2", "Other revenue"],
   },
   {
     name: "Costs of living",

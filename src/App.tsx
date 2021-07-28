@@ -32,14 +32,12 @@ export default function App() {
           data.values
             .slice(1)
             .map(
-              ([index, date, description, , , amount, category]: [
+              ([index, date, description, category, amount]: [
                 number,
                 string,
                 string,
-                any,
-                any,
-                string,
                 category,
+                string,
               ]) => {
                 return {
                   index,
@@ -61,6 +59,8 @@ export default function App() {
   React.useEffect(() => {
     getGSheetData();
   }, []);
+
+  console.log("latest transaction list: ", cleanTransactions);
 
   return (
     <>
