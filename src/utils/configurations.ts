@@ -1,5 +1,5 @@
 // Assets
-import { iGroupConfig } from "./types";
+import { iGroupConfig, Category } from "./types";
 
 // CONFIGURATION MODELS
 export const CONFIG_MONTHS = [
@@ -54,9 +54,15 @@ export const CONFIG_GROUP_STRUCTURE: Array<iGroupConfig> = [
   },
 ];
 
-export const CONFIG_GROUP_LIST = CONFIG_GROUP_STRUCTURE.map(
+export const CONFIG_GROUP_LIST: Array<string> = CONFIG_GROUP_STRUCTURE.map(
   (group) => group.name,
 );
+
+export const CONFIG_CATEGORY_LIST: Array<Category> =
+  CONFIG_GROUP_STRUCTURE.reduce((acc: Array<Category>, group) => {
+    return acc.concat(...group.categories);
+  }, []);
+
 export const CONFIG_CATEGORY_TO_GROUP: { [cat: string]: string } =
   CONFIG_GROUP_STRUCTURE.reduce(
     (accumulator, group) => ({

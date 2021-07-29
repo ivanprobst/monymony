@@ -1,34 +1,26 @@
+import { CONFIG_GROUP_STRUCTURE } from "./configurations";
+
 // TYPES
-export type category =
-  | "Revenue 1"
-  | "Revenue 2"
-  | "Other revenue"
-  | "Home"
-  | "Health"
-  | "Meal"
-  | "Transport"
-  | "Interests"
-  | "Other living"
-  | "Restaurants and bars"
-  | "Media"
-  | "Gift"
-  | "Holiday"
-  | "Stuff"
-  | "Other fun"
-  | "3a"
-  | "Home investments"
-  | "Other investments";
+const tmpCatArray: Array<string> = CONFIG_GROUP_STRUCTURE.reduce(
+  (acc: Array<string>, group) => {
+    return acc.concat(...group.categories);
+  },
+  [],
+);
+export type Category = typeof tmpCatArray[number];
 
 export interface iTransaction {
-  index: number;
+  index: string;
   date: string;
   description: string;
-  category: category;
+  category: Category;
   amount: number;
+  groupName: string;
+  monthIndex: number;
 }
 
 export interface iGroupConfig {
   name: string;
   type: "revenues" | "costs";
-  categories: Array<category>;
+  categories: Array<Category>;
 }

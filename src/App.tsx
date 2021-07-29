@@ -10,7 +10,12 @@ import GridViewer from "./components/Grids";
 import TransactionsList from "./components/Transactions";
 
 // Assets
-import { iTransaction, category } from "./utils/types";
+import { iTransaction, Category } from "./utils/types";
+import {
+  CONFIG_MONTHS,
+  CONFIG_CATEGORY_LIST,
+  CONFIG_CATEGORY_TO_GROUP,
+} from "./utils/configurations";
 
 // RENDER
 export default function App() {
@@ -28,30 +33,63 @@ export default function App() {
       )
       .then((res) => {
         const data = res.data;
+        const errorArr: Array<{}> = [];
+        const indexMem = new Set();
         setCleanTransactions(
           data.values
             .slice(1)
-            .map(
-              ([index, date, description, category, amount]: [
-                number,
-                string,
-                string,
-                category,
-                string,
-              ]) => {
-                return {
-                  index,
-                  date,
-                  description,
-                  category,
-                  amount: parseInt(amount),
-                };
+            .reduce(
+              (
+                acc: Array<iTransaction>,
+                [index, date, description, category, amount]: [
+                  string,
+                  string,
+                  string,
+                  string,
+                  string,
+                ],
+              ) => {
+                let errorMsg = "";
+                if (indexMem.has(index)) {
+                  errorMsg = "index already exists";
+                } else if (Number.isNaN(parseInt(date.split(".")[1]))) {
+                  errorMsg = "date format can not be parsed";
+                } else if (
+                  parseInt(date.split(".")[1]) > CONFIG_MONTHS.length
+                ) {
+                  errorMsg = "month is not in within config range"; // REALLY A PROBLEM???
+                } else if (!CONFIG_CATEGORY_LIST.includes(category)) {
+                  errorMsg = "category does not exist in config";
+                } else if (Number.isNaN(parseInt(amount))) {
+                  errorMsg = "amount is not a number";
+                }
+
+                if (errorMsg !== "") {
+                  errorArr.push({
+                    index: index,
+                    description: description,
+                    error: errorMsg,
+                  });
+                  return acc;
+                } else {
+                  indexMem.add(index);
+                  return acc.concat({
+                    index,
+                    date,
+                    monthIndex: parseInt(date.split(".")[1]),
+                    description,
+                    category: category as Category,
+                    groupName: CONFIG_CATEGORY_TO_GROUP[category],
+                    amount: parseInt(amount),
+                  });
+                }
               },
+              [],
             ),
         );
       })
       .catch((err) => {
-        console.log("error");
+        console.log("error: ", err);
       });
   }
 
