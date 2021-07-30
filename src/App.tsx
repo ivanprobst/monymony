@@ -94,7 +94,13 @@ export default function App() {
         setTransactionErrorList(errorArr);
       })
       .catch((err) => {
-        console.log("error: ", err);
+        setTransactionErrorList([
+          {
+            index: "",
+            description: "",
+            message: "Failed to connect to transactions source",
+          },
+        ]);
       });
   }
 

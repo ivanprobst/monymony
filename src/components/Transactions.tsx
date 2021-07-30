@@ -60,7 +60,7 @@ export default function TransactionsList({
         </table>
       </div>
       <div className="pl-2 pt-2 border-l-2">
-        <h3 className="text-mblue">Transaction format errors:</h3>
+        <h3 className="text-mblue">Transactions errors:</h3>
         <ul>
           {transactionErrorList.length === 0 ? (
             <li className="p-1 text-green-500">No error</li>
