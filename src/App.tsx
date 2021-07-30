@@ -10,50 +10,97 @@ import GridViewer from "./components/Grids";
 import TransactionsList from "./components/Transactions";
 
 // Assets
-import { iTransaction, category } from "./utils/types";
+import { iTransaction, iTransactionError, Category } from "./utils/types";
+import {
+  CONFIG_MONTHS,
+  CONFIG_CATEGORY_LIST,
+  CONFIG_CATEGORY_TO_GROUP,
+} from "./utils/configurations";
 
 // RENDER
 export default function App() {
   // States
   const [cleanTransactions, setCleanTransactions] = React.useState<
-    iTransaction[]
+    Array<iTransaction>
+  >([]);
+  const [transactionErrorList, setTransactionErrorList] = React.useState<
+    Array<iTransactionError>
   >([]);
 
   // Helpers
   function getGSheetData() {
     setCleanTransactions([]);
+    setTransactionErrorList([]);
     axios
       .get(
         `${process.env.REACT_APP_GSHEET_URL}?key=${process.env.REACT_APP_GAPI_KEY}`,
       )
       .then((res) => {
         const data = res.data;
+        const errorArr: Array<iTransactionError> = [];
+        const indexMem = new Set();
         setCleanTransactions(
           data.values
             .slice(1)
-            .map(
-              ([index, date, description, , , amount, category]: [
-                number,
-                string,
-                string,
-                any,
-                any,
-                string,
-                category,
-              ]) => {
-                return {
-                  index,
-                  date,
-                  description,
-                  category,
-                  amount: parseInt(amount),
-                };
+            .reduce(
+              (
+                acc: Array<iTransaction>,
+                [index, date, description, category, amount]: [
+                  string,
+                  string,
+                  string,
+                  string,
+                  string,
+                ],
+              ) => {
+                let errorMsg = "";
+                if (indexMem.has(index)) {
+                  errorMsg = "index already exists";
+                } else if (Number.isNaN(parseInt(date.split(".")[1]))) {
+                  errorMsg = "date format can not be parsed";
+                } else if (
+                  parseInt(date.split(".")[1]) > CONFIG_MONTHS.length
+                ) {
+                  errorMsg = "month is not in within config range"; // REALLY A PROBLEM???
+                } else if (!CONFIG_CATEGORY_LIST.includes(category)) {
+                  errorMsg = "category does not exist in config";
+                } else if (Number.isNaN(parseInt(amount))) {
+                  errorMsg = "amount is not a number";
+                }
+
+                if (errorMsg !== "") {
+                  errorArr.push({
+                    index: index,
+                    description: description,
+                    message: errorMsg,
+                  });
+                  return acc;
+                } else {
+                  indexMem.add(index);
+                  return acc.concat({
+                    index,
+                    date,
+                    monthIndex: parseInt(date.split(".")[1]) - 1,
+                    description,
+                    category: category as Category,
+                    groupName: CONFIG_CATEGORY_TO_GROUP[category],
+                    amount: parseInt(amount),
+                  });
+                }
               },
+              [],
             ),
         );
+        setTransactionErrorList(errorArr);
       })
       .catch((err) => {
-        console.log("error");
+        setTransactionErrorList([
+          {
+            index: "",
+            description: "",
+            message: "Failed to connect to transactions source",
+          },
+        ]);
       });
   }
 
@@ -109,6 +156,7 @@ export default function App() {
             <h2 className="section-title">Transactions</h2>
             <TransactionsList
               cleanTransactions={cleanTransactions}
+              transactionErrorList={transactionErrorList}
             ></TransactionsList>
           </Route>
           <Route path="/grid">
