@@ -24,3 +24,9 @@ export interface iGroupConfig {
   type: "revenues" | "costs";
   categories: Array<Category>;
 }
+
+export interface iTransactionError {
+  index: string;
+  description: string;
+  message: string;
+}

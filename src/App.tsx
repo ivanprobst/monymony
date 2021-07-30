@@ -10,7 +10,7 @@ import GridViewer from "./components/Grids";
 import TransactionsList from "./components/Transactions";
 
 // Assets
-import { iTransaction, Category } from "./utils/types";
+import { iTransaction, iTransactionError, Category } from "./utils/types";
 import {
   CONFIG_MONTHS,
   CONFIG_CATEGORY_LIST,
@@ -21,19 +21,23 @@ import {
 export default function App() {
   // States
   const [cleanTransactions, setCleanTransactions] = React.useState<
-    iTransaction[]
+    Array<iTransaction>
+  >([]);
+  const [transactionErrorList, setTransactionErrorList] = React.useState<
+    Array<iTransactionError>
   >([]);
 
   // Helpers
   function getGSheetData() {
     setCleanTransactions([]);
+    setTransactionErrorList([]);
     axios
       .get(
         `${process.env.REACT_APP_GSHEET_URL}?key=${process.env.REACT_APP_GAPI_KEY}`,
       )
       .then((res) => {
         const data = res.data;
-        const errorArr: Array<{}> = [];
+        const errorArr: Array<iTransactionError> = [];
         const indexMem = new Set();
         setCleanTransactions(
           data.values
@@ -68,7 +72,7 @@ export default function App() {
                   errorArr.push({
                     index: index,
                     description: description,
-                    error: errorMsg,
+                    message: errorMsg,
                   });
                   return acc;
                 } else {
@@ -87,6 +91,7 @@ export default function App() {
               [],
             ),
         );
+        setTransactionErrorList(errorArr);
       })
       .catch((err) => {
         console.log("error: ", err);
@@ -147,6 +152,7 @@ export default function App() {
             <h2 className="section-title">Transactions</h2>
             <TransactionsList
               cleanTransactions={cleanTransactions}
+              transactionErrorList={transactionErrorList}
             ></TransactionsList>
           </Route>
           <Route path="/grid">
