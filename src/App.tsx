@@ -76,7 +76,7 @@ export default function App() {
                   return acc.concat({
                     index,
                     date,
-                    monthIndex: parseInt(date.split(".")[1]),
+                    monthIndex: parseInt(date.split(".")[1]) - 1,
                     description,
                     category: category as Category,
                     groupName: CONFIG_CATEGORY_TO_GROUP[category],

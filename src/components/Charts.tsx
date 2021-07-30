@@ -18,7 +18,6 @@ import {
   CONFIG_GROUP_STRUCTURE,
   CONFIG_GROUP_LIST,
   CONFIG_CHART_COLOR,
-  CONFIG_CATEGORY_TO_GROUP,
 } from "../utils/configurations";
 
 // Types
@@ -180,13 +179,9 @@ export default function ChartViewer({
 
   // Calculate dataset totals
   for (const transaction of cleanTransactions) {
-    const monthIndex = parseInt(transaction.date.split(".")[1]) - 1;
-    chartLinesDataset[monthIndex]["dataset"][
-      CONFIG_CATEGORY_TO_GROUP[transaction.category]
-    ] =
-      (chartLinesDataset[monthIndex]["dataset"][
-        CONFIG_CATEGORY_TO_GROUP[transaction.category]
-      ] as number) + transaction.amount;
+    chartLinesDataset[transaction.monthIndex]["dataset"][
+      transaction.groupName
+    ] += transaction.amount;
   }
 
   // Calculate dataset income

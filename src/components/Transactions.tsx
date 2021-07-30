@@ -6,10 +6,7 @@ import {
 
 // Assets
 import { iTransaction } from "../utils/types";
-import {
-  CONFIG_CATEGORY_TO_GROUP,
-  CONFIG_GROUP_TO_TYPE,
-} from "../utils/configurations";
+import { CONFIG_GROUP_TO_TYPE } from "../utils/configurations";
 
 // Component
 function Transaction({ transaction }: { transaction: iTransaction }) {
@@ -19,9 +16,7 @@ function Transaction({ transaction }: { transaction: iTransaction }) {
       <td className="p-2">{transaction.date}</td>
       <td className="p-2">{transaction.description}</td>
       <td className="p-2">
-        {CONFIG_GROUP_TO_TYPE[
-          CONFIG_CATEGORY_TO_GROUP[transaction.category]
-        ] === "costs" ? (
+        {CONFIG_GROUP_TO_TYPE[transaction.groupName] === "costs" ? (
           <ChevronDoubleDownIcon className="inline h-4 w-4 text-mred" />
         ) : (
           <ChevronDoubleUpIcon className="inline h-4 w-4 text-green-500" />

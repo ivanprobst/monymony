@@ -1,10 +1,6 @@
 // Assets
 import { iTransaction } from "../utils/types";
-import {
-  CONFIG_MONTHS,
-  CONFIG_GROUP_STRUCTURE,
-  CONFIG_CATEGORY_TO_GROUP,
-} from "../utils/configurations";
+import { CONFIG_MONTHS, CONFIG_GROUP_STRUCTURE } from "../utils/configurations";
 
 // Types
 interface iGridData {
@@ -91,18 +87,9 @@ export default function GridViewer({
 
   // Fill in category rows
   for (const transaction of cleanTransactions) {
-    if (
-      gridData[CONFIG_CATEGORY_TO_GROUP[transaction.category]][
-        transaction.category
-      ] === undefined
-    ) {
-      throw new Error(
-        `Category not defined in configuration: ${transaction.category}`,
-      );
-    }
-    gridData[CONFIG_CATEGORY_TO_GROUP[transaction.category]][
-      transaction.category
-    ][parseInt(transaction.date.split(".")[1]) - 1] += transaction.amount;
+    gridData[transaction.groupName][transaction.category][
+      transaction.monthIndex
+    ] += transaction.amount;
   }
 
   // Fill in total and profit for each group
