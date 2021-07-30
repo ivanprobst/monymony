@@ -59,12 +59,18 @@ export const CONFIG_CATEGORY_TO_GROUP: { [cat: string]: string } =
     {},
   );
 
+export const CONFIG_GROUP_TO_TYPE: { [groupName: string]: string } =
+  CONFIG_GROUP_STRUCTURE.reduce(
+    (acc, group) => ({ ...acc, [group.name]: group.type }),
+    {},
+  );
+
 export const CONFIG_CHART_COLOR: {
   [group: string]: { [type: string]: string };
 } = {
-  Revenues: { class: "revenues-color", colorCode: "#E5D352" },
-  "Costs of living": { class: "costs-color", colorCode: "#AC3931" },
-  "Costs of fun": { class: "costs-color", colorCode: "#AC3931" },
-  Investments: { class: "costs-color", colorCode: "#AC3931" },
-  Income: { class: "income-color", colorCode: "#537D8D" },
+  Revenues: { colorClass: "myellow", colorCode: "#E5D352" },
+  "Costs of living": { colorClass: "mred", colorCode: "#AC3931" },
+  "Costs of fun": { colorClass: "mred", colorCode: "#AC3931" },
+  Investments: { colorClass: "mred", colorCode: "#AC3931" },
+  Income: { colorClass: "mblue", colorCode: "#537D8D" },
 };

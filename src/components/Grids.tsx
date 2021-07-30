@@ -1,13 +1,3 @@
-// Libs
-import {
-  TableContainer,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@material-ui/core";
-
 // Assets
 import { iTransaction } from "../utils/types";
 import {
@@ -25,22 +15,18 @@ interface iGridData {
 
 // COMP: GridCell
 function GridCell({ value, type }: { value: number; type: string }) {
-  const cellStyle: { [key: string]: string } = {};
-
-  if (value === 0) {
-    cellStyle.color = "#aaa";
-  }
-
-  if (type === "total") {
-    cellStyle.background = "#C1D2D9";
-  } else if (type === "profit") {
-    cellStyle.background = value < 0 ? "#D98680" : "#D3D9A7";
-  }
-
   return (
-    <TableCell align="right" style={cellStyle}>
+    <td
+      className={`p-2 text-right ${value === 0 ? "text-gray-300" : ""} ${
+        type === "Profit"
+          ? value < 0
+            ? "bg-mred-light"
+            : "bg-mgreen-light"
+          : ""
+      }`}
+    >
       {value.toLocaleString("en")}
-    </TableCell>
+    </td>
   );
 }
 
@@ -54,30 +40,28 @@ function GridGroupSection({
 }) {
   return (
     <>
-      <TableRow>
-        <TableCell variant="head">{groupName}</TableCell>
-      </TableRow>
+      <tr className="border-t-4">
+        <td className="p-2 pt-4 font-bold text-base">{groupName}</td>
+      </tr>
       {Object.entries(groupData).map(([categoryName, categoryData]) => (
-        <TableRow key={`${groupName}_${categoryName}`}>
-          <TableCell>{categoryName}</TableCell>
+        <tr
+          key={categoryName}
+          className={categoryName === "Total" ? "border-t" : ""}
+        >
+          <td
+            className={`p-2 pl-4 ${
+              categoryName === "Profit" || categoryName === "Total"
+                ? "font-bold"
+                : ""
+            }`}
+          >
+            {categoryName}
+          </td>
           {categoryData.map((amount, index) => (
-            <GridCell
-              key={`${categoryName}_${index}`}
-              value={amount}
-              type={
-                categoryName === "Total"
-                  ? "total"
-                  : categoryName === "Profit"
-                  ? "profit"
-                  : "category"
-              }
-            ></GridCell>
+            <GridCell key={index} value={amount} type={categoryName}></GridCell>
           ))}
-        </TableRow>
+        </tr>
       ))}
-      <TableRow>
-        <TableCell>&nbsp;</TableCell>
-      </TableRow>
     </>
   );
 }
@@ -149,30 +133,28 @@ export default function GridViewer({
   }
 
   return (
-    <TableContainer>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell></TableCell>
-            {CONFIG_MONTHS.map((month) => (
-              <TableCell key={month} align="right">
-                {month}
-              </TableCell>
-            ))}
-            <TableCell>Total</TableCell>
-          </TableRow>
-        </TableHead>
-
-        <TableBody>
-          {Object.entries(gridData).map(([groupName, groupData]) => (
-            <GridGroupSection
-              key={groupName}
-              groupName={groupName}
-              groupData={groupData}
-            ></GridGroupSection>
+    <table className="w-full">
+      <thead className="font-bold">
+        <tr className="text-right">
+          <td></td>
+          {CONFIG_MONTHS.map((month) => (
+            <td key={month} className="p-2 text-base">
+              {month}
+            </td>
           ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          <td className="p-2 text-base">Total</td>
+        </tr>
+      </thead>
+
+      <tbody>
+        {Object.entries(gridData).map(([groupName, groupData]) => (
+          <GridGroupSection
+            key={groupName}
+            groupName={groupName}
+            groupData={groupData}
+          ></GridGroupSection>
+        ))}
+      </tbody>
+    </table>
   );
 }

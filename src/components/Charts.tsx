@@ -1,6 +1,5 @@
 // Libs
 import * as React from "react";
-import { Grid, FormControlLabel, Checkbox } from "@material-ui/core";
 import {
   ResponsiveContainer,
   CartesianGrid,
@@ -36,7 +35,7 @@ type ChartReferenceSet = {
   [groupName: string]: { [referenceType: string]: number };
 };
 
-// COMP: Chart
+// Component
 function Chart({
   curvesToDisplay,
   chartLinesDataset,
@@ -47,7 +46,7 @@ function Chart({
   chartReferenceData: ChartReferenceSet;
 }) {
   return (
-    <ResponsiveContainer width="95%" height={500}>
+    <ResponsiveContainer width="95%" minHeight={500}>
       <LineChart
         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
         data={chartLinesDataset}
@@ -112,7 +111,7 @@ function Chart({
   );
 }
 
-// COMP: CurveSelector
+// Component
 function CurveSelector({
   curvesToDisplay,
   curveToggler,
@@ -123,27 +122,22 @@ function CurveSelector({
   return (
     <>
       {Object.entries(curvesToDisplay).map(([curveName, displayCurve]) => (
-        <FormControlLabel
-          key={curveName}
-          control={
-            <Checkbox
-              checked={displayCurve}
-              onChange={curveToggler}
-              name={curveName}
-              color="primary"
-              classes={{
-                colorPrimary: CONFIG_CHART_COLOR[curveName]["class"],
-              }}
-            />
-          }
-          label={curveName}
-        />
+        <label key={curveName} className="block mb-2">
+          <input
+            className={`text-${CONFIG_CHART_COLOR[curveName]["colorClass"]}`}
+            name={curveName}
+            type="checkbox"
+            onChange={curveToggler}
+            checked={displayCurve}
+          />
+          <span className="ml-2 text-base">{curveName}</span>
+        </label>
       ))}
     </>
   );
 }
 
-// RENDER
+// Render
 export default function ChartViewer({
   cleanTransactions,
 }: {
@@ -236,20 +230,20 @@ export default function ChartViewer({
   }
 
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={10}>
+    <section className="grid grid-cols-5">
+      <div className="col-span-4">
         <Chart
           curvesToDisplay={curvesToDisplay}
           chartLinesDataset={chartLinesDataset}
           chartReferenceData={chartReferenceData}
         ></Chart>
-      </Grid>
-      <Grid item xs={2}>
+      </div>
+      <div>
         <CurveSelector
           curvesToDisplay={curvesToDisplay}
           curveToggler={toggleCurveCheckbox}
         ></CurveSelector>
-      </Grid>
-    </Grid>
+      </div>
+    </section>
   );
 }
