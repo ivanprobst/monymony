@@ -109,8 +109,6 @@ export default function App() {
     getGSheetData();
   }, []);
 
-  console.log("latest transaction list: ", cleanTransactions);
-
   return (
     <>
       <header className="grid grid-cols-2 p-4 bg-mred">

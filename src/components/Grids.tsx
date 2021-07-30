@@ -10,7 +10,15 @@ interface iGridData {
 }
 
 // COMP: GridCell
-function GridCell({ value, type }: { value: number; type: string }) {
+function GridCell({
+  value,
+  type,
+  isLast,
+}: {
+  value: number;
+  type: string;
+  isLast: boolean;
+}) {
   return (
     <td
       className={`p-2 text-right ${value === 0 ? "text-gray-300" : ""} ${
@@ -19,7 +27,7 @@ function GridCell({ value, type }: { value: number; type: string }) {
             ? "bg-mred-light"
             : "bg-mgreen-light"
           : ""
-      }`}
+      } ${isLast ? "border-l" : ""}`}
     >
       {value.toLocaleString("en")}
     </td>
@@ -54,7 +62,12 @@ function GridGroupSection({
             {categoryName}
           </td>
           {categoryData.map((amount, index) => (
-            <GridCell key={index} value={amount} type={categoryName}></GridCell>
+            <GridCell
+              key={index}
+              value={amount}
+              type={categoryName}
+              isLast={index === categoryData.length - 1 ? true : false}
+            ></GridCell>
           ))}
         </tr>
       ))}
@@ -129,7 +142,7 @@ export default function GridViewer({
               {month}
             </td>
           ))}
-          <td className="p-2 text-base">Total</td>
+          <td className="p-2 border-l text-base">Total</td>
         </tr>
       </thead>
 

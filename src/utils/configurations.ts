@@ -87,7 +87,7 @@ export const CONFIG_GROUP_TO_TYPE: { [groupName: string]: string } =
 export const CONFIG_CHART_COLOR: {
   [group: string]: { [type: string]: string };
 } = {
-  Revenues: { colorClass: "myellow", colorCode: "#E5D352" },
+  Revenues: { colorClass: "green-500", colorCode: "#10B981" },
   "Costs of living": { colorClass: "mred", colorCode: "#AC3931" },
   "Costs of fun": { colorClass: "mred", colorCode: "#AC3931" },
   Investments: { colorClass: "mred", colorCode: "#AC3931" },

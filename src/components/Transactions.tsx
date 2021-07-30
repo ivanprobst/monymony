@@ -40,7 +40,7 @@ export default function TransactionsList({
     <section className="grid grid-cols-5">
       <div className="col-span-4 pl-2 pr-2">
         <table className="w-full">
-          <thead className="border-b-2 font-bold">
+          <thead className="border-b-2 font-bold text-base">
             <tr>
               <td className="p-2">Index</td>
               <td className="p-2">Date</td>
@@ -60,7 +60,7 @@ export default function TransactionsList({
         </table>
       </div>
       <div className="pl-2 pt-2 border-l-2">
-        <h3 className="text-mblue">Transactions errors:</h3>
+        <h3 className="text-mblue text-base">Transactions errors:</h3>
         <ul>
           {transactionErrorList.length === 0 ? (
             <li className="p-1 text-green-500">No error</li>
