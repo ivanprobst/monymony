@@ -1,55 +1,55 @@
 /* Structure */
 .App-header {
-	background-color: #ac3931;
-	padding: 0 20px;
-	display: flex;
-	flex-direction: column;
+  background-color: #ac3931;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .App-header h1 {
-	font-size: calc(10px + 2vmin);
-	color: white;
+  font-size: calc(10px + 2vmin);
+  color: white;
 }
 
 .App-header div div:nth-child(2) {
-	padding-top: 20px;
-	text-align: right;
-	margin: 0;
+  padding-top: 20px;
+  text-align: right;
+  margin: 0;
 }
 
 .App-header button {
-	background: #537d8d;
+  background: #537d8d;
 }
 
 .App-body {
-	padding: 20px;
-	color: #482c3d;
+  padding: 20px;
+  color: #482c3d;
 }
 
 /* Bits */
 @media (prefers-reduced-motion: no-preference) {
-	.App-logo {
-		animation: App-logo-spin infinite 20s linear;
-		height: 20vmin;
-	}
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+    height: 20vmin;
+  }
 }
 @keyframes App-logo-spin {
-	from {
-		transform: rotate(0deg);
-	}
-	to {
-		transform: rotate(360deg);
-	}
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .revenues-color {
-	color: #e5d352 !important;
+  color: #e5d352 !important;
 }
 
 .costs-color {
-	color: #ac3931 !important;
+  color: #ac3931 !important;
 }
 
 .income-color {
-	color: #537d8d !important;
+  color: #537d8d !important;
 }
