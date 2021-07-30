@@ -41,3 +41,15 @@
 		transform: rotate(360deg);
 	}
 }
+
+.revenues-color {
+	color: #e5d352 !important;
+}
+
+.costs-color {
+	color: #ac3931 !important;
+}
+
+.income-color {
+	color: #537d8d !important;
+}

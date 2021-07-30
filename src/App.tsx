@@ -23,14 +23,14 @@ export default function App() {
 	>([]);
 
 	const tabs = {
-		0: <Charts></Charts>,
+		0: <Charts cleanTransactions={cleanTransactions}></Charts>,
 		1: <Grids cleanTransactions={cleanTransactions}></Grids>,
 		2: <Transactions cleanTransactions={cleanTransactions}></Transactions>,
 	};
 
 	type tabOptions = keyof typeof tabs;
 
-	const [currentTab, setCurrentTab] = React.useState<tabOptions>(1);
+	const [currentTab, setCurrentTab] = React.useState<tabOptions>(0);
 
 	// LOADING
 	React.useEffect(() => {
@@ -92,7 +92,7 @@ export default function App() {
 	function getGSheetData() {
 		axios
 			.get(
-				`${process.env.REACT_APP_GSHEET_URL}?key=${process.env.REACT_APP_GAPI_KEY}`
+				`${process.env.REACT_APP_GSHEET_URL}?key=${process.env.REACT_APP_GAPI_KEY}`,
 			)
 			.then((res) => {
 				const data = res.data;
@@ -107,7 +107,7 @@ export default function App() {
 								any,
 								any,
 								string,
-								category
+								category,
 							]) => {
 								return {
 									index,
@@ -116,8 +116,8 @@ export default function App() {
 									category,
 									amount: parseInt(amount),
 								};
-							}
-						)
+							},
+						),
 				);
 			})
 			.catch((err) => {
