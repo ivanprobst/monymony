@@ -1,48 +1,57 @@
 // Libs
+import { useContext } from "react";
 import {
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
 } from "@heroicons/react/solid";
 
 // Assets
-import { iTransaction, iTransactionError } from "../utils/types";
-import { CONFIG_GROUP_TO_TYPE } from "../utils/configurations";
+import { TransactionContext, iTransactionError } from "../utils/types";
 
 // Component
-function Transaction({ transaction }: { transaction: iTransaction }) {
+function TransactionRow({
+  transaction: { date, description, costOrRevenue, category, amount },
+}: {
+  transaction: {
+    date: string;
+    description: string;
+    costOrRevenue: string;
+    category: string;
+    amount: number;
+  };
+}) {
   return (
     <tr className="h-8 even:bg-gray-100 hover:bg-mblue-light">
-      <td className="p-2">{transaction.index}</td>
-      <td className="p-2">{transaction.date}</td>
-      <td className="p-2">{transaction.description}</td>
+      <td className="p-2">{date}</td>
+      <td className="p-2">{description}</td>
       <td className="p-2">
-        {CONFIG_GROUP_TO_TYPE[transaction.groupName] === "costs" ? (
+        {costOrRevenue === "costs" ? (
           <ChevronDoubleDownIcon className="inline h-4 w-4 text-mred" />
         ) : (
           <ChevronDoubleUpIcon className="inline h-4 w-4 text-green-500" />
         )}
-        &nbsp;{transaction.category}
+        &nbsp;{category}
       </td>
-      <td className="p-2">{transaction.amount.toLocaleString("en")}</td>
+      <td className="p-2">{amount.toLocaleString("en")}</td>
     </tr>
   );
 }
 
 // Render
 export default function TransactionsList({
-  cleanTransactions,
   transactionErrorList,
 }: {
-  cleanTransactions: iTransaction[];
   transactionErrorList: Array<iTransactionError>;
 }) {
+  // Definitions
+  const allTransactions = useContext(TransactionContext);
+
   return (
     <section className="grid grid-cols-5">
       <div className="col-span-4 pl-2 pr-2">
         <table className="w-full">
           <thead className="border-b-2 font-bold text-base">
             <tr>
-              <td className="p-2">Index</td>
               <td className="p-2">Date</td>
               <td className="p-2">Description</td>
               <td className="p-2">Category</td>
@@ -50,11 +59,11 @@ export default function TransactionsList({
             </tr>
           </thead>
           <tbody>
-            {cleanTransactions.map((transaction) => (
-              <Transaction
-                key={transaction.index}
+            {Array.from(allTransactions.transactions, ([id, transaction]) => (
+              <TransactionRow
+                key={id}
                 transaction={transaction}
-              ></Transaction>
+              ></TransactionRow>
             ))}
           </tbody>
         </table>

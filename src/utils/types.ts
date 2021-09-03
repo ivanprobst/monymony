@@ -1,4 +1,50 @@
-import { CONFIG_GROUP_STRUCTURE } from "./configurations";
+import { createContext } from "react";
+import {
+  CONFIG_CATEGORY_TO_GROUP,
+  CONFIG_GROUP_STRUCTURE,
+  CONFIG_GROUP_TO_TYPE,
+} from "./configurations";
+import { types, Instance } from "mobx-state-tree";
+
+// MobX types
+export const Transaction = types
+  .model("Transaction", {
+    id: types.identifier,
+    date: "", // DD.MM.YYYY
+    description: "",
+    category: "No category",
+    amount: 0,
+  })
+  .views((self) => ({
+    get month() {
+      return parseInt(self.date.split(".")[1]) - 1;
+    },
+    get group() {
+      return CONFIG_CATEGORY_TO_GROUP[self.category];
+    },
+    get costOrRevenue() {
+      return CONFIG_GROUP_TO_TYPE[CONFIG_CATEGORY_TO_GROUP[self.category]]; // ??? Can we reuse the group view?
+    },
+  }));
+
+export interface ITransaction extends Instance<typeof Transaction> {}
+
+export const TransactionStore = types
+  .model("TransactionStore", {
+    transactions: types.optional(types.map(Transaction), {}),
+  })
+  .views((self) => ({
+    get numberOfTransactions() {
+      return self.transactions.size;
+    },
+  }))
+  .actions((self) => ({
+    addTransaction(id: string, newRawTransaction: ITransaction) {
+      self.transactions.set(id, Transaction.create(newRawTransaction));
+    },
+  }));
+
+export const TransactionContext = createContext(TransactionStore.create());
 
 // TYPES
 const tmpCatArray: Array<string> = CONFIG_GROUP_STRUCTURE.reduce(
@@ -8,16 +54,6 @@ const tmpCatArray: Array<string> = CONFIG_GROUP_STRUCTURE.reduce(
   [],
 );
 export type Category = typeof tmpCatArray[number];
-
-export interface iTransaction {
-  index: string;
-  date: string;
-  description: string;
-  category: Category;
-  amount: number;
-  groupName: string;
-  monthIndex: number;
-}
 
 export interface iGroupConfig {
   name: string;

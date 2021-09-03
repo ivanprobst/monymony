@@ -1,5 +1,8 @@
+// Libs
+import { useContext } from "react";
+
 // Assets
-import { iTransaction } from "../utils/types";
+import { TransactionContext } from "../utils/types";
 import { CONFIG_MONTHS, CONFIG_GROUP_STRUCTURE } from "../utils/configurations";
 
 // Types
@@ -76,12 +79,9 @@ function GridGroupSection({
 }
 
 // RENDER
-export default function GridViewer({
-  cleanTransactions,
-}: {
-  cleanTransactions: Array<iTransaction>;
-}) {
+export default function GridViewer() {
   // Definitions
+  const allTransactions = useContext(TransactionContext);
   let gridData: iGridData = {};
 
   // Build empty grid
@@ -99,10 +99,10 @@ export default function GridViewer({
   }
 
   // Fill in category rows
-  for (const transaction of cleanTransactions) {
-    gridData[transaction.groupName][transaction.category][
-      transaction.monthIndex
-    ] += transaction.amount;
+  for (const [, { group, category, month, amount }] of Array.from(
+    allTransactions.transactions,
+  )) {
+    gridData[group][category][month] += amount;
   }
 
   // Fill in total and profit for each group

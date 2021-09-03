@@ -12,7 +12,7 @@ import {
 } from "recharts";
 
 // Assets
-import { iTransaction } from "../utils/types";
+import { TransactionContext } from "../utils/types";
 import {
   CONFIG_MONTHS,
   CONFIG_GROUP_STRUCTURE,
@@ -137,11 +137,10 @@ function CurveSelector({
 }
 
 // Render
-export default function ChartViewer({
-  cleanTransactions,
-}: {
-  cleanTransactions: Array<iTransaction>;
-}) {
+export default function ChartViewer() {
+  // Definitions
+  const allTransactions = React.useContext(TransactionContext);
+
   // States
   const [curvesToDisplay, setCurvesToDisplay] =
     React.useState<CurveToDisplayMap>({
@@ -178,10 +177,10 @@ export default function ChartViewer({
   );
 
   // Calculate dataset totals
-  for (const transaction of cleanTransactions) {
-    chartLinesDataset[transaction.monthIndex]["dataset"][
-      transaction.groupName
-    ] += transaction.amount;
+  for (const [, { month, group, amount }] of Array.from(
+    allTransactions.transactions,
+  )) {
+    chartLinesDataset[month]["dataset"][group] += amount;
   }
 
   // Calculate dataset income
