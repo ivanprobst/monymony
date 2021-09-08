@@ -180,7 +180,7 @@ export default function ChartViewer() {
   for (const [, { month, group, amount }] of Array.from(
     allTransactions.transactions,
   )) {
-    chartLinesDataset[month]["dataset"][group] += amount;
+    chartLinesDataset[month - 1]["dataset"][group] += amount;
   }
 
   // Calculate dataset income

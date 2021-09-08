@@ -17,7 +17,7 @@ export const Transaction = types
   })
   .views((self) => ({
     get month() {
-      return parseInt(self.date.split(".")[1]) - 1;
+      return parseInt(self.date.split(".")[1]);
     },
     get group() {
       return CONFIG_CATEGORY_TO_GROUP[self.category];
@@ -36,6 +36,20 @@ export const TransactionStore = types
   .views((self) => ({
     get numberOfTransactions() {
       return self.transactions.size;
+    },
+    totalFromCategoryOrGroup(
+      filterType: "category" | "group",
+      filterValue: string,
+      filterMonth?: number,
+    ) {
+      return Array.from(self.transactions)
+        .filter(([, { category, group, month }]) => {
+          return (
+            (filterType === "category" ? category : group) === filterValue &&
+            (filterMonth ? month === filterMonth : true)
+          );
+        })
+        .reduce((acc, [, { amount }]) => acc + amount, 0);
     },
   }))
   .actions((self) => ({

@@ -6,7 +6,7 @@ import { RefreshIcon } from "@heroicons/react/solid";
 
 // Components
 import ChartViewer from "./components/Charts";
-import GridViewer from "./components/Grids";
+import GridFull from "./components/Grids";
 import TransactionsList from "./components/Transactions";
 
 // Assets
@@ -150,7 +150,7 @@ export default function App() {
           </Route>
           <Route path="/grid">
             <h2 className="section-title">Grid</h2>
-            <GridViewer></GridViewer>
+            <GridFull></GridFull>
           </Route>
           <Route path="/chart">
             <h2 className="section-title">Chart</h2>

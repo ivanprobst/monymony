@@ -54,6 +54,12 @@ export const CONFIG_GROUP_STRUCTURE: Array<iGroupConfig> = [
   },
 ];
 
+export const CONFIG_GROUP_TO_CATEGORY_LIST: {
+  [groupName: string]: Array<Category>;
+} = CONFIG_GROUP_STRUCTURE.reduce((acc, group) => {
+  return { ...acc, [group.name]: group.categories };
+}, {});
+
 export const CONFIG_GROUP_LIST: Array<string> = CONFIG_GROUP_STRUCTURE.map(
   (group) => group.name,
 );
