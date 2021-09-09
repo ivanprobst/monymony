@@ -15,121 +15,112 @@ import {
 import { TransactionContext } from "../utils/types";
 import {
   CONFIG_MONTHS,
-  CONFIG_GROUP_STRUCTURE,
   CONFIG_GROUP_LIST,
   CONFIG_CHART_COLOR,
 } from "../utils/configurations";
 
 // Types
-type CurveToDisplayMap = {
-  [curveName: string]: boolean;
-};
+interface GroupCurveToDisplayMap {
+  [group: string]: boolean;
+}
 
 type ChartDataset = Array<{
   month: string;
-  dataset: { [groupName: string]: number };
+  dataset: { [group: string]: number };
 }>;
 
-type ChartReferenceSet = {
-  [groupName: string]: { [referenceType: string]: number };
-};
+interface ChartTrendSet {
+  [groupName: string]: {
+    average: number;
+    regressionA: number;
+    regressionB: number;
+  };
+}
 
 // Component
 function Chart({
-  curvesToDisplay,
-  chartLinesDataset,
-  chartReferenceData,
+  groupCurvesToDisplay,
+  chartDataset,
+  chartTrendSet,
 }: {
-  curvesToDisplay: CurveToDisplayMap;
-  chartLinesDataset: ChartDataset;
-  chartReferenceData: ChartReferenceSet;
+  groupCurvesToDisplay: GroupCurveToDisplayMap;
+  chartDataset: ChartDataset;
+  chartTrendSet: ChartTrendSet;
 }) {
   return (
     <ResponsiveContainer width="95%" minHeight={500}>
       <LineChart
         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-        data={chartLinesDataset}
+        data={chartDataset}
       >
         <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
         <XAxis dataKey="month" />
         <YAxis />
         <Tooltip />
-        {Object.entries(curvesToDisplay).reduce(
-          (curveList: Array<JSX.Element>, [curveName, displayCurve]) => {
-            if (displayCurve) {
-              return curveList
-                .concat([
-                  <Line
-                    key={`amount_${curveName}`}
-                    type="monotone"
-                    dataKey={`dataset.${curveName}`}
-                    stroke={CONFIG_CHART_COLOR[curveName]["colorCode"]}
-                    dot={{
-                      stroke: CONFIG_CHART_COLOR[curveName]["colorCode"],
-                      strokeWidth: 1,
-                    }}
-                  ></Line>,
-                ])
-                .concat([
-                  <ReferenceLine
-                    label="Average"
-                    key={`average_${curveName}`}
-                    stroke={CONFIG_CHART_COLOR[curveName]["colorCode"]}
-                    strokeDasharray="1 5"
-                    y={chartReferenceData[curveName]["average"]}
-                  />,
-                ])
-                .concat([
-                  <ReferenceLine
-                    label="Trend"
-                    key={`trend_${curveName}`}
-                    stroke={CONFIG_CHART_COLOR[curveName]["colorCode"]}
-                    strokeDasharray="4 4"
-                    segment={[
-                      {
-                        x: CONFIG_MONTHS[0],
-                        y: chartReferenceData[curveName]["a"],
-                      },
-                      {
-                        x: CONFIG_MONTHS[CONFIG_MONTHS.length - 1],
-                        y:
-                          CONFIG_MONTHS.length *
-                            chartReferenceData[curveName]["b"] +
-                          chartReferenceData[curveName]["a"],
-                      },
-                    ]}
-                  />,
-                ]);
-            }
-            return curveList;
-          },
-          [],
-        )}
+        {Object.entries(groupCurvesToDisplay)
+          .filter(([, displayCurves]) => displayCurves)
+          .map(([group]) => {
+            return [
+              <Line
+                key={`amount_${group}`}
+                type="monotone"
+                dataKey={`dataset.${group}`}
+                stroke={CONFIG_CHART_COLOR[group]["colorCode"]}
+              ></Line>,
+
+              <ReferenceLine
+                key={`average_${group}`}
+                stroke={CONFIG_CHART_COLOR[group]["colorCode"]}
+                strokeDasharray="1 5"
+                y={chartTrendSet[group]["average"]}
+              />,
+
+              <ReferenceLine
+                label="Trend"
+                key={`trend_${group}`}
+                stroke={CONFIG_CHART_COLOR[group]["colorCode"]}
+                strokeDasharray="4 4"
+                segment={[
+                  {
+                    x: CONFIG_MONTHS[0],
+                    y: chartTrendSet[group]["regressionA"],
+                  },
+                  {
+                    x: CONFIG_MONTHS[CONFIG_MONTHS.length - 1],
+                    y:
+                      CONFIG_MONTHS.length *
+                        chartTrendSet[group]["regressionB"] +
+                      chartTrendSet[group]["regressionA"],
+                  },
+                ]}
+              />,
+            ];
+          })}
       </LineChart>
     </ResponsiveContainer>
   );
 }
 
 // Component
-function CurveSelector({
-  curvesToDisplay,
+function CurveController({
+  groupCurvesToDisplay,
   curveToggler,
 }: {
-  curvesToDisplay: CurveToDisplayMap;
+  groupCurvesToDisplay: GroupCurveToDisplayMap;
   curveToggler: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
     <>
-      {Object.entries(curvesToDisplay).map(([curveName, displayCurve]) => (
-        <label key={curveName} className="block mb-2">
+      {Object.entries(groupCurvesToDisplay).map(([group, displayCurves]) => (
+        <label key={group} className="block mb-2">
           <input
-            className={`text-${CONFIG_CHART_COLOR[curveName]["colorClass"]}`}
-            name={curveName}
+            className={`text-${CONFIG_CHART_COLOR[group]["colorClass"]}`}
+            name={group}
             type="checkbox"
             onChange={curveToggler}
-            checked={displayCurve}
+            checked={displayCurves}
           />
-          <span className="ml-2 text-base">{curveName}</span>
+          <span className="ml-2 text-base">{group}</span>
         </label>
       ))}
     </>
@@ -141,102 +132,79 @@ export default function ChartViewer() {
   // Definitions
   const allTransactions = React.useContext(TransactionContext);
 
-  // States
-  const [curvesToDisplay, setCurvesToDisplay] =
-    React.useState<CurveToDisplayMap>({
-      ...CONFIG_GROUP_LIST.reduce(
-        (accumulator: { [group: string]: boolean }, groupName) => ({
-          ...accumulator,
-          [groupName]: false,
-        }),
-        { Income: true },
-      ),
-    });
+  const [groupCurvesToDisplay, setCurvesToDisplay] =
+    React.useState<GroupCurveToDisplayMap>(
+      Object.fromEntries(CONFIG_GROUP_LIST.map((group) => [[group], true])),
+    );
 
   // Helpers
   const toggleCurveCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCurvesToDisplay({
-      ...curvesToDisplay,
+      ...groupCurvesToDisplay,
       [event.target.name]: event.target.checked,
     });
   };
 
-  // Build empty chart lines dataset
-  const chartLinesDataset: ChartDataset = CONFIG_MONTHS.map((monthKey) =>
-    CONFIG_GROUP_LIST.reduce(
-      (
-        accumulator: { month: string; dataset: { [group: string]: number } },
-        groupName,
-      ) => {
-        const test = { ...accumulator };
-        test.dataset[groupName] = 0;
-        return test;
-      },
-      { month: monthKey, dataset: { Income: 0 } },
-    ),
-  );
+  // Build standard dataset
+  const chartDataset: ChartDataset = [];
+  CONFIG_MONTHS.forEach((month, monthIndex) => {
+    const dataset = Object.fromEntries(
+      CONFIG_GROUP_LIST.map((group) => [
+        [group],
+        allTransactions.totalFromCategoryOrGroup(
+          "group",
+          group,
+          monthIndex + 1,
+        ),
+      ]),
+    );
 
-  // Calculate dataset totals
-  for (const [, { month, group, amount }] of Array.from(
-    allTransactions.transactions,
-  )) {
-    chartLinesDataset[month - 1]["dataset"][group] += amount;
-  }
+    chartDataset.push({
+      month,
+      dataset,
+    });
+  });
 
-  // Calculate dataset income
-  for (const monthIndex in CONFIG_MONTHS) {
-    for (const group of CONFIG_GROUP_STRUCTURE) {
-      let newIncome =
-        chartLinesDataset[monthIndex]["dataset"][group.name] *
-        (group.type === "revenues" ? 1 : -1);
-      chartLinesDataset[monthIndex]["dataset"]["Income"] =
-        chartLinesDataset[monthIndex]["dataset"]["Income"] + newIncome;
-    }
-  }
-
-  // Calculate references lines: averages and linear regression
-  const chartReferenceData: ChartReferenceSet = {};
-  const groupList = CONFIG_GROUP_STRUCTURE.map((group) => group.name).concat([
-    "Income",
-  ]);
-  for (const group of groupList) {
+  // Build trend dataset (averages and linear regression)
+  const chartTrendSet: ChartTrendSet = {};
+  CONFIG_GROUP_LIST.forEach((group) => {
     let sumX = 0;
     let sumY = 0;
     let sumX2 = 0;
     let sumXY = 0;
-    for (let i = 0; i < CONFIG_MONTHS.length; i++) {
-      if (chartLinesDataset[i] !== undefined) {
-        sumX += i;
-        sumX2 += i * i;
-        sumY += chartLinesDataset[i]["dataset"][group];
-        sumXY += chartLinesDataset[i]["dataset"][group] * i;
-      }
-    }
-    chartReferenceData[group] = {
+
+    CONFIG_MONTHS.forEach((month, monthIndex) => {
+      sumX += monthIndex;
+      sumX2 += monthIndex * monthIndex;
+      sumY += chartDataset[monthIndex]["dataset"][group];
+      sumXY += chartDataset[monthIndex]["dataset"][group] * monthIndex;
+    });
+
+    chartTrendSet[group] = {
       average: sumY / CONFIG_MONTHS.length,
-      a:
+      regressionA:
         (sumY * sumX2 - sumX * sumXY) /
         (CONFIG_MONTHS.length * sumX2 - sumX * sumX),
-      b:
+      regressionB:
         (CONFIG_MONTHS.length * sumXY - sumX * sumY) /
         (CONFIG_MONTHS.length * sumX2 - sumX * sumX),
     };
-  }
+  });
 
   return (
     <section className="grid grid-cols-5">
       <div className="col-span-4">
         <Chart
-          curvesToDisplay={curvesToDisplay}
-          chartLinesDataset={chartLinesDataset}
-          chartReferenceData={chartReferenceData}
+          groupCurvesToDisplay={groupCurvesToDisplay}
+          chartDataset={chartDataset}
+          chartTrendSet={chartTrendSet}
         ></Chart>
       </div>
       <div>
-        <CurveSelector
-          curvesToDisplay={curvesToDisplay}
+        <CurveController
+          groupCurvesToDisplay={groupCurvesToDisplay}
           curveToggler={toggleCurveCheckbox}
-        ></CurveSelector>
+        ></CurveController>
       </div>
     </section>
   );
