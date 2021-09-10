@@ -53,8 +53,12 @@ export const TransactionStore = types
     },
   }))
   .actions((self) => ({
-    addTransaction(id: string, newRawTransaction: ITransaction) {
-      self.transactions.set(id, Transaction.create(newRawTransaction));
+    setTransactions(transactions: Array<[string, ITransaction]>) {
+      self.transactions.clear();
+      self.transactions.merge(transactions);
+    },
+    addTransaction(id: string, transaction: ITransaction) {
+      self.transactions.set(id, Transaction.create(transaction));
     },
   }));
 

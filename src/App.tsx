@@ -1,5 +1,6 @@
 // Libs
 import * as React from "react";
+import { observer } from "mobx-react-lite";
 import { Switch, Route, NavLink } from "react-router-dom";
 import axios from "axios";
 import { RefreshIcon } from "@heroicons/react/solid";
@@ -14,30 +15,35 @@ import {
   TransactionContext,
   Transaction,
   iTransactionError,
+  ITransaction,
 } from "./utils/types";
 import { CONFIG_MONTHS, CONFIG_CATEGORY_LIST } from "./utils/configurations";
 
 // RENDER
-export default function App() {
+export default observer(function App() {
   // Definitions
   const allTransactions = React.useContext(TransactionContext);
+  const [isFetchingData, setIsFetchingData] = React.useState<boolean>(false);
   const [transactionErrorList, setTransactionErrorList] = React.useState<
     Array<iTransactionError>
   >([]);
 
   // Helpers
   const getGSheetData = function () {
-    setTransactionErrorList([]);
+    setIsFetchingData(true);
+
     axios
       .get(
         `${process.env.REACT_APP_GSHEET_URL}?key=${process.env.REACT_APP_GAPI_KEY}`,
       )
       .then((res) => {
-        const data = res.data;
+        setIsFetchingData(false);
+
         const errorArr: Array<iTransactionError> = [];
+        const transactions: Array<[string, ITransaction]> = [];
         const indexMem = new Set();
 
-        data.values
+        res.data.values
           .slice(1)
           .forEach(
             ([id, date, description, category, amount]: [
@@ -68,7 +74,8 @@ export default function App() {
                 });
               } else {
                 indexMem.add(id);
-                allTransactions.addTransaction(
+
+                transactions.push([
                   id,
                   Transaction.create({
                     id,
@@ -77,11 +84,12 @@ export default function App() {
                     category,
                     amount: parseInt(amount),
                   }),
-                );
+                ]);
               }
             },
           );
-        setTransactionErrorList(errorArr);
+        allTransactions.setTransactions(transactions);
+        setTransactionErrorList(errorArr); // ??? useless render of App; will be cleaned during backend implementation
       })
       .catch((err) => {
         setTransactionErrorList([
@@ -99,82 +107,82 @@ export default function App() {
 
   return (
     <>
-      <header className="grid grid-cols-2 p-4 bg-mred">
-        <h1 className="self-center text-3xl text-white">
-          <a href="/">Mony mony</a>
-        </h1>
-        <nav className="self-center text-right">
-          <button
-            className="p-2 text-white hover:text-mred-light"
-            onClick={getGSheetData}
-          >
-            <RefreshIcon
-              className={`inline h-6 w-6 ${
-                allTransactions.numberOfTransactions === 0
-                  ? "animate-spin-slow"
-                  : ""
-              }`}
-            />
-          </button>
-          <NavLink
-            className="nav-button"
-            activeClassName="bg-mred-light text-white"
-            to="/transactions"
-          >
-            Transactions
-          </NavLink>
-          <NavLink
-            className="nav-button"
-            activeClassName="bg-mred-light text-white"
-            to="/grid"
-          >
-            Grid
-          </NavLink>
-          <NavLink
-            className="nav-button"
-            activeClassName="bg-mred-light text-white"
-            to="/chart"
-          >
-            Chart
-          </NavLink>
-        </nav>
-      </header>
+      <TransactionContext.Provider value={allTransactions}>
+        <header className="grid grid-cols-2 p-4 bg-mred">
+          <h1 className="self-center text-3xl text-white">
+            <a href="/">Mony mony</a>
+          </h1>
+          <nav className="self-center text-right">
+            <button
+              className="p-2 text-white hover:text-mred-light"
+              onClick={getGSheetData}
+            >
+              <RefreshIcon
+                className={`inline h-6 w-6 ${
+                  isFetchingData === true ? "animate-spin-slow" : ""
+                }`}
+              />
+            </button>
+            <NavLink
+              className="nav-button"
+              activeClassName="bg-mred-light text-white"
+              to="/transactions"
+            >
+              Transactions
+            </NavLink>
+            <NavLink
+              className="nav-button"
+              activeClassName="bg-mred-light text-white"
+              to="/grid"
+            >
+              Grid
+            </NavLink>
+            <NavLink
+              className="nav-button"
+              activeClassName="bg-mred-light text-white"
+              to="/chart"
+            >
+              Chart
+            </NavLink>
+          </nav>
+        </header>
 
-      <main className="flex-auto p-8 text-sm text-gray-700">
-        <Switch>
-          <Route path="/transactions">
-            <h2 className="section-title">Transactions</h2>
-            <TransactionsList
-              transactionErrorList={transactionErrorList}
-            ></TransactionsList>
-          </Route>
-          <Route path="/grid">
-            <h2 className="section-title">Grid</h2>
-            <GridFull></GridFull>
-          </Route>
-          <Route path="/chart">
-            <h2 className="section-title">Chart</h2>
-            <ChartViewer></ChartViewer>
-          </Route>
-          <Route path="/">
-            <h2 className="section-title">Chart</h2>
-            <ChartViewer></ChartViewer>
-          </Route>
-        </Switch>
-      </main>
+        <main className="flex-auto p-8 text-sm text-gray-700">
+          <Switch>
+            <Route path="/transactions">
+              <h2 className="section-title">Transactions</h2>
+              <TransactionsList
+                transactionErrorList={transactionErrorList}
+              ></TransactionsList>
+            </Route>
+            <Route path="/grid">
+              <h2 className="section-title">Grid</h2>
+              <GridFull></GridFull>
+            </Route>
+            <Route path="/chart">
+              <h2 className="section-title">Chart</h2>
+              <ChartViewer></ChartViewer>
+            </Route>
+            <Route path="/">
+              <h2 className="section-title">Chart</h2>
+              <ChartViewer></ChartViewer>
+            </Route>
+          </Switch>
+        </main>
 
-      <footer className="p-4 text-white bg-mred">
-        © 2021 by ivanprobst (
-        <a
-          className="underline"
-          target="_blank"
-          href="https://github.com/ivanprobst/monymony"
-          rel="noopener noreferrer"
-        >
-          check out this project on GitHub
-        </a>
-        )
-      </footer>
+        <footer className="p-4 text-white bg-mred">
+          © 2021 by ivanprobst (
+          <a
+            className="underline"
+            target="_blank"
+            href="https://github.com/ivanprobst/monymony"
+            rel="noopener noreferrer"
+          >
+            check out this project on GitHub
+          </a>
+          )
+        </footer>
+      </TransactionContext.Provider>
     </>
   );
-}
+});

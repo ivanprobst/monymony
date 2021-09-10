@@ -1,5 +1,6 @@
 // Libs
 import { useContext } from "react";
+import { observer } from "mobx-react-lite";
 import {
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
@@ -38,7 +39,7 @@ function TransactionRow({
 }
 
 // Render
-export default function TransactionsList({
+export default observer(function TransactionsList({
   transactionErrorList,
 }: {
   transactionErrorList: Array<iTransactionError>;
@@ -87,4 +88,4 @@ export default function TransactionsList({
       </div>
     </section>
   );
-}
+});

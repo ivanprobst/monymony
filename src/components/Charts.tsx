@@ -1,5 +1,6 @@
 // Libs
 import * as React from "react";
+import { observer } from "mobx-react-lite";
 import {
   ResponsiveContainer,
   CartesianGrid,
@@ -128,7 +129,7 @@ function CurveController({
 }
 
 // Render
-export default function ChartViewer() {
+export default observer(function ChartViewer() {
   // Definitions
   const allTransactions = React.useContext(TransactionContext);
 
@@ -165,7 +166,7 @@ export default function ChartViewer() {
     });
   });
 
-  // Build trend dataset (averages and linear regression)
+  // Build trends dataset
   const chartTrendSet: ChartTrendSet = {};
   CONFIG_GROUP_LIST.forEach((group) => {
     let sumX = 0;
@@ -208,4 +209,4 @@ export default function ChartViewer() {
       </div>
     </section>
   );
-}
+});
