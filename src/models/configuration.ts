@@ -1,71 +1,70 @@
-import { createContext } from "react";
+// Libs
+import * as React from "react";
 import { types, Instance } from "mobx-state-tree";
-import { MONTHS, GROUP_STRUCTURE } from "./configurations";
 
-// Model: Transactions
-export const Transaction = types
-  .model("Transaction", {
-    id: types.identifier,
-    date: "", // DD.MM.YYYY
-    description: "",
-    category: "No category",
-    group: "No group",
-    type: types.optional(
-      types.union(types.literal("costs"), types.literal("revenues")),
-      "costs",
-    ),
-    amount: 0,
-  })
-  .views((self) => ({
-    get month() {
-      return parseInt(self.date.split(".")[1]);
-    },
-  }));
+// Default configurations
+export const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
-export interface ITransaction extends Instance<typeof Transaction> {}
+export const GROUP_STRUCTURE: Array<{
+  group: string;
+  type: "costs" | "revenues";
+  categories: Array<string>;
+  colorTheme: { colorClass: string; colorCode: string }; // ??? Type shouldn't be manual, issues with MST types.array (IGroupConfiguration)
+}> = [
+  {
+    group: "Revenues",
+    type: "revenues",
+    categories: ["Revenue 1", "Revenue 2", "Other revenue"],
+    colorTheme: { colorClass: "green-500", colorCode: "#10B981" },
+  },
+  {
+    group: "Costs of living",
+    type: "costs",
+    categories: [
+      "Home",
+      "Health",
+      "Meal",
+      "Transport",
+      "Interests",
+      "Other living",
+    ],
+    colorTheme: { colorClass: "mred", colorCode: "#AC3931" },
+  },
+  {
+    group: "Costs of fun",
+    type: "costs",
+    categories: [
+      "Restaurants and bars",
+      "Media",
+      "Gift",
+      "Holiday",
+      "Stuff",
+      "Other fun",
+    ],
+    colorTheme: { colorClass: "mred", colorCode: "#AC3931" },
+  },
+  {
+    group: "Investments",
+    type: "costs",
+    categories: ["3a", "Home investments", "Other investments"],
+    colorTheme: { colorClass: "mred", colorCode: "#AC3931" },
+  },
+];
 
-export const TransactionStore = types
-  .model("TransactionStore", {
-    transactions: types.map(Transaction),
-  })
-  .views((self) => ({
-    get numberOfTransactions() {
-      return self.transactions.size;
-    },
-    totalFromCategoryOrGroup(
-      filterType: "category" | "group",
-      filterValue: string,
-      filterMonth?: number,
-    ) {
-      return Array.from(self.transactions)
-        .filter(([, { category, group, month }]) => {
-          return (
-            (filterType === "category" ? category : group) === filterValue &&
-            (filterMonth ? month === filterMonth : true)
-          );
-        })
-        .reduce((acc, [, { amount }]) => acc + amount, 0);
-    },
-  }))
-  .actions((self) => ({
-    setTransactions(transactions: Array<[string, ITransaction]>) {
-      self.transactions.clear();
-      self.transactions.merge(transactions);
-    },
-    addTransaction(id: string, transaction: ITransaction) {
-      self.transactions.set(id, Transaction.create(transaction));
-    },
-  }));
-
-export const TransactionContext = createContext(TransactionStore.create());
-
-export interface iTransactionError {
-  index: string;
-  description: string;
-  message: string;
-}
-
-// Model: Configurations
+// Models
 export const GroupConfiguration = types.model("GroupConfiguration", {
   group: types.string,
   type: types.union(types.literal("costs"), types.literal("revenues")),
@@ -142,4 +141,4 @@ GROUP_STRUCTURE.forEach((groupConfiguration) => {
     GroupConfiguration.create(groupConfiguration),
   );
 });
-export const ConfigurationContext = createContext(configurationStore);
+export const ConfigurationContext = React.createContext(configurationStore);

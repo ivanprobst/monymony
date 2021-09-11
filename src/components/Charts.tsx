@@ -12,8 +12,9 @@ import {
   ReferenceLine,
 } from "recharts";
 
-// Assets
-import { TransactionContext, ConfigurationContext } from "../utils/types";
+// Models
+import { TransactionContext } from "../models/transaction";
+import { ConfigurationContext } from "../models/configuration";
 
 // Types
 interface GroupCurveToDisplayMap {
@@ -130,7 +131,7 @@ function CurveController({
 // Render
 export default observer(function ChartViewer() {
   // Definitions
-  const allTransactions = React.useContext(TransactionContext);
+  const transactionsStore = React.useContext(TransactionContext);
   const config = React.useContext(ConfigurationContext);
 
   const [groupCurvesToDisplay, setCurvesToDisplay] =
@@ -152,7 +153,7 @@ export default observer(function ChartViewer() {
     const dataset = Object.fromEntries(
       config.groupsList.map((group) => [
         [group],
-        allTransactions.totalFromCategoryOrGroup(
+        transactionsStore.totalFromCategoryOrGroup(
           "group",
           group,
           monthIndex + 1,

@@ -2,8 +2,9 @@
 import * as React from "react";
 import { observer } from "mobx-react-lite";
 
-// Assets
-import { TransactionContext, ConfigurationContext } from "../utils/types";
+// Models
+import { TransactionContext } from "../models/transaction";
+import { ConfigurationContext } from "../models/configuration";
 
 // Component
 function GridDataCell({
@@ -32,7 +33,7 @@ const GridDataRow = observer(function GridDataRow({
   category?: string;
   group?: string;
 }) {
-  const allTransactions = React.useContext(TransactionContext);
+  const transactionsStore = React.useContext(TransactionContext);
   const config = React.useContext(ConfigurationContext);
 
   return (
@@ -43,7 +44,7 @@ const GridDataRow = observer(function GridDataRow({
       {config.monthsList.map((month, index) => (
         <GridDataCell
           key={(category ? category : group ? group : "") + index}
-          value={allTransactions.totalFromCategoryOrGroup(
+          value={transactionsStore.totalFromCategoryOrGroup(
             category ? "category" : "group",
             category ? category : group ? group : "",
             index + 1,
@@ -51,7 +52,7 @@ const GridDataRow = observer(function GridDataRow({
         ></GridDataCell>
       ))}
       <GridDataCell
-        value={allTransactions.totalFromCategoryOrGroup(
+        value={transactionsStore.totalFromCategoryOrGroup(
           category ? "category" : "group",
           category ? category : group ? group : "",
         )}

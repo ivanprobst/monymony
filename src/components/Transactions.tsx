@@ -1,13 +1,13 @@
 // Libs
-import { useContext } from "react";
+import * as React from "react";
 import { observer } from "mobx-react-lite";
 import {
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
 } from "@heroicons/react/solid";
 
-// Assets
-import { TransactionContext, iTransactionError } from "../utils/types";
+// Models
+import { TransactionContext, ITransactionError } from "../models/transaction";
 
 // Component
 function TransactionRow({
@@ -42,10 +42,10 @@ function TransactionRow({
 export default observer(function TransactionsList({
   transactionErrorList,
 }: {
-  transactionErrorList: Array<iTransactionError>;
+  transactionErrorList: Array<ITransactionError>;
 }) {
   // Definitions
-  const allTransactions = useContext(TransactionContext);
+  const transactionsStore = React.useContext(TransactionContext);
 
   return (
     <section className="grid grid-cols-5">
@@ -60,7 +60,7 @@ export default observer(function TransactionsList({
             </tr>
           </thead>
           <tbody>
-            {Array.from(allTransactions.transactions, ([id, transaction]) => (
+            {Array.from(transactionsStore.transactions, ([id, transaction]) => (
               <TransactionRow
                 key={id}
                 transaction={transaction}
