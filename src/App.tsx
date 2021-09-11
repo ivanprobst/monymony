@@ -13,16 +13,17 @@ import TransactionsList from "./components/Transactions";
 // Assets
 import {
   TransactionContext,
+  ConfigurationContext,
   Transaction,
   iTransactionError,
   ITransaction,
 } from "./utils/types";
-import { CONFIG_MONTHS, CONFIG_CATEGORY_LIST } from "./utils/configurations";
 
 // RENDER
 export default observer(function App() {
   // Definitions
   const allTransactions = React.useContext(TransactionContext);
+  const config = React.useContext(ConfigurationContext);
   const [isFetchingData, setIsFetchingData] = React.useState<boolean>(false);
   const [transactionErrorList, setTransactionErrorList] = React.useState<
     Array<iTransactionError>
@@ -58,9 +59,9 @@ export default observer(function App() {
                 errorMsg = "index already exists";
               } else if (Number.isNaN(parseInt(date.split(".")[1]))) {
                 errorMsg = "date format can not be parsed";
-              } else if (parseInt(date.split(".")[1]) > CONFIG_MONTHS.length) {
+              } else if (parseInt(date.split(".")[1]) > config.numberOfMonths) {
                 errorMsg = "month is not in within config range"; // ??? Is it really a problem?
-              } else if (!CONFIG_CATEGORY_LIST.includes(category)) {
+              } else if (!config.categoriesList.includes(category)) {
                 errorMsg = "category does not exist in config";
               } else if (Number.isNaN(parseInt(amount))) {
                 errorMsg = "amount is not a number";
@@ -82,6 +83,8 @@ export default observer(function App() {
                     date,
                     description,
                     category,
+                    group: config.groupFromCategory(category),
+                    type: config.typeFromCategory(category),
                     amount: parseInt(amount),
                   }),
                 ]);
@@ -89,7 +92,7 @@ export default observer(function App() {
             },
           );
         allTransactions.setTransactions(transactions);
-        setTransactionErrorList(errorArr); // ??? useless render of App; will be cleaned during backend implementation
+        setTransactionErrorList(errorArr); // ??? trigs useless rerender of App; will be cleaned during backend implementation
       })
       .catch((err) => {
         setTransactionErrorList([
@@ -103,7 +106,7 @@ export default observer(function App() {
   };
 
   // Loading
-  React.useEffect(getGSheetData, [allTransactions]); // ??? Depedency is correct?
+  React.useEffect(getGSheetData, [allTransactions, config]); // ??? Depedency is correct?
 
   return (
     <>

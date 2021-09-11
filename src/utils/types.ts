@@ -1,29 +1,24 @@
 import { createContext } from "react";
-import {
-  CONFIG_CATEGORY_TO_GROUP,
-  CONFIG_GROUP_STRUCTURE,
-  CONFIG_GROUP_TO_TYPE,
-} from "./configurations";
 import { types, Instance } from "mobx-state-tree";
+import { MONTHS, GROUP_STRUCTURE } from "./configurations";
 
-// MobX types
+// Model: Transactions
 export const Transaction = types
   .model("Transaction", {
     id: types.identifier,
     date: "", // DD.MM.YYYY
     description: "",
     category: "No category",
+    group: "No group",
+    type: types.optional(
+      types.union(types.literal("costs"), types.literal("revenues")),
+      "costs",
+    ),
     amount: 0,
   })
   .views((self) => ({
     get month() {
       return parseInt(self.date.split(".")[1]);
-    },
-    get group() {
-      return CONFIG_CATEGORY_TO_GROUP[self.category];
-    },
-    get costOrRevenue() {
-      return CONFIG_GROUP_TO_TYPE[CONFIG_CATEGORY_TO_GROUP[self.category]]; // ??? Can we reuse the group view?
     },
   }));
 
@@ -31,7 +26,7 @@ export interface ITransaction extends Instance<typeof Transaction> {}
 
 export const TransactionStore = types
   .model("TransactionStore", {
-    transactions: types.optional(types.map(Transaction), {}),
+    transactions: types.map(Transaction),
   })
   .views((self) => ({
     get numberOfTransactions() {
@@ -64,23 +59,87 @@ export const TransactionStore = types
 
 export const TransactionContext = createContext(TransactionStore.create());
 
-// TYPES
-const tmpCatArray: Array<string> = CONFIG_GROUP_STRUCTURE.reduce(
-  (acc: Array<string>, group) => {
-    return acc.concat(...group.categories);
-  },
-  [],
-);
-export type Category = typeof tmpCatArray[number];
-
-export interface iGroupConfig {
-  name: string;
-  type: "revenues" | "costs";
-  categories: Array<Category>;
-}
-
 export interface iTransactionError {
   index: string;
   description: string;
   message: string;
 }
+
+// Model: Configurations
+export const GroupConfiguration = types.model("GroupConfiguration", {
+  group: types.string,
+  type: types.union(types.literal("costs"), types.literal("revenues")),
+  categories: types.array(types.string),
+  colorTheme: types.model({
+    colorClass: types.string,
+    colorCode: types.string,
+  }),
+});
+
+export interface IGroupConfiguration
+  extends Instance<typeof GroupConfiguration> {}
+
+export const ConfigurationStore = types
+  .model("ConfigurationStore", {
+    groupsConfigurations: types.array(GroupConfiguration),
+    monthsConfiguration: types.array(types.string),
+  })
+  .views((self) => ({
+    get monthsList() {
+      return self.monthsConfiguration;
+    },
+    get numberOfMonths() {
+      return self.monthsConfiguration.length;
+    },
+    get groupsList() {
+      return self.groupsConfigurations.map(
+        (groupConfiguration) => groupConfiguration.group,
+      );
+    },
+    get categoriesList() {
+      return self.groupsConfigurations.flatMap(
+        (groupConfiguration) => groupConfiguration.categories,
+      );
+    },
+    categoriesFromGroup(group: string) {
+      return self.groupsConfigurations.find(
+        (groupConfiguration) => group === groupConfiguration.group,
+      )?.categories; // ??? Fix the potential undefined return
+    },
+    groupFromCategory(category: string) {
+      return self.groupsConfigurations.find((groupConfiguration) =>
+        groupConfiguration.categories.includes(category),
+      )?.group; // ??? Fix the potential undefined return
+    },
+    typeFromCategory(category: string) {
+      return self.groupsConfigurations.find((groupConfiguration) =>
+        groupConfiguration.categories.includes(category),
+      )?.type; // ??? Fix the potential undefined return
+    },
+    colorThemeFromGroup(group: string) {
+      return self.groupsConfigurations.find(
+        (groupConfiguration) => group === groupConfiguration.group,
+      )?.colorTheme; // ??? Fix the potential undefined return
+    },
+  }))
+  .actions((self) => ({
+    addGroupConfiguration(groupConfiguration: IGroupConfiguration) {
+      self.groupsConfigurations.push(groupConfiguration);
+    },
+    setMonthsConfiguration(monthsConfiguration: Array<string>) {
+      self.monthsConfiguration.clear();
+      monthsConfiguration.forEach((month) =>
+        self.monthsConfiguration.push(month),
+      ); // ??? Loop seems overkill, check how to directly assign
+    },
+  }));
+
+// Context creation
+const configurationStore = ConfigurationStore.create();
+configurationStore.setMonthsConfiguration(MONTHS);
+GROUP_STRUCTURE.forEach((groupConfiguration) => {
+  configurationStore.addGroupConfiguration(
+    GroupConfiguration.create(groupConfiguration),
+  );
+});
+export const ConfigurationContext = createContext(configurationStore);

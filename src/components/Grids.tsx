@@ -1,13 +1,9 @@
 // Libs
-import { useContext } from "react";
+import * as React from "react";
+import { observer } from "mobx-react-lite";
 
 // Assets
-import { TransactionContext } from "../utils/types";
-import {
-  CONFIG_MONTHS,
-  CONFIG_GROUP_TO_CATEGORY_LIST,
-  CONFIG_GROUP_LIST,
-} from "../utils/configurations";
+import { TransactionContext, ConfigurationContext } from "../utils/types";
 
 // Component
 function GridDataCell({
@@ -29,21 +25,22 @@ function GridDataCell({
 }
 
 // Component
-function GridDataRow({
+const GridDataRow = observer(function GridDataRow({
   category,
   group,
 }: {
   category?: string;
   group?: string;
 }) {
-  const allTransactions = useContext(TransactionContext);
+  const allTransactions = React.useContext(TransactionContext);
+  const config = React.useContext(ConfigurationContext);
 
   return (
     <tr>
       <td className={`p-2 pl-4 ${category ? "" : "font-bold"}`}>
         {category ? category : "Total"}
       </td>
-      {CONFIG_MONTHS.map((month, index) => (
+      {config.monthsList.map((month, index) => (
         <GridDataCell
           key={(category ? category : group ? group : "") + index}
           value={allTransactions.totalFromCategoryOrGroup(
@@ -62,16 +59,18 @@ function GridDataRow({
       ></GridDataCell>
     </tr>
   );
-}
+});
 
 // Component
 function GridGroupSection({ group }: { group: string }) {
+  const config = React.useContext(ConfigurationContext);
+
   return (
     <>
       <tr className="border-t-4">
         <td className="p-2 pt-4 font-bold text-base">{group}</td>
       </tr>
-      {CONFIG_GROUP_TO_CATEGORY_LIST[group].map((category) => (
+      {config.categoriesFromGroup(group)?.map((category) => (
         <GridDataRow key={category} category={category}></GridDataRow>
       ))}
       <GridDataRow group={group}></GridDataRow>
@@ -81,12 +80,14 @@ function GridGroupSection({ group }: { group: string }) {
 
 // RENDER
 export default function GridFull() {
+  const config = React.useContext(ConfigurationContext);
+
   return (
     <table className="w-full">
       <thead className="font-bold">
         <tr className="text-right">
           <td></td>
-          {CONFIG_MONTHS.map((month) => (
+          {config.monthsList.map((month) => (
             <td key={month} className="p-2 text-base">
               {month}
             </td>
@@ -96,7 +97,7 @@ export default function GridFull() {
       </thead>
 
       <tbody>
-        {CONFIG_GROUP_LIST.map((group) => (
+        {config.groupsList.map((group) => (
           <GridGroupSection key={group} group={group}></GridGroupSection>
         ))}
       </tbody>

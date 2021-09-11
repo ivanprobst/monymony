@@ -11,12 +11,12 @@ import { TransactionContext, iTransactionError } from "../utils/types";
 
 // Component
 function TransactionRow({
-  transaction: { date, description, costOrRevenue, category, amount },
+  transaction: { date, description, type, category, amount },
 }: {
   transaction: {
     date: string;
     description: string;
-    costOrRevenue: string;
+    type: string;
     category: string;
     amount: number;
   };
@@ -26,7 +26,7 @@ function TransactionRow({
       <td className="p-2">{date}</td>
       <td className="p-2">{description}</td>
       <td className="p-2">
-        {costOrRevenue === "costs" ? (
+        {type === "costs" ? (
           <ChevronDoubleDownIcon className="inline h-4 w-4 text-mred" />
         ) : (
           <ChevronDoubleUpIcon className="inline h-4 w-4 text-green-500" />

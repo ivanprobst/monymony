@@ -13,12 +13,7 @@ import {
 } from "recharts";
 
 // Assets
-import { TransactionContext } from "../utils/types";
-import {
-  CONFIG_MONTHS,
-  CONFIG_GROUP_LIST,
-  CONFIG_CHART_COLOR,
-} from "../utils/configurations";
+import { TransactionContext, ConfigurationContext } from "../utils/types";
 
 // Types
 interface GroupCurveToDisplayMap {
@@ -48,6 +43,8 @@ function Chart({
   chartDataset: ChartDataset;
   chartTrendSet: ChartTrendSet;
 }) {
+  const config = React.useContext(ConfigurationContext);
+
   return (
     <ResponsiveContainer width="95%" minHeight={500}>
       <LineChart
@@ -66,12 +63,12 @@ function Chart({
                 key={`amount_${group}`}
                 type="monotone"
                 dataKey={`dataset.${group}`}
-                stroke={CONFIG_CHART_COLOR[group]["colorCode"]}
+                stroke={config.colorThemeFromGroup(group)?.colorCode}
               ></Line>,
 
               <ReferenceLine
                 key={`average_${group}`}
-                stroke={CONFIG_CHART_COLOR[group]["colorCode"]}
+                stroke={config.colorThemeFromGroup(group)?.colorCode}
                 strokeDasharray="1 5"
                 y={chartTrendSet[group]["average"]}
               />,
@@ -79,17 +76,17 @@ function Chart({
               <ReferenceLine
                 label="Trend"
                 key={`trend_${group}`}
-                stroke={CONFIG_CHART_COLOR[group]["colorCode"]}
+                stroke={config.colorThemeFromGroup(group)?.colorCode}
                 strokeDasharray="4 4"
                 segment={[
                   {
-                    x: CONFIG_MONTHS[0],
+                    x: config.monthsList[0],
                     y: chartTrendSet[group]["regressionA"],
                   },
                   {
-                    x: CONFIG_MONTHS[CONFIG_MONTHS.length - 1],
+                    x: config.monthsList[config.numberOfMonths - 1],
                     y:
-                      CONFIG_MONTHS.length *
+                      config.numberOfMonths *
                         chartTrendSet[group]["regressionB"] +
                       chartTrendSet[group]["regressionA"],
                   },
@@ -110,12 +107,14 @@ function CurveController({
   groupCurvesToDisplay: GroupCurveToDisplayMap;
   curveToggler: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
+  const config = React.useContext(ConfigurationContext);
+
   return (
     <>
       {Object.entries(groupCurvesToDisplay).map(([group, displayCurves]) => (
         <label key={group} className="block mb-2">
           <input
-            className={`text-${CONFIG_CHART_COLOR[group]["colorClass"]}`}
+            className={`text-${config.colorThemeFromGroup(group)?.colorClass}`}
             name={group}
             type="checkbox"
             onChange={curveToggler}
@@ -132,10 +131,11 @@ function CurveController({
 export default observer(function ChartViewer() {
   // Definitions
   const allTransactions = React.useContext(TransactionContext);
+  const config = React.useContext(ConfigurationContext);
 
   const [groupCurvesToDisplay, setCurvesToDisplay] =
     React.useState<GroupCurveToDisplayMap>(
-      Object.fromEntries(CONFIG_GROUP_LIST.map((group) => [[group], true])),
+      Object.fromEntries(config.groupsList.map((group) => [[group], true])),
     );
 
   // Helpers
@@ -148,9 +148,9 @@ export default observer(function ChartViewer() {
 
   // Build standard dataset
   const chartDataset: ChartDataset = [];
-  CONFIG_MONTHS.forEach((month, monthIndex) => {
+  config.monthsList.forEach((month, monthIndex) => {
     const dataset = Object.fromEntries(
-      CONFIG_GROUP_LIST.map((group) => [
+      config.groupsList.map((group) => [
         [group],
         allTransactions.totalFromCategoryOrGroup(
           "group",
@@ -168,13 +168,13 @@ export default observer(function ChartViewer() {
 
   // Build trends dataset
   const chartTrendSet: ChartTrendSet = {};
-  CONFIG_GROUP_LIST.forEach((group) => {
+  config.groupsList.forEach((group) => {
     let sumX = 0;
     let sumY = 0;
     let sumX2 = 0;
     let sumXY = 0;
 
-    CONFIG_MONTHS.forEach((month, monthIndex) => {
+    config.monthsList.forEach((month, monthIndex) => {
       sumX += monthIndex;
       sumX2 += monthIndex * monthIndex;
       sumY += chartDataset[monthIndex]["dataset"][group];
@@ -182,13 +182,13 @@ export default observer(function ChartViewer() {
     });
 
     chartTrendSet[group] = {
-      average: sumY / CONFIG_MONTHS.length,
+      average: sumY / config.numberOfMonths,
       regressionA:
         (sumY * sumX2 - sumX * sumXY) /
-        (CONFIG_MONTHS.length * sumX2 - sumX * sumX),
+        (config.numberOfMonths * sumX2 - sumX * sumX),
       regressionB:
-        (CONFIG_MONTHS.length * sumXY - sumX * sumY) /
-        (CONFIG_MONTHS.length * sumX2 - sumX * sumX),
+        (config.numberOfMonths * sumXY - sumX * sumY) /
+        (config.numberOfMonths * sumX2 - sumX * sumX),
     };
   });
 
