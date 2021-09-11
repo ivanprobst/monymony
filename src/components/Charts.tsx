@@ -27,7 +27,7 @@ type ChartDataset = Array<{
 }>;
 
 interface ChartTrendSet {
-  [groupName: string]: {
+  [group: string]: {
     average: number;
     regressionA: number;
     regressionB: number;

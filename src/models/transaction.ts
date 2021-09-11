@@ -29,6 +29,11 @@ export const TransactionStore = types
     transactions: types.map(Transaction),
   })
   .views((self) => ({
+    get transactionsList() {
+      return Array.from(self.transactions).map(
+        ([, transaction]) => transaction,
+      );
+    },
     get numberOfTransactions() {
       return self.transactions.size;
     },

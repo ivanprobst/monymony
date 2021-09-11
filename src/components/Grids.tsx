@@ -3,7 +3,7 @@ import * as React from "react";
 import { observer } from "mobx-react-lite";
 
 // Models
-import { TransactionContext } from "../models/transaction";
+import { TransactionContext, ITransaction } from "../models/transaction";
 import { ConfigurationContext } from "../models/configuration";
 
 // Component
@@ -30,8 +30,8 @@ const GridDataRow = observer(function GridDataRow({
   category,
   group,
 }: {
-  category?: string;
-  group?: string;
+  category?: ITransaction["category"];
+  group?: ITransaction["group"];
 }) {
   const transactionsStore = React.useContext(TransactionContext);
   const config = React.useContext(ConfigurationContext);

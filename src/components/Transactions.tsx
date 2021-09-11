@@ -7,18 +7,22 @@ import {
 } from "@heroicons/react/solid";
 
 // Models
-import { TransactionContext, ITransactionError } from "../models/transaction";
+import {
+  TransactionContext,
+  ITransaction,
+  ITransactionError,
+} from "../models/transaction";
 
 // Component
 function TransactionRow({
   transaction: { date, description, type, category, amount },
 }: {
   transaction: {
-    date: string;
-    description: string;
-    type: string;
-    category: string;
-    amount: number;
+    date: ITransaction["date"];
+    description: ITransaction["description"];
+    type: ITransaction["type"];
+    category: ITransaction["category"];
+    amount: ITransaction["amount"];
   };
 }) {
   return (
@@ -60,9 +64,9 @@ export default observer(function TransactionsList({
             </tr>
           </thead>
           <tbody>
-            {Array.from(transactionsStore.transactions, ([id, transaction]) => (
+            {Array.from(transactionsStore.transactionsList, (transaction) => (
               <TransactionRow
-                key={id}
+                key={transaction.id}
                 transaction={transaction}
               ></TransactionRow>
             ))}
