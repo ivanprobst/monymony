@@ -4,6 +4,8 @@ import { observer } from "mobx-react-lite";
 import {
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from "@heroicons/react/solid";
 
 // Models
@@ -11,6 +13,7 @@ import {
   TransactionContext,
   ITransaction,
   ITransactionError,
+  ITransactionsOrdering,
 } from "../models/transaction";
 
 // Component
@@ -42,6 +45,38 @@ function TransactionRow({
   );
 }
 
+// Component
+function TransactionsTableHeader({
+  orderParameter,
+  children,
+}: {
+  orderParameter: ITransactionsOrdering["parameter"];
+  children: string;
+}) {
+  // Definitions
+  const transactionsStore = React.useContext(TransactionContext);
+
+  return (
+    <td
+      className="p-2"
+      onClick={() => {
+        transactionsStore.setOrdering(orderParameter);
+      }}
+    >
+      {children}{" "}
+      {transactionsStore.ordering.parameter === orderParameter ? (
+        transactionsStore.ordering.way === "up" ? (
+          <ChevronUpIcon className="inline h-4 w-4 text-mred" />
+        ) : (
+          <ChevronDownIcon className="inline h-4 w-4 text-mred" />
+        )
+      ) : (
+        ""
+      )}
+    </td>
+  );
+}
+
 // Render
 export default observer(function TransactionsList({
   transactionErrorList,
@@ -56,15 +91,23 @@ export default observer(function TransactionsList({
       <div className="col-span-4 pl-2 pr-2">
         <table className="w-full">
           <thead className="border-b-2 font-bold text-base">
-            <tr>
-              <td className="p-2">Date</td>
-              <td className="p-2">Description</td>
-              <td className="p-2">Category</td>
-              <td className="p-2">Amount</td>
+            <tr className="cursor-pointer">
+              <TransactionsTableHeader orderParameter={"date"}>
+                Date
+              </TransactionsTableHeader>
+              <TransactionsTableHeader orderParameter={"description"}>
+                Description
+              </TransactionsTableHeader>
+              <TransactionsTableHeader orderParameter={"category"}>
+                Category
+              </TransactionsTableHeader>
+              <TransactionsTableHeader orderParameter={"amount"}>
+                Amount
+              </TransactionsTableHeader>
             </tr>
           </thead>
           <tbody>
-            {Array.from(transactionsStore.transactionsList, (transaction) => (
+            {transactionsStore.orderedTransactionsList.map((transaction) => (
               <TransactionRow
                 key={transaction.id}
                 transaction={transaction}

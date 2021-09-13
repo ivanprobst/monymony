@@ -24,9 +24,28 @@ export const Transaction = types
 
 export interface ITransaction extends Instance<typeof Transaction> {}
 
-export const TransactionStore = types
+// Models
+const TransactionsOrdering = types.model("ordering", {
+  parameter: types.union(
+    types.literal("date"),
+    types.literal("description"),
+    types.literal("category"),
+    types.literal("amount"),
+  ),
+  way: types.union(types.literal("up"), types.literal("down")),
+});
+
+export interface ITransactionsOrdering
+  extends Instance<typeof TransactionsOrdering> {}
+
+// Models
+const TransactionStore = types
   .model("TransactionStore", {
     transactions: types.map(Transaction),
+    ordering: types.optional(TransactionsOrdering, {
+      parameter: "date",
+      way: "up",
+    }),
   })
   .views((self) => ({
     get transactionsList() {
@@ -36,6 +55,21 @@ export const TransactionStore = types
     },
     get numberOfTransactions() {
       return self.transactions.size;
+    },
+    get orderedTransactionsList() {
+      return Array.from(self.transactions) // ??? improve date ordering (move date to Date format)
+        .map(([, transaction]) => transaction)
+        .sort((a, b) => {
+          if (self.ordering.way === "up") {
+            return a[self.ordering.parameter] < b[self.ordering.parameter]
+              ? -1
+              : 1;
+          } else {
+            return a[self.ordering.parameter] > b[self.ordering.parameter]
+              ? -1
+              : 1;
+          }
+        });
     },
     totalFromCategoryOrGroup(
       filterType: "category" | "group",
@@ -59,6 +93,13 @@ export const TransactionStore = types
     },
     addTransaction(id: string, transaction: ITransaction) {
       self.transactions.set(id, Transaction.create(transaction));
+    },
+    setOrdering(transactionOrder: ITransactionsOrdering["parameter"]) {
+      if (transactionOrder === self.ordering.parameter) {
+        self.ordering.way = self.ordering.way === "up" ? "down" : "up";
+      } else {
+        self.ordering.parameter = transactionOrder;
+      }
     },
   }));
 

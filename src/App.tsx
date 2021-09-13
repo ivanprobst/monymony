@@ -154,7 +154,6 @@ export default observer(function App() {
           <main className="flex-auto p-8 text-sm text-gray-700">
             <Switch>
               <Route path="/transactions">
-                <h2 className="section-title">Transactions</h2>
                 <TransactionsList
                   transactionErrorList={transactionErrorList}
                 ></TransactionsList>
