@@ -1,8 +1,12 @@
 // Libs
 import * as React from "react";
 import { types, Instance } from "mobx-state-tree";
+import { v4 as uuidv4 } from "uuid";
 
 // Models
+import { IMessage } from "./message";
+
+// Model
 export const Transaction = types
   .model("Transaction", {
     id: types.identifier,
@@ -25,7 +29,7 @@ export const Transaction = types
 
 export interface ITransaction extends Instance<typeof Transaction> {}
 
-// Models
+// Model
 const TransactionsOrdering = types.model("ordering", {
   parameter: types.union(
     types.literal("date"),
@@ -39,7 +43,7 @@ const TransactionsOrdering = types.model("ordering", {
 export interface ITransactionsOrdering
   extends Instance<typeof TransactionsOrdering> {}
 
-// Models
+// Model
 const TransactionStore = types
   .model("TransactionStore", {
     transactions: types.map(Transaction),
@@ -113,18 +117,21 @@ const TransactionStore = types
         (transaction) => (transaction.isSelected = true),
       );
     },
-    deleteSeletedTransactions() {
+    deleteSeletedTransactions(): IMessage {
+      let count = 0;
       self.transactions.forEach((transaction) => {
-        if (transaction.isSelected) self.transactions.delete(transaction.id);
+        if (transaction.isSelected) {
+          count++;
+          self.transactions.delete(transaction.id);
+        }
       });
+      return {
+        id: uuidv4(),
+        text: `${count} transaction(s) deleted.`,
+        type: "confirmation",
+      };
     },
   }));
-
-export interface ITransactionError {
-  index: string;
-  description: string;
-  message: string;
-}
 
 // Context
 export const TransactionContext = React.createContext(

@@ -8,13 +8,16 @@ import {
   ChevronUpIcon,
 } from "@heroicons/react/solid";
 
+// Components
+import MessageBox from "./MessageBox";
+
 // Models
 import {
   TransactionContext,
   ITransaction,
-  ITransactionError,
   ITransactionsOrdering,
 } from "../models/transaction";
+import { MessageContext } from "../models/message";
 
 // Component
 const TransactionRow = observer(function ({
@@ -97,17 +100,14 @@ function TransactionsTableHeader({
 }
 
 // Render
-export default observer(function TransactionsList({
-  transactionErrorList,
-}: {
-  transactionErrorList: Array<ITransactionError>;
-}) {
+export default observer(function TransactionsList() {
   // Definitions
   const transactionsStore = React.useContext(TransactionContext);
+  const messageStore = React.useContext(MessageContext);
 
   return (
-    <section className="grid grid-cols-5">
-      <div className="col-span-4 pl-2 pr-2">
+    <section className="grid grid-cols-6">
+      <div className="col-span-5 pl-2 pr-2">
         <table className="w-full">
           <thead className="border-b-2 font-bold text-base">
             <tr className="cursor-pointer">
@@ -146,30 +146,20 @@ export default observer(function TransactionsList({
         </table>
       </div>
 
-      <div className="pl-2 pt-2 border-l-2">
+      <div className="pt-2 text-center border-l-2">
         <button
-          className="p-2 text-mred border-2 border-mred"
-          onClick={transactionsStore.deleteSeletedTransactions}
+          className="w-4/5 p-2 text-mred border-2 border-mred"
+          onClick={() => {
+            messageStore.addMessage(
+              transactionsStore.deleteSeletedTransactions(),
+            );
+          }}
         >
           Delete transaction(s)
         </button>
-        <hr className="m-2" />
-        <h3 className="text-mblue text-base">Transactions errors:</h3>
-        <ul>
-          {transactionErrorList.length === 0 ? (
-            <li className="p-1 text-green-500">No error</li>
-          ) : (
-            transactionErrorList.map((errorItem) => (
-              <li
-                key={`${errorItem.index}_${errorItem.message}`}
-                className="p-1 text-mred"
-              >
-                {errorItem.index} - {errorItem.description}: {errorItem.message}
-              </li>
-            ))
-          )}
-        </ul>
       </div>
+
+      {messageStore.messages.size > 0 && <MessageBox></MessageBox>}
     </section>
   );
 });

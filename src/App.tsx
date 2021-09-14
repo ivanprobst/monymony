@@ -15,19 +15,17 @@ import {
   TransactionContext,
   Transaction,
   ITransaction,
-  ITransactionError,
 } from "./models/transaction";
 import { ConfigurationContext } from "./models/configuration";
+import { MessageContext } from "./models/message";
 
-// RENDER
+// Render
 export default observer(function App() {
   // Definitions
   const transactionsStore = React.useContext(TransactionContext);
   const config = React.useContext(ConfigurationContext);
+  const messageStore = React.useContext(MessageContext);
   const [isFetchingData, setIsFetchingData] = React.useState<boolean>(false);
-  const [transactionErrorList, setTransactionErrorList] = React.useState<
-    Array<ITransactionError>
-  >([]);
 
   // Helpers
   const getGSheetData = function () {
@@ -40,7 +38,7 @@ export default observer(function App() {
       .then((res) => {
         setIsFetchingData(false);
 
-        const errorArr: Array<ITransactionError> = [];
+        const errorArr: Array<string> = [];
         const transactions: Array<[string, ITransaction]> = [];
         const indexMem = new Set();
 
@@ -54,13 +52,14 @@ export default observer(function App() {
               string,
               string,
             ]) => {
+              // ??? keeping error logic for now, will be deleted with backend import implementation
               let errorMsg = "";
               if (indexMem.has(id)) {
                 errorMsg = "index already exists";
               } else if (Number.isNaN(parseInt(date.split(".")[1]))) {
                 errorMsg = "date format can not be parsed";
               } else if (parseInt(date.split(".")[1]) > config.numberOfMonths) {
-                errorMsg = "month is not in within config range"; // ??? Is it really a problem?
+                errorMsg = "month is not in within config range";
               } else if (!config.categoriesList.includes(category)) {
                 errorMsg = "category does not exist in config";
               } else if (Number.isNaN(parseInt(amount))) {
@@ -68,11 +67,7 @@ export default observer(function App() {
               }
 
               if (errorMsg !== "") {
-                errorArr.push({
-                  index: id,
-                  description: description,
-                  message: errorMsg,
-                });
+                errorArr.push(errorMsg);
               } else {
                 indexMem.add(id);
 
@@ -92,16 +87,9 @@ export default observer(function App() {
             },
           );
         transactionsStore.setTransactions(transactions);
-        setTransactionErrorList(errorArr); // ??? trigs useless rerender of App; will be cleaned during backend implementation
       })
       .catch((err) => {
-        setTransactionErrorList([
-          {
-            index: "",
-            description: "",
-            message: "Failed to connect to transactions source",
-          },
-        ]);
+        // ??? for now nothing, add error message later
       });
   };
 
@@ -112,79 +100,79 @@ export default observer(function App() {
     <>
       <TransactionContext.Provider value={transactionsStore}>
         <ConfigurationContext.Provider value={config}>
-          <header className="grid grid-cols-2 p-4 bg-mred">
-            <h1 className="self-center text-3xl text-white">
-              <a href="/">Mony mony</a>
-            </h1>
-            <nav className="self-center text-right">
-              <button
-                className="p-2 text-white hover:text-mred-light"
-                onClick={getGSheetData}
-              >
-                <RefreshIcon
-                  className={`inline h-6 w-6 ${
-                    isFetchingData === true ? "animate-spin-slow" : ""
-                  }`}
-                />
-              </button>
-              <NavLink
-                className="nav-button"
-                activeClassName="bg-mred-light text-white"
-                to="/transactions"
-              >
-                Transactions
-              </NavLink>
-              <NavLink
-                className="nav-button"
-                activeClassName="bg-mred-light text-white"
-                to="/grid"
-              >
-                Grid
-              </NavLink>
-              <NavLink
-                className="nav-button"
-                activeClassName="bg-mred-light text-white"
-                to="/chart"
-              >
-                Chart
-              </NavLink>
-            </nav>
-          </header>
+          <MessageContext.Provider value={messageStore}>
+            <header className="grid grid-cols-2 p-4 bg-mred">
+              <h1 className="self-center text-3xl text-white">
+                <a href="/">Mony mony</a>
+              </h1>
+              <nav className="self-center text-right">
+                <button
+                  className="p-2 text-white hover:text-mred-light"
+                  onClick={getGSheetData}
+                >
+                  <RefreshIcon
+                    className={`inline h-6 w-6 ${
+                      isFetchingData === true ? "animate-spin-slow" : ""
+                    }`}
+                  />
+                </button>
+                <NavLink
+                  className="nav-button"
+                  activeClassName="bg-mred-light text-white"
+                  to="/transactions"
+                >
+                  Transactions
+                </NavLink>
+                <NavLink
+                  className="nav-button"
+                  activeClassName="bg-mred-light text-white"
+                  to="/grid"
+                >
+                  Grid
+                </NavLink>
+                <NavLink
+                  className="nav-button"
+                  activeClassName="bg-mred-light text-white"
+                  to="/chart"
+                >
+                  Chart
+                </NavLink>
+              </nav>
+            </header>
 
-          <main className="flex-auto p-8 text-sm text-gray-700">
-            <Switch>
-              <Route path="/transactions">
-                <TransactionsList
-                  transactionErrorList={transactionErrorList}
-                ></TransactionsList>
-              </Route>
-              <Route path="/grid">
-                <h2 className="section-title">Grid</h2>
-                <GridFull></GridFull>
-              </Route>
-              <Route path="/chart">
-                <h2 className="section-title">Chart</h2>
-                <ChartViewer></ChartViewer>
-              </Route>
-              <Route path="/">
-                <h2 className="section-title">Chart</h2>
-                <ChartViewer></ChartViewer>
-              </Route>
-            </Switch>
-          </main>
+            <main className="flex-auto p-8 text-sm text-gray-700">
+              <Switch>
+                <Route path="/transactions">
+                  <TransactionsList />
+                </Route>
+                <Route path="/grid">
+                  <h2 className="section-title">Grid</h2>
+                  <GridFull />
+                </Route>
+                <Route path="/chart">
+                  <h2 className="section-title">Chart</h2>
+                  <ChartViewer />
+                </Route>
+                <Route path="/">
+                  <h2 className="section-title">Chart</h2>
+                  <ChartViewer />
+                </Route>
+              </Switch>
+            </main>
 
-          <footer className="p-4 text-white bg-mred">
-            © 2021 by ivanprobst (
-            <a
-              className="underline"
-              target="_blank"
-              href="https://github.com/ivanprobst/monymony"
-              rel="noopener noreferrer"
-            >
-              check out this project on GitHub
-            </a>
-            )
-          </footer>
+            <footer className="p-4 text-white bg-mred">
+              © 2021 by ivanprobst (
+              <a
+                className="underline"
+                target="_blank"
+                href="https://github.com/ivanprobst/monymony"
+                rel="noopener noreferrer"
+              >
+                check out this project on GitHub
+              </a>
+              )
+            </footer>
+          </MessageContext.Provider>
         </ConfigurationContext.Provider>
       </TransactionContext.Provider>
     </>
