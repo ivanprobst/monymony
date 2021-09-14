@@ -15,6 +15,7 @@ export const Transaction = types
       "costs",
     ),
     amount: 0,
+    isSelected: false,
   })
   .views((self) => ({
     get month() {
@@ -100,6 +101,22 @@ const TransactionStore = types
       } else {
         self.ordering.parameter = transactionOrder;
       }
+    },
+    toggleSelectedTransaction(id: ITransaction["id"]) {
+      const transaction = self.transactions.get(id);
+      if (transaction !== undefined) {
+        transaction.isSelected = !transaction.isSelected;
+      }
+    },
+    selectAllTransactions() {
+      self.transactions.forEach(
+        (transaction) => (transaction.isSelected = true),
+      );
+    },
+    deleteSeletedTransactions() {
+      self.transactions.forEach((transaction) => {
+        if (transaction.isSelected) self.transactions.delete(transaction.id);
+      });
     },
   }));
 
