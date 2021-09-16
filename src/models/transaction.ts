@@ -14,17 +14,26 @@ export const Transaction = types
     date: "", // DD.MM.YYYY >> YYYY-MM-DD
     description: "",
     category: "No category",
-    group: "No group",
-    type: types.optional(
-      types.union(types.literal("costs"), types.literal("revenues")),
-      "costs",
-    ),
     amount: 0,
-    isSelected: false,
+    // group: "No group",
+    // type: types.optional(
+    //   types.union(types.literal("costs"), types.literal("revenues")),
+    //   "costs",
+    // ),
+    //isSelected: false,
   })
   .views((self) => ({
     get month() {
       return parseInt(self.date.split(".")[1]);
+    },
+    get group() {
+      return ""; // ??? add as views instead of DB props
+    },
+    get type() {
+      return "";
+    },
+    get isSelected() {
+      return false;
     },
   }));
 
@@ -110,13 +119,13 @@ const TransactionStore = types
     toggleSelectedTransaction(id: ITransaction["id"]) {
       const transaction = self.transactions.get(id);
       if (transaction !== undefined) {
-        transaction.isSelected = !transaction.isSelected;
+        //transaction.isSelected = !transaction.isSelected;
       }
     },
     selectAllTransactions() {
-      self.transactions.forEach(
+      /*self.transactions.forEach(
         (transaction) => (transaction.isSelected = true),
-      );
+      );*/
     },
     deleteSeletedTransactions(): IMessage {
       let count = 0;
@@ -132,30 +141,28 @@ const TransactionStore = types
         type: "confirmation",
       };
     },
-    createTransactionInDB(
-      transaction: {
-        date: ITransaction["date"];
-        description: ITransaction["description"];
-        category: ITransaction["category"];
-        amount: ITransaction["amount"];
-      },
-      creationConfirmation: (confirmation: {
-        status: string;
-        data: string;
-      }) => void,
-    ) {
-      axios
-        .get(
-          `https://us-central1-mony-mony-314909.cloudfunctions.net/addTransaction?transaction=${JSON.stringify(
-            transaction,
-          )}`,
-        ) // ??? move API url somewhere else
-        .then((res) => {
-          creationConfirmation({ status: "success", data: res.data.id }); // ??? move confirmations status to model
-        })
-        .catch((err) => {
-          creationConfirmation({ status: "failed", data: "post failed" });
-        });
+  }))
+  .actions((self) => ({
+    async createTransactionInDB(transaction: {
+      date: ITransaction["date"];
+      description: ITransaction["description"];
+      category: ITransaction["category"];
+      amount: ITransaction["amount"];
+    }) {
+      const res = await axios.get(
+        `https://us-central1-mony-mony-314909.cloudfunctions.net/addTransaction?transaction=${JSON.stringify(
+          transaction,
+        )}`,
+      ); // ??? move API url somewhere else
+
+      return { status: "success", data: res.data.id }; // ??? move confirmations status to model
+    },
+    async loadTransactionsFromDB() {
+      const res = await axios.get(
+        "https://us-central1-mony-mony-314909.cloudfunctions.net/getTransactions",
+      ); // ??? move API url somewhere else
+
+      self.setTransactions(res.data.data);
     },
   }));
 

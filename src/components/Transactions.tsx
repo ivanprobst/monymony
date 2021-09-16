@@ -1,4 +1,4 @@
-// Libs
+// Import: libs
 import * as React from "react";
 import { observer } from "mobx-react-lite";
 import { v4 as uuidv4 } from "uuid";
@@ -9,10 +9,8 @@ import {
   ChevronUpIcon,
 } from "@heroicons/react/solid";
 
-// Components
+// Import: components and models
 import MessageBox from "./MessageBox";
-
-// Models
 import {
   TransactionContext,
   ITransaction,
@@ -20,7 +18,7 @@ import {
 } from "../models/transaction";
 import { MessageContext } from "../models/message";
 
-// Component
+// COMPONENT
 const TransactionRow = observer(function ({
   transaction: { id, date, description, type, category, amount, isSelected },
 }: {
@@ -34,9 +32,10 @@ const TransactionRow = observer(function ({
     isSelected: ITransaction["isSelected"];
   };
 }) {
-  // Definitions
+  // State and context
   const transactionsStore = React.useContext(TransactionContext);
 
+  // Render
   return (
     <tr className="h-8 even:bg-gray-100 hover:bg-mblue-light">
       <td>
@@ -68,7 +67,7 @@ const TransactionRow = observer(function ({
   );
 });
 
-// Component
+// COMPONENT
 function TransactionsTableHeader({
   orderParameter,
   children,
@@ -76,9 +75,10 @@ function TransactionsTableHeader({
   orderParameter: ITransactionsOrdering["parameter"];
   children: string;
 }) {
-  // Definitions
+  // State and context
   const transactionsStore = React.useContext(TransactionContext);
 
+  // Render
   return (
     <td
       className="p-2"
@@ -100,7 +100,7 @@ function TransactionsTableHeader({
   );
 }
 
-// Component
+// COMPONENT
 function CreateTransactionForm() {
   // State and context
   const transactionsStore = React.useContext(TransactionContext);
@@ -112,7 +112,7 @@ function CreateTransactionForm() {
     amount: "",
   });
 
-  // Helpers
+  // Helper
   const handleChange = function (event: React.FormEvent<HTMLInputElement>) {
     setFormData({
       ...formData,
@@ -120,6 +120,7 @@ function CreateTransactionForm() {
     });
   };
 
+  // Helper
   const creationConfirmation = function (confirmation: {
     status: string;
     data: string;
@@ -139,17 +140,20 @@ function CreateTransactionForm() {
     }
   };
 
+  // Helper
   const processForm = async function (event: React.FormEvent) {
     event.preventDefault();
-    await transactionsStore.createTransactionInDB(
-      {
-        date: formData.date,
-        description: formData.description,
-        category: formData.category, // ??? Handle empty vals
-        amount: parseInt(formData.amount), // ??? Add type checking?
-      },
-      creationConfirmation,
-    );
+    // ??? Add data sanity checks here
+    const confirmation = await transactionsStore.createTransactionInDB({
+      date: formData.date,
+      description: formData.description,
+      category: formData.category,
+      amount: parseInt(formData.amount) ?? 0,
+    });
+
+    creationConfirmation(confirmation);
+
+    transactionsStore.loadTransactionsFromDB(); // ??? rough reload, check if the best
   };
 
   // Render
@@ -161,6 +165,7 @@ function CreateTransactionForm() {
         type="date"
         value={formData.date}
         onChange={handleChange}
+        required
       />
       <input
         className="mb-4 shadow text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -169,6 +174,7 @@ function CreateTransactionForm() {
         placeholder="Description"
         value={formData.description}
         onChange={handleChange}
+        required
       />
       <input
         className="mb-4 shadow text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -177,6 +183,7 @@ function CreateTransactionForm() {
         placeholder="Category"
         value={formData.category}
         onChange={handleChange}
+        required
       />
       <input
         className="mb-4 shadow text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -185,6 +192,7 @@ function CreateTransactionForm() {
         placeholder="Amount"
         value={formData.amount}
         onChange={handleChange}
+        required
       />
       <button className="p-2 text-mred border-2 border-mred">
         Create transaction
@@ -193,12 +201,13 @@ function CreateTransactionForm() {
   );
 }
 
-// Render
+// MAIN
 export default observer(function TransactionsList() {
-  // Definitions
+  // State and context
   const transactionsStore = React.useContext(TransactionContext);
   const messageStore = React.useContext(MessageContext);
 
+  // Render
   return (
     <section className="grid grid-cols-6">
       <div className="col-span-5 pl-2 pr-2">
