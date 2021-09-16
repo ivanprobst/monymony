@@ -1,6 +1,7 @@
 // Libs
 import * as React from "react";
 import { observer } from "mobx-react-lite";
+import { v4 as uuidv4 } from "uuid";
 import {
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
@@ -99,6 +100,99 @@ function TransactionsTableHeader({
   );
 }
 
+// Component
+function CreateTransactionForm() {
+  // State and context
+  const transactionsStore = React.useContext(TransactionContext);
+  const messageStore = React.useContext(MessageContext);
+  const [formData, setFormData] = React.useState({
+    date: "2021-01-01",
+    description: "",
+    category: "",
+    amount: "",
+  });
+
+  // Helpers
+  const handleChange = function (event: React.FormEvent<HTMLInputElement>) {
+    setFormData({
+      ...formData,
+      [event.currentTarget.name]: event.currentTarget.value,
+    });
+  };
+
+  const creationConfirmation = function (confirmation: {
+    status: string;
+    data: string;
+  }) {
+    if (confirmation.status === "success") {
+      messageStore.addMessage({
+        id: uuidv4(),
+        text: `New transaction created: ${confirmation.data}`,
+        type: "confirmation",
+      });
+    } else {
+      messageStore.addMessage({
+        id: uuidv4(),
+        text: `Error: ${confirmation.data}`,
+        type: "error",
+      });
+    }
+  };
+
+  const processForm = async function (event: React.FormEvent) {
+    event.preventDefault();
+    await transactionsStore.createTransactionInDB(
+      {
+        date: formData.date,
+        description: formData.description,
+        category: formData.category, // ??? Handle empty vals
+        amount: parseInt(formData.amount), // ??? Add type checking?
+      },
+      creationConfirmation,
+    );
+  };
+
+  // Render
+  return (
+    <form className="p-2" onSubmit={processForm}>
+      <input
+        className="mb-4 shadow text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        name="date"
+        type="date"
+        value={formData.date}
+        onChange={handleChange}
+      />
+      <input
+        className="mb-4 shadow text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        name="description"
+        type="text"
+        placeholder="Description"
+        value={formData.description}
+        onChange={handleChange}
+      />
+      <input
+        className="mb-4 shadow text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        name="category"
+        type="text"
+        placeholder="Category"
+        value={formData.category}
+        onChange={handleChange}
+      />
+      <input
+        className="mb-4 shadow text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        name="amount"
+        type="number"
+        placeholder="Amount"
+        value={formData.amount}
+        onChange={handleChange}
+      />
+      <button className="p-2 text-mred border-2 border-mred">
+        Create transaction
+      </button>
+    </form>
+  );
+}
+
 // Render
 export default observer(function TransactionsList() {
   // Definitions
@@ -157,6 +251,9 @@ export default observer(function TransactionsList() {
         >
           Delete transaction(s)
         </button>
+        <hr className="m-2" />
+        <h2 className="text-lg">Create a transaction</h2>
+        <CreateTransactionForm />
       </div>
 
       {messageStore.messages.size > 0 && <MessageBox></MessageBox>}

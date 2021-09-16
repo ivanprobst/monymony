@@ -2,6 +2,7 @@
 import * as React from "react";
 import { types, Instance } from "mobx-state-tree";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 
 // Models
 import { IMessage } from "./message";
@@ -10,7 +11,7 @@ import { IMessage } from "./message";
 export const Transaction = types
   .model("Transaction", {
     id: types.identifier,
-    date: "", // DD.MM.YYYY
+    date: "", // DD.MM.YYYY >> YYYY-MM-DD
     description: "",
     category: "No category",
     group: "No group",
@@ -130,6 +131,31 @@ const TransactionStore = types
         text: `${count} transaction(s) deleted.`,
         type: "confirmation",
       };
+    },
+    createTransactionInDB(
+      transaction: {
+        date: ITransaction["date"];
+        description: ITransaction["description"];
+        category: ITransaction["category"];
+        amount: ITransaction["amount"];
+      },
+      creationConfirmation: (confirmation: {
+        status: string;
+        data: string;
+      }) => void,
+    ) {
+      axios
+        .get(
+          `https://us-central1-mony-mony-314909.cloudfunctions.net/addTransaction?transaction=${JSON.stringify(
+            transaction,
+          )}`,
+        ) // ??? move API url somewhere else
+        .then((res) => {
+          creationConfirmation({ status: "success", data: res.data.id }); // ??? move confirmations status to model
+        })
+        .catch((err) => {
+          creationConfirmation({ status: "failed", data: "post failed" });
+        });
     },
   }));
 
