@@ -61,6 +61,7 @@ const TransactionStore = types
       way: "up",
     }),
     selectedTransactions: types.map(types.string),
+    isLoading: false,
   })
   .views((self) => ({
     get transactionsList() {
@@ -135,6 +136,9 @@ const TransactionStore = types
         self.selectedTransactions.set(transaction.id, transaction.id),
       );
     },
+    toggleLoading() {
+      self.isLoading = !self.isLoading;
+    },
   }))
   .actions((self) => ({
     createTransactionInDB: flow(function* createTransactionInDB(transaction: {
@@ -143,11 +147,13 @@ const TransactionStore = types
       category: ITransaction["category"];
       amount: ITransaction["amount"];
     }) {
+      self.toggleLoading();
       const res = yield axios.get(
         `https://europe-west1-mony-mony-314909.cloudfunctions.net/addTransaction?transaction=${JSON.stringify(
           transaction,
         )}`,
       );
+      self.toggleLoading();
 
       self.setTransactions(res.data.data);
       self.setTransactions(res.data.data);
@@ -157,9 +163,11 @@ const TransactionStore = types
       } as Pick<IMessage, "type" | "text">;
     }),
     loadTransactionsFromDB: flow(function* loadTransactionsFromDB() {
+      self.toggleLoading();
       const res = yield axios.get(
         "https://europe-west1-mony-mony-314909.cloudfunctions.net/getTransactions",
       );
+      self.toggleLoading();
 
       self.setTransactions(res.data.data);
     }),
@@ -167,11 +175,13 @@ const TransactionStore = types
       function* deleteSelectedTransactionsInDB() {
         const ids = Array.from(self.selectedTransactions).map(([id]) => id);
 
+        self.toggleLoading();
         const res = yield axios.get(
           `https://europe-west1-mony-mony-314909.cloudfunctions.net/deleteTransactions?ids=${JSON.stringify(
             ids,
           )}`,
         );
+        self.toggleLoading();
 
         self.setTransactions(res.data.data);
         return {

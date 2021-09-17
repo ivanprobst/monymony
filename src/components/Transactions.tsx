@@ -173,7 +173,10 @@ function CreateTransactionForm() {
         onChange={handleChange}
         required
       />
-      <button className="p-2 text-mred border-2 border-mred">
+      <button
+        disabled={transactionsStore.isLoading}
+        className="p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         Create transaction
       </button>
     </form>
@@ -237,7 +240,8 @@ export default observer(function TransactionsList() {
 
       <div className="pt-2 text-center border-l-2">
         <button
-          className="w-4/5 p-2 text-mred border-2 border-mred"
+          disabled={transactionsStore.isLoading}
+          className="w-4/5 p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={processTransactionsDeletion}
         >
           Delete transaction(s)

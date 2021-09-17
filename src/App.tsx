@@ -18,18 +18,14 @@ export default observer(function App() {
   const transactionsStore = React.useContext(TransactionContext);
   const config = React.useContext(ConfigurationContext);
   const messageStore = React.useContext(MessageContext);
-  const [isFetchingData, setIsFetchingData] = React.useState<boolean>(false);
 
   // Helper
-  const getGSheetData = function () {
-    setIsFetchingData(true);
-    transactionsStore.loadTransactionsFromDB().then(() => {
-      setIsFetchingData(false);
-    });
+  const reloadDatafromDB = function () {
+    transactionsStore.loadTransactionsFromDB();
   };
 
   // Loading
-  React.useEffect(getGSheetData, [transactionsStore, config]); // ??? Depedency is correct?
+  React.useEffect(reloadDatafromDB, [transactionsStore, config]); // ??? Depedency is correct?
 
   // Render
   return (
@@ -44,11 +40,11 @@ export default observer(function App() {
               <nav className="self-center text-right">
                 <button
                   className="p-2 text-white hover:text-mred-light"
-                  onClick={getGSheetData}
+                  onClick={reloadDatafromDB}
                 >
                   <RefreshIcon
                     className={`inline h-6 w-6 ${
-                      isFetchingData === true ? "animate-spin-slow" : ""
+                      transactionsStore.isLoading ? "animate-spin-slow" : ""
                     }`}
                   />
                 </button>
