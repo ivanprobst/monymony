@@ -122,24 +122,6 @@ function CreateTransactionForm() {
   };
 
   // Helper
-  const creationConfirmation = function (confirmation: {
-    status: string;
-    data: string;
-  }) {
-    if (confirmation.status === "success") {
-      messageStore.addMessage({
-        text: `New transaction created: ${confirmation.data}`,
-        type: "confirmation",
-      });
-    } else {
-      messageStore.addMessage({
-        text: `Error: ${confirmation.data}`,
-        type: "error",
-      });
-    }
-  };
-
-  // Helper
   const processForm = async function (event: React.FormEvent) {
     event.preventDefault();
     // ??? Add data sanity checks here
@@ -150,9 +132,7 @@ function CreateTransactionForm() {
       amount: parseInt(formData.amount) ?? 0,
     });
 
-    creationConfirmation(confirmation);
-
-    transactionsStore.loadTransactionsFromDB(); // ??? rough reload, check if the best
+    messageStore.addMessage(confirmation);
   };
 
   // Render
@@ -206,6 +186,13 @@ export default observer(function TransactionsList() {
   const transactionsStore = React.useContext(TransactionContext);
   const messageStore = React.useContext(MessageContext);
 
+  // Helper
+  const processTransactionsDeletion = async function () {
+    const confirmation =
+      await transactionsStore.deleteSelectedTransactionsInDB();
+    messageStore.addMessage(confirmation);
+  };
+
   // Render
   return (
     <section className="grid grid-cols-6">
@@ -251,7 +238,7 @@ export default observer(function TransactionsList() {
       <div className="pt-2 text-center border-l-2">
         <button
           className="w-4/5 p-2 text-mred border-2 border-mred"
-          onClick={transactionsStore.deleteSelectedTransactionsInDB}
+          onClick={processTransactionsDeletion}
         >
           Delete transaction(s)
         </button>

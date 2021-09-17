@@ -30,12 +30,15 @@ export const MessagesStore = types
     },
   }))
   .actions((self) => ({
-    addMessage(message: { text: IMessage["text"]; type: IMessage["type"] }) {
+    addMessage(message: Pick<IMessage, "type" | "text">) {
       const id = uuidv4();
       self.messages.set(id, { ...message, id });
     },
     deleteMessage(id: IMessage["id"]) {
       self.messages.delete(id);
+    },
+    deleteAllMessages() {
+      self.messages.clear();
     },
   }));
 

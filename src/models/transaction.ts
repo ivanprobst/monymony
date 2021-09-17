@@ -1,8 +1,11 @@
-// Libs
+// Import: libs
 import * as React from "react";
 import { types, Instance } from "mobx-state-tree";
 import axios from "axios";
 import { flow } from "mobx";
+
+// Import: components and models
+import { IMessage } from "./message";
 
 // Model
 export const Transaction = types
@@ -147,7 +150,11 @@ const TransactionStore = types
       );
 
       self.setTransactions(res.data.data);
-      return { status: "success", data: res.data.id }; // ??? move confirmations status to model
+      self.setTransactions(res.data.data);
+      return {
+        type: "confirmation",
+        text: `New transaction created.`,
+      } as Pick<IMessage, "type" | "text">;
     }),
     loadTransactionsFromDB: flow(function* loadTransactionsFromDB() {
       const res = yield axios.get(
@@ -167,7 +174,10 @@ const TransactionStore = types
         );
 
         self.setTransactions(res.data.data);
-        return { status: "success", data: res.data }; // ??? move confirmations status to model
+        return {
+          type: "confirmation",
+          text: `Transaction(s) deleted.`,
+        } as Pick<IMessage, "type" | "text">;
       },
     ),
   }));

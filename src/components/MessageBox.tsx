@@ -1,4 +1,4 @@
-// Libs
+// Import: libs
 import * as React from "react";
 import { observer } from "mobx-react-lite";
 import {
@@ -6,63 +6,64 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   TrashIcon,
+  XCircleIcon,
 } from "@heroicons/react/outline";
 
-// Models
+// Import: components and models
 import { MessageContext, IMessage } from "../models/message";
 
-// Component
+// COMPONENT
 function MessageIcon({ type }: { type: string }) {
   switch (type) {
     case "error":
       return (
-        <ExclamationCircleIcon className="inline mb-1 h-6 w-6 text-mred" />
+        <ExclamationCircleIcon className="inline mb-1 mr-1 h-6 w-6 text-mred" />
       );
     case "confirmation":
-      return <CheckCircleIcon className="inline mb-1 h-6 w-6 text-green-500" />;
-    case "information":
       return (
-        <InformationCircleIcon className="inline mb-1 h-6 w-6 text-mblue" />
+        <CheckCircleIcon className="inline mb-1 mr-1 h-6 w-6 text-green-500" />
       );
     default:
       return (
-        <InformationCircleIcon className="inline mb-1 h-6 w-6 text-mblue" />
+        <InformationCircleIcon className="inline mb-1 mr-1 h-6 w-6 text-mblue" />
       );
   }
 }
 
-// Component
+// COMPONENT
 function MessageRow({ message: { type, text, id } }: { message: IMessage }) {
   const messageStore = React.useContext(MessageContext);
 
+  // Render
   return (
     <li>
       <MessageIcon type={type} />
-      &nbsp;
       {text}
-      &nbsp;
-      <button
-        onClick={() => {
-          messageStore.deleteMessage(id);
-        }}
-      >
-        <TrashIcon className="inline mb-1 h-4 w-4 text-mred" />
+      <button onClick={() => messageStore.deleteMessage(id)}>
+        <TrashIcon className="inline mb-1 ml-1 h-4 w-4 text-mred" />
       </button>
     </li>
   );
 }
 
-// Render
+// MAIN
 export default observer(function MessageBox() {
   const messageStore = React.useContext(MessageContext);
 
+  // Render
   return (
-    <article className="p-2 fixed bottom-10 left-5 bg-white border-mblue border-2">
+    <div className="fixed bottom-10 left-5 p-2 pt-3 bg-white border-mblue border-2">
       <ul>
         {messageStore.messagesList.map((message: IMessage) => (
           <MessageRow key={message.id} message={message}></MessageRow>
         ))}
       </ul>
-    </article>
+      <button
+        className="absolute -top-2 -right-2"
+        onClick={messageStore.deleteAllMessages}
+      >
+        <XCircleIcon className="h-6 w-6 text-mblue bg-white" />
+      </button>
+    </div>
   );
 });
