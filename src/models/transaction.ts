@@ -2,6 +2,7 @@
 import * as React from "react";
 import { types, Instance } from "mobx-state-tree";
 import axios from "axios";
+import { flow } from "mobx";
 
 // Model
 export const Transaction = types
@@ -133,13 +134,13 @@ const TransactionStore = types
     },
   }))
   .actions((self) => ({
-    async createTransactionInDB(transaction: {
+    createTransactionInDB: flow(function* createTransactionInDB(transaction: {
       date: ITransaction["date"];
       description: ITransaction["description"];
       category: ITransaction["category"];
       amount: ITransaction["amount"];
     }) {
-      const res = await axios.get(
+      const res = yield axios.get(
         `https://europe-west1-mony-mony-314909.cloudfunctions.net/addTransaction?transaction=${JSON.stringify(
           transaction,
         )}`,
@@ -147,26 +148,28 @@ const TransactionStore = types
 
       self.setTransactions(res.data.data);
       return { status: "success", data: res.data.id }; // ??? move confirmations status to model
-    },
-    async loadTransactionsFromDB() {
-      const res = await axios.get(
+    }),
+    loadTransactionsFromDB: flow(function* loadTransactionsFromDB() {
+      const res = yield axios.get(
         "https://europe-west1-mony-mony-314909.cloudfunctions.net/getTransactions",
       );
 
       self.setTransactions(res.data.data);
-    },
-    async deleteSelectedTransactionsInDB() {
-      const ids = Array.from(self.selectedTransactions).map(([id]) => id);
+    }),
+    deleteSelectedTransactionsInDB: flow(
+      function* deleteSelectedTransactionsInDB() {
+        const ids = Array.from(self.selectedTransactions).map(([id]) => id);
 
-      const res = await axios.get(
-        `https://europe-west1-mony-mony-314909.cloudfunctions.net/deleteTransactions?ids=${JSON.stringify(
-          ids,
-        )}`,
-      );
+        const res = yield axios.get(
+          `https://europe-west1-mony-mony-314909.cloudfunctions.net/deleteTransactions?ids=${JSON.stringify(
+            ids,
+          )}`,
+        );
 
-      self.setTransactions(res.data.data);
-      return { status: "success", data: res.data }; // ??? move confirmations status to model
-    },
+        self.setTransactions(res.data.data);
+        return { status: "success", data: res.data }; // ??? move confirmations status to model
+      },
+    ),
   }));
 
 // Context
