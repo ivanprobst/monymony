@@ -1,7 +1,6 @@
 // Import: libs
 import * as React from "react";
 import { observer } from "mobx-react-lite";
-import { v4 as uuidv4 } from "uuid";
 import {
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
@@ -20,7 +19,7 @@ import { MessageContext } from "../models/message";
 
 // COMPONENT
 const TransactionRow = observer(function ({
-  transaction: { id, date, description, type, category, amount, isSelected },
+  transaction: { id, date, description, type, category, amount },
 }: {
   transaction: {
     id: ITransaction["id"];
@@ -29,11 +28,15 @@ const TransactionRow = observer(function ({
     type: ITransaction["type"];
     category: ITransaction["category"];
     amount: ITransaction["amount"];
-    isSelected: ITransaction["isSelected"];
   };
 }) {
   // State and context
   const transactionsStore = React.useContext(TransactionContext);
+
+  // Helper
+  const toggleSelection = function (event: React.FormEvent<HTMLInputElement>) {
+    transactionsStore.toggleSelectedTransaction(event.currentTarget.name);
+  };
 
   // Render
   return (
@@ -44,10 +47,8 @@ const TransactionRow = observer(function ({
             type="checkbox"
             name={id}
             className="text-mblue"
-            onChange={() => {
-              transactionsStore.toggleSelectedTransaction(id);
-            }}
-            checked={isSelected}
+            onChange={toggleSelection}
+            checked={transactionsStore.isTransactionSelected(id)}
           />
           <span className="ml-1 text-xs">{id}</span>
         </label>
@@ -127,13 +128,11 @@ function CreateTransactionForm() {
   }) {
     if (confirmation.status === "success") {
       messageStore.addMessage({
-        id: uuidv4(),
         text: `New transaction created: ${confirmation.data}`,
         type: "confirmation",
       });
     } else {
       messageStore.addMessage({
-        id: uuidv4(),
         text: `Error: ${confirmation.data}`,
         type: "error",
       });
@@ -252,11 +251,7 @@ export default observer(function TransactionsList() {
       <div className="pt-2 text-center border-l-2">
         <button
           className="w-4/5 p-2 text-mred border-2 border-mred"
-          onClick={() => {
-            messageStore.addMessage(
-              transactionsStore.deleteSeletedTransactions(),
-            );
-          }}
+          onClick={transactionsStore.deleteSelectedTransactionsInDB}
         >
           Delete transaction(s)
         </button>

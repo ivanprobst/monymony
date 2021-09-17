@@ -1,6 +1,7 @@
 // Libs
 import * as React from "react";
 import { types, Instance } from "mobx-state-tree";
+import { v4 as uuidv4 } from "uuid";
 
 // Model
 const Message = types.model("Message", {
@@ -29,8 +30,9 @@ export const MessagesStore = types
     },
   }))
   .actions((self) => ({
-    addMessage(message: IMessage) {
-      self.messages.set(message.id, message);
+    addMessage(message: { text: IMessage["text"]; type: IMessage["type"] }) {
+      const id = uuidv4();
+      self.messages.set(id, { ...message, id });
     },
     deleteMessage(id: IMessage["id"]) {
       self.messages.delete(id);

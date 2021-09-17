@@ -1,11 +1,7 @@
 // Libs
 import * as React from "react";
 import { types, Instance } from "mobx-state-tree";
-import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-
-// Models
-import { IMessage } from "./message";
 
 // Model
 export const Transaction = types
@@ -20,7 +16,6 @@ export const Transaction = types
     //   types.union(types.literal("costs"), types.literal("revenues")),
     //   "costs",
     // ),
-    //isSelected: false,
   })
   .views((self) => ({
     get month() {
@@ -61,6 +56,7 @@ const TransactionStore = types
       parameter: "date",
       way: "up",
     }),
+    selectedTransactions: types.map(types.string),
   })
   .views((self) => ({
     get transactionsList() {
@@ -100,11 +96,18 @@ const TransactionStore = types
         })
         .reduce((acc, [, { amount }]) => acc + amount, 0);
     },
+    isTransactionSelected(id: ITransaction["id"]) {
+      return self.selectedTransactions.has(id);
+    },
   }))
   .actions((self) => ({
-    setTransactions(transactions: Array<[string, ITransaction]>) {
+    setTransactions(transactions: Array<ITransaction>) {
+      const mappedTransactions = transactions.map((transaction) => [
+        transaction.id,
+        transaction,
+      ]);
       self.transactions.clear();
-      self.transactions.merge(transactions);
+      self.transactions.merge(mappedTransactions);
     },
     addTransaction(id: string, transaction: ITransaction) {
       self.transactions.set(id, Transaction.create(transaction));
@@ -117,29 +120,16 @@ const TransactionStore = types
       }
     },
     toggleSelectedTransaction(id: ITransaction["id"]) {
-      const transaction = self.transactions.get(id);
-      if (transaction !== undefined) {
-        //transaction.isSelected = !transaction.isSelected;
+      if (self.selectedTransactions.has(id)) {
+        self.selectedTransactions.delete(id);
+      } else {
+        self.selectedTransactions.set(id, id);
       }
     },
     selectAllTransactions() {
-      /*self.transactions.forEach(
-        (transaction) => (transaction.isSelected = true),
-      );*/
-    },
-    deleteSeletedTransactions(): IMessage {
-      let count = 0;
-      self.transactions.forEach((transaction) => {
-        if (transaction.isSelected) {
-          count++;
-          self.transactions.delete(transaction.id);
-        }
-      });
-      return {
-        id: uuidv4(),
-        text: `${count} transaction(s) deleted.`,
-        type: "confirmation",
-      };
+      self.transactions.forEach((transaction) =>
+        self.selectedTransactions.set(transaction.id, transaction.id),
+      );
     },
   }))
   .actions((self) => ({
@@ -150,19 +140,32 @@ const TransactionStore = types
       amount: ITransaction["amount"];
     }) {
       const res = await axios.get(
-        `https://us-central1-mony-mony-314909.cloudfunctions.net/addTransaction?transaction=${JSON.stringify(
+        `https://europe-west1-mony-mony-314909.cloudfunctions.net/addTransaction?transaction=${JSON.stringify(
           transaction,
         )}`,
-      ); // ??? move API url somewhere else
+      );
 
+      self.setTransactions(res.data.data);
       return { status: "success", data: res.data.id }; // ??? move confirmations status to model
     },
     async loadTransactionsFromDB() {
       const res = await axios.get(
-        "https://us-central1-mony-mony-314909.cloudfunctions.net/getTransactions",
-      ); // ??? move API url somewhere else
+        "https://europe-west1-mony-mony-314909.cloudfunctions.net/getTransactions",
+      );
 
       self.setTransactions(res.data.data);
+    },
+    async deleteSelectedTransactionsInDB() {
+      const ids = Array.from(self.selectedTransactions).map(([id]) => id);
+
+      const res = await axios.get(
+        `https://europe-west1-mony-mony-314909.cloudfunctions.net/deleteTransactions?ids=${JSON.stringify(
+          ids,
+        )}`,
+      );
+
+      self.setTransactions(res.data.data);
+      return { status: "success", data: res.data }; // ??? move confirmations status to model
     },
   }));
 
