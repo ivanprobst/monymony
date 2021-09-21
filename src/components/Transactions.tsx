@@ -9,13 +9,9 @@ import {
 } from "@heroicons/react/solid";
 
 // Import: components and models
+import { RootContext } from "../models/root";
+import { ITransaction, ITransactionsOrdering } from "../models/transaction";
 import MessageBox from "./MessageBox";
-import {
-  TransactionContext,
-  ITransaction,
-  ITransactionsOrdering,
-} from "../models/transaction";
-import { MessageContext } from "../models/message";
 
 // COMPONENT
 const TransactionRow = observer(function ({
@@ -31,7 +27,7 @@ const TransactionRow = observer(function ({
   };
 }) {
   // State and context
-  const transactionsStore = React.useContext(TransactionContext);
+  const transactionsStore = React.useContext(RootContext).transactionStore;
 
   // Helper
   const toggleSelection = function (event: React.FormEvent<HTMLInputElement>) {
@@ -56,11 +52,12 @@ const TransactionRow = observer(function ({
       <td className="p-2">{date}</td>
       <td className="p-2">{description}</td>
       <td className="p-2">
-        {type === "costs" ? (
-          <ChevronDoubleDownIcon className="inline h-4 w-4 text-mred" />
-        ) : (
-          <ChevronDoubleUpIcon className="inline h-4 w-4 text-green-500" />
-        )}
+        {type &&
+          (type === "costs" ? (
+            <ChevronDoubleDownIcon className="inline h-4 w-4 text-mred" />
+          ) : (
+            <ChevronDoubleUpIcon className="inline h-4 w-4 text-green-500" />
+          ))}
         &nbsp;{category}
       </td>
       <td className="p-2">{amount.toLocaleString("en")}</td>
@@ -77,7 +74,7 @@ function TransactionsTableHeader({
   children: string;
 }) {
   // State and context
-  const transactionsStore = React.useContext(TransactionContext);
+  const transactionsStore = React.useContext(RootContext).transactionStore;
 
   // Render
   return (
@@ -104,8 +101,8 @@ function TransactionsTableHeader({
 // COMPONENT
 function CreateTransactionForm() {
   // State and context
-  const transactionsStore = React.useContext(TransactionContext);
-  const messageStore = React.useContext(MessageContext);
+  const transactionsStore = React.useContext(RootContext).transactionStore;
+  const messageStore = React.useContext(RootContext).messageStore;
   const [formData, setFormData] = React.useState({
     date: "2021-01-01",
     description: "",
@@ -186,8 +183,8 @@ function CreateTransactionForm() {
 // MAIN
 export default observer(function TransactionsList() {
   // State and context
-  const transactionsStore = React.useContext(TransactionContext);
-  const messageStore = React.useContext(MessageContext);
+  const transactionsStore = React.useContext(RootContext).transactionStore;
+  const messageStore = React.useContext(RootContext).messageStore;
 
   // Helper
   const processTransactionsDeletion = async function () {

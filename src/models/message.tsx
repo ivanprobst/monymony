@@ -1,9 +1,8 @@
 // Libs
-import * as React from "react";
 import { types, Instance } from "mobx-state-tree";
 import { v4 as uuidv4 } from "uuid";
 
-// Model
+// MODEL
 const Message = types.model("Message", {
   id: types.identifier,
   text: "",
@@ -16,12 +15,12 @@ const Message = types.model("Message", {
     "information",
   ),
 });
-
 export interface IMessage extends Instance<typeof Message> {}
+export interface IMessageNoID extends Pick<IMessage, "text" | "type"> {}
 
-// Model
-export const MessagesStore = types
-  .model("MessagesStore", {
+// MODEL
+export const MessageStore = types
+  .model("MessageStore", {
     messages: types.map(Message),
   })
   .views((self) => ({
@@ -30,7 +29,7 @@ export const MessagesStore = types
     },
   }))
   .actions((self) => ({
-    addMessage(message: Pick<IMessage, "type" | "text">) {
+    addMessage(message: IMessageNoID) {
       const id = uuidv4();
       self.messages.set(id, { ...message, id });
     },
@@ -41,6 +40,4 @@ export const MessagesStore = types
       self.messages.clear();
     },
   }));
-
-// Context
-export const MessageContext = React.createContext(MessagesStore.create());
+export interface IMessageStore extends Instance<typeof MessageStore> {}

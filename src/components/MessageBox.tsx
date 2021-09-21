@@ -10,7 +10,8 @@ import {
 } from "@heroicons/react/outline";
 
 // Import: components and models
-import { MessageContext, IMessage } from "../models/message";
+import { RootContext } from "../models/root";
+import { IMessage } from "../models/message";
 
 // COMPONENT
 function MessageIcon({ type }: { type: string }) {
@@ -32,7 +33,7 @@ function MessageIcon({ type }: { type: string }) {
 
 // COMPONENT
 function MessageRow({ message: { type, text, id } }: { message: IMessage }) {
-  const messageStore = React.useContext(MessageContext);
+  const messageStore = React.useContext(RootContext).messageStore;
 
   // Render
   return (
@@ -48,7 +49,7 @@ function MessageRow({ message: { type, text, id } }: { message: IMessage }) {
 
 // MAIN
 export default observer(function MessageBox() {
-  const messageStore = React.useContext(MessageContext);
+  const messageStore = React.useContext(RootContext).messageStore;
 
   // Render
   return (

@@ -1,45 +1,41 @@
 // Import: libs
-import * as React from "react";
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, getRoot } from "mobx-state-tree";
 import axios from "axios";
 import { flow } from "mobx";
 
 // Import: components and models
-import { IMessage } from "./message";
+import { IRootStore } from "./root";
+import { IMessageNoID } from "./message";
+import { IConfigurationStore } from "./configuration";
 
-// Model
-export const Transaction = types
+// MODEL
+const Transaction = types
   .model("Transaction", {
     id: types.identifier,
     date: "", // DD.MM.YYYY >> YYYY-MM-DD
     description: "",
     category: "No category",
     amount: 0,
-    // group: "No group",
-    // type: types.optional(
-    //   types.union(types.literal("costs"), types.literal("revenues")),
-    //   "costs",
-    // ),
   })
   .views((self) => ({
     get month() {
-      return parseInt(self.date.split(".")[1]);
+      return parseInt(self.date.split("-")[1]);
     },
-    get group() {
-      return ""; // ??? add as views instead of DB props
+    get group(): string | undefined {
+      const config: IConfigurationStore =
+        getRoot<IRootStore>(self).configurationStore;
+      return config.groupFromCategory(self.category);
     },
-    get type() {
-      return "";
-    },
-    get isSelected() {
-      return false;
+    get type(): string | undefined {
+      const config: IConfigurationStore =
+        getRoot<IRootStore>(self).configurationStore;
+      return config.typeFromCategory(self.category);
     },
   }));
-
 export interface ITransaction extends Instance<typeof Transaction> {}
 
-// Model
-const TransactionsOrdering = types.model("ordering", {
+// MODEL
+const TransactionsOrdering = types.model("TransactionsOrdering", {
   parameter: types.union(
     types.literal("date"),
     types.literal("description"),
@@ -48,12 +44,11 @@ const TransactionsOrdering = types.model("ordering", {
   ),
   way: types.union(types.literal("up"), types.literal("down")),
 });
-
 export interface ITransactionsOrdering
   extends Instance<typeof TransactionsOrdering> {}
 
-// Model
-const TransactionStore = types
+// MODEL
+export const TransactionStore = types
   .model("TransactionStore", {
     transactions: types.map(Transaction),
     ordering: types.optional(TransactionsOrdering, {
@@ -73,7 +68,7 @@ const TransactionStore = types
       return self.transactions.size;
     },
     get orderedTransactionsList() {
-      return Array.from(self.transactions) // ??? improve date ordering (move date to Date format)
+      return Array.from(self.transactions)
         .map(([, transaction]) => transaction)
         .sort((a, b) => {
           if (self.ordering.way === "up") {
@@ -160,7 +155,7 @@ const TransactionStore = types
       return {
         type: "confirmation",
         text: `New transaction created.`,
-      } as Pick<IMessage, "type" | "text">;
+      } as IMessageNoID;
     }),
     loadTransactionsFromDB: flow(function* loadTransactionsFromDB() {
       self.toggleLoading();
@@ -187,12 +182,8 @@ const TransactionStore = types
         return {
           type: "confirmation",
           text: `Transaction(s) deleted.`,
-        } as Pick<IMessage, "type" | "text">;
+        } as IMessageNoID;
       },
     ),
   }));
-
-// Context
-export const TransactionContext = React.createContext(
-  TransactionStore.create(),
-);
+export interface ITransactionsStore extends Instance<typeof TransactionStore> {}
