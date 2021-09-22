@@ -102,7 +102,6 @@ function TransactionsTableHeader({
 function CreateTransactionForm() {
   // State and context
   const transactionsStore = React.useContext(RootContext).transactionStore;
-  const messageStore = React.useContext(RootContext).messageStore;
   const [formData, setFormData] = React.useState({
     date: "2021-01-01",
     description: "",
@@ -119,17 +118,15 @@ function CreateTransactionForm() {
   };
 
   // Helper
-  const processForm = async function (event: React.FormEvent) {
+  const processForm = function (event: React.FormEvent) {
     event.preventDefault();
     // ??? Add data sanity checks here
-    const confirmation = await transactionsStore.createTransactionInDB({
+    transactionsStore.createTransactionInDB({
       date: formData.date,
       description: formData.description,
       category: formData.category,
       amount: parseInt(formData.amount) ?? 0,
     });
-
-    messageStore.addMessage(confirmation);
   };
 
   // Render
@@ -186,13 +183,6 @@ export default observer(function TransactionsList() {
   const transactionsStore = React.useContext(RootContext).transactionStore;
   const messageStore = React.useContext(RootContext).messageStore;
 
-  // Helper
-  const processTransactionsDeletion = async function () {
-    const confirmation =
-      await transactionsStore.deleteSelectedTransactionsInDB();
-    messageStore.addMessage(confirmation);
-  };
-
   // Render
   return (
     <section className="grid grid-cols-6">
@@ -239,7 +229,7 @@ export default observer(function TransactionsList() {
         <button
           disabled={transactionsStore.isLoading}
           className="w-4/5 p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={processTransactionsDeletion}
+          onClick={transactionsStore.deleteSelectedTransactionsInDB}
         >
           Delete transaction(s)
         </button>

@@ -1,62 +1,103 @@
+// Libs
 import * as functions from "firebase-functions";
-import * as corsMod from "cors";
 import { firestore, initializeApp } from "firebase-admin";
+import * as express from "express";
+import * as cors from "cors";
 
+// Types
+interface IResponse {
+  status: "success" | "fail" | "error";
+  data?: {};
+  message?: string;
+  code?: number;
+}
+
+// Init
 initializeApp();
-const cors = corsMod({ origin: true });
+const transactions = express();
+transactions.use(cors({ origin: true }));
+exports.transactions = functions
+  .region("europe-west1")
+  .https.onRequest(transactions);
 
 // Helper
-const getAllTransactions = async function () {
-  const snapshot = await firestore().collection("transactions").get();
-  return snapshot.docs.map((transaction) => ({
-    ...transaction.data(),
-    id: transaction.id,
-  }));
+const docWithID = function (
+  docSnapshot: firestore.DocumentSnapshot<firestore.DocumentData>,
+) {
+  return {
+    ...docSnapshot.data(),
+    id: docSnapshot.id,
+  };
 };
 
-// addTransaction
-exports.addTransaction = functions
-  .region("europe-west1")
-  .https.onRequest(async (req, res) => {
-    cors(req, res, async () => {
-      // ??? improve with JSON post?
-      const transaction = req.query.transaction
-        ? JSON.parse(req.query.transaction as string)
-        : {};
+// GET /transactions/
+transactions.get("/", (req, res) => {
+  firestore()
+    .collection("transactions")
+    .get()
+    .then((docSnapshots) => {
+      const data = docSnapshots.docs.map((docSnapshot) =>
+        docWithID(docSnapshot),
+      );
 
-      await firestore().collection("transactions").add(transaction);
-
-      const data = await getAllTransactions();
-      res.json({ data });
+      const response: IResponse = {
+        status: "success",
+        data: { transactions: data },
+      };
+      res.json(response);
     });
+});
+
+// GET /transactions/:id
+// ??? Error handling: doc not found
+transactions.get("/:id", (req, res) => {
+  const id = req.params.id;
+
+  firestore()
+    .doc(`transactions/${id}`)
+    .get()
+    .then((docSnapshot) => {
+      const response: IResponse = {
+        status: "success",
+        data: { transaction: docWithID(docSnapshot) },
+      };
+      res.json(response);
+    });
+});
+
+// POST /transactions/
+// ??? Error handling: failed to create
+transactions.post("/", (req, res) => {
+  const transaction = req.body.data;
+
+  firestore()
+    .collection("transactions")
+    .add(transaction)
+    .then((docRef) => docRef.get())
+    .then((docSnapshot) => {
+      const response: IResponse = {
+        status: "success",
+        data: { transaction: docWithID(docSnapshot) },
+      };
+      res.json(response);
+    });
+});
+
+// DELETE /transactions/
+// ??? Error handling: no doc found
+transactions.delete("/", (req, res) => {
+  const ids = req.body.data;
+  const writeBatch = firestore().batch();
+
+  ids.forEach((id: string) => {
+    writeBatch.delete(firestore().doc(`transactions/${id}`));
   });
 
-// deleteTransactions
-exports.deleteTransactions = functions
-  .region("europe-west1")
-  .https.onRequest(async (req, res) => {
-    cors(req, res, async () => {
-      // ??? improve with JSON post?
-      const ids = req.query.ids ? JSON.parse(req.query.ids as string) : [];
-      const writeBatch = firestore().batch();
-
-      ids.forEach((id: string) => {
-        writeBatch.delete(firestore().doc(`transactions/${id}`));
-        functions.logger.info("added to batch: ", id);
-      });
-      await writeBatch.commit();
-
-      const data = await getAllTransactions();
-      res.json({ data });
-    });
+  writeBatch.commit().then((doc) => {
+    const response: IResponse = {
+      status: "success",
+      code: 204,
+    };
+    res.json(response);
   });
-
-// getTransactions
-exports.getTransactions = functions
-  .region("europe-west1")
-  .https.onRequest(async (req, res) => {
-    cors(req, res, async () => {
-      const data = await getAllTransactions();
-      res.json({ data });
-    });
-  });
+});

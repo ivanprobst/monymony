@@ -15,6 +15,7 @@ export default observer(function App() {
   // State and context
   const rootStore = React.useContext(RootContext);
   const transactionsStore = rootStore.transactionStore;
+  const configurationStore = rootStore.configurationStore;
 
   // Helper
   const reloadDatafromDB = function () {
@@ -39,7 +40,7 @@ export default observer(function App() {
             >
               <RefreshIcon
                 className={`inline h-6 w-6 ${
-                  transactionsStore.isLoading ? "animate-spin-slow" : ""
+                  configurationStore.isLoadingData ? "animate-spin-slow" : ""
                 }`}
               />
             </button>

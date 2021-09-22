@@ -1,7 +1,5 @@
 // Import: libs
 import { types, Instance, getRoot } from "mobx-state-tree";
-import axios from "axios";
-import { flow } from "mobx";
 
 // Import: components and models
 import { IRootStore } from "./root";
@@ -112,6 +110,9 @@ export const TransactionStore = types
     addTransaction(id: string, transaction: ITransaction) {
       self.transactions.set(id, Transaction.create(transaction));
     },
+    deleteTransaction(id: string) {
+      self.transactions.delete(id);
+    },
     setOrdering(transactionOrder: ITransactionsOrdering["parameter"]) {
       if (transactionOrder === self.ordering.parameter) {
         self.ordering.way = self.ordering.way === "up" ? "down" : "up";
@@ -134,56 +135,53 @@ export const TransactionStore = types
     toggleLoading() {
       self.isLoading = !self.isLoading;
     },
-  }))
-  .actions((self) => ({
-    createTransactionInDB: flow(function* createTransactionInDB(transaction: {
+    loadTransactionsFromDB() {
+      getRoot<IRootStore>(self).configurationStore.callAPI(
+        { method: "get", collection: "transactions" },
+        (data) => {
+          getRoot<IRootStore>(self).transactionStore.setTransactions(
+            data.transactions,
+          );
+        },
+      );
+    },
+    createTransactionInDB(transaction: {
       date: ITransaction["date"];
       description: ITransaction["description"];
       category: ITransaction["category"];
       amount: ITransaction["amount"];
     }) {
-      self.toggleLoading();
-      const res = yield axios.get(
-        `https://europe-west1-mony-mony-314909.cloudfunctions.net/addTransaction?transaction=${JSON.stringify(
-          transaction,
-        )}`,
+      getRoot<IRootStore>(self).configurationStore.callAPI(
+        { method: "post", collection: "transactions", body: transaction },
+        (data) => {
+          getRoot<IRootStore>(self).transactionStore.addTransaction(
+            data.transaction.id,
+            data.transaction,
+          );
+
+          getRoot<IRootStore>(self).messageStore.addMessage({
+            type: "confirmation",
+            text: `New transaction created.`,
+          } as IMessageNoID);
+        },
       );
-      self.toggleLoading();
+    },
+    deleteSelectedTransactionsInDB() {
+      const ids = Array.from(self.selectedTransactions).map(([id]) => id);
 
-      self.setTransactions(res.data.data);
-      self.setTransactions(res.data.data);
-      return {
-        type: "confirmation",
-        text: `New transaction created.`,
-      } as IMessageNoID;
-    }),
-    loadTransactionsFromDB: flow(function* loadTransactionsFromDB() {
-      self.toggleLoading();
-      const res = yield axios.get(
-        "https://europe-west1-mony-mony-314909.cloudfunctions.net/getTransactions",
+      getRoot<IRootStore>(self).configurationStore.callAPI(
+        { method: "delete", collection: "transactions", body: ids },
+        () => {
+          ids.forEach((id) =>
+            getRoot<IRootStore>(self).transactionStore.deleteTransaction(id),
+          );
+
+          getRoot<IRootStore>(self).messageStore.addMessage({
+            type: "confirmation",
+            text: `Transaction(s) deleted.`,
+          } as IMessageNoID);
+        },
       );
-      self.toggleLoading();
-
-      self.setTransactions(res.data.data);
-    }),
-    deleteSelectedTransactionsInDB: flow(
-      function* deleteSelectedTransactionsInDB() {
-        const ids = Array.from(self.selectedTransactions).map(([id]) => id);
-
-        self.toggleLoading();
-        const res = yield axios.get(
-          `https://europe-west1-mony-mony-314909.cloudfunctions.net/deleteTransactions?ids=${JSON.stringify(
-            ids,
-          )}`,
-        );
-        self.toggleLoading();
-
-        self.setTransactions(res.data.data);
-        return {
-          type: "confirmation",
-          text: `Transaction(s) deleted.`,
-        } as IMessageNoID;
-      },
-    ),
+    },
   }));
 export interface ITransactionsStore extends Instance<typeof TransactionStore> {}

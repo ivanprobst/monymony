@@ -1,5 +1,10 @@
 // Libs
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, getRoot } from "mobx-state-tree";
+import { flow } from "mobx";
+import axios, { Method } from "axios";
+
+// Import: components and models
+import { IRootStore } from "./root";
 
 // MODEL
 const GroupConfiguration = types.model("GroupConfiguration", {
@@ -71,6 +76,8 @@ export const ConfigurationStore = types
       "Nov",
       "Dec",
     ]),
+    APIurl: "https://europe-west1-mony-mony-314909.cloudfunctions.net",
+    isLoadingData: false,
   })
   .views((self) => ({
     get monthsList() {
@@ -109,6 +116,36 @@ export const ConfigurationStore = types
         (groupConfiguration) => group === groupConfiguration.group,
       )?.colorTheme;
     },
+  }))
+  .actions((self) => ({
+    toggleIsLoadingData() {
+      self.isLoadingData = !self.isLoadingData;
+    },
+
+    callAPI: flow(function* callAPI(
+      callParams: {
+        method: Method;
+        collection: string;
+        param?: string;
+        body?: {};
+      },
+      cb: (data: any) => void,
+    ) {
+      getRoot<IRootStore>(self).configurationStore.toggleIsLoadingData();
+
+      const response = yield axios({
+        method: callParams.method,
+        url: `${self.APIurl}/${callParams.collection}/${
+          callParams.param === undefined ? "" : callParams.param
+        }`,
+        data: callParams.body === undefined ? {} : { data: callParams.body },
+      });
+
+      getRoot<IRootStore>(self).configurationStore.toggleIsLoadingData();
+
+      // ??? add logic if status === error / fail?
+      cb(response.data.data);
+    }),
   }));
 export interface IConfigurationStore
   extends Instance<typeof ConfigurationStore> {}
