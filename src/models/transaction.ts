@@ -9,7 +9,7 @@ import { IMessageNoID } from "./message";
 const Transaction = types
   .model("Transaction", {
     id: types.identifier,
-    date: "", // DD.MM.YYYY >> YYYY-MM-DD
+    date: "2021-01-01",
     description: "",
     category: "No category",
     amount: 0,
@@ -25,7 +25,7 @@ const Transaction = types
       const group = groupConfigurations.find((groupConfiguration) =>
         groupConfiguration.categories.includes(self.category),
       );
-      return group ? group.group : "";
+      return group ? group.group : "No group";
     },
     get type(): string {
       const groupConfigurations =
@@ -34,7 +34,7 @@ const Transaction = types
       const group = groupConfigurations.find((groupConfiguration) =>
         groupConfiguration.categories.includes(self.category),
       );
-      return group ? group.type : "";
+      return group ? group.type : "No type";
     },
   }));
 export interface ITransaction extends Instance<typeof Transaction> {}
@@ -115,8 +115,8 @@ export const TransactionStore = types
       self.transactions.clear();
       self.transactions.merge(mappedTransactions);
     },
-    addTransaction(id: string, transaction: ITransaction) {
-      self.transactions.set(id, Transaction.create(transaction));
+    addTransaction(transaction: ITransaction) {
+      self.transactions.set(transaction.id, transaction);
     },
     deleteTransaction(id: string) {
       self.transactions.delete(id);
@@ -160,10 +160,13 @@ export const TransactionStore = types
       amount: ITransaction["amount"];
     }) {
       getRoot<IRootStore>(self).configurationStore.callAPI(
-        { method: "post", collection: "transactions", body: transaction },
+        {
+          method: "post",
+          collection: "transactions",
+          body: transaction,
+        },
         (data) => {
           getRoot<IRootStore>(self).transactionStore.addTransaction(
-            data.transaction.id,
             data.transaction,
           );
 

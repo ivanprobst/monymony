@@ -1,6 +1,7 @@
 // Import: libs
 import * as React from "react";
 import { observer } from "mobx-react-lite";
+import Dayjs from "dayjs";
 import {
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
@@ -58,7 +59,7 @@ const TransactionRow = observer(function ({
           {id}
         </span>
       </td>
-      <td className="p-2">{date}</td>
+      <td className="p-2">{Dayjs(date).format("MMM D, YYYY")}</td>
       <td className="p-2">{description}</td>
       <td className="p-2">{category}</td>
       <td className="p-2">
