@@ -112,6 +112,8 @@ function TransactionsTableHeader({
 function CreateTransactionForm() {
   // State and context
   const transactionsStore = React.useContext(RootContext).transactionStore;
+  const configurationStore = React.useContext(RootContext).configurationStore;
+
   const [formData, setFormData] = React.useState({
     date: "2021-01-01",
     description: "",
@@ -178,7 +180,7 @@ function CreateTransactionForm() {
         required
       />
       <button
-        disabled={transactionsStore.isLoading}
+        disabled={configurationStore.isLoadingData}
         className="p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Create transaction
@@ -241,7 +243,10 @@ export default observer(function TransactionsList() {
 
       <div className="pt-2 text-center border-l-2">
         <button
-          disabled={transactionsStore.isLoading}
+          disabled={
+            configurationStore.isLoadingData ||
+            transactionsStore.selectedTransactions.size === 0
+          }
           className="w-4/5 p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={transactionsStore.deleteSelectedTransactionsInDB}
         >
