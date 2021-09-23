@@ -28,11 +28,11 @@ const TransactionRow = observer(function ({
     amount: ITransaction["amount"];
   };
 }) {
-  // State and context
+  // Context
   const transactionsStore = React.useContext(RootContext).transactionStore;
 
   // Helper
-  const toggleSelection = function (
+  const handleTransactionSelection = function (
     event: React.MouseEvent<HTMLTableRowElement>,
   ) {
     transactionsStore.toggleSelectedTransaction(event.currentTarget.id);
@@ -43,7 +43,7 @@ const TransactionRow = observer(function ({
     <tr
       id={id}
       className="h-8 even:bg-gray-100 hover:bg-mblue-light"
-      onClick={toggleSelection}
+      onClick={handleTransactionSelection}
     >
       <td className="group relative">
         <label className="block pl-2">
@@ -84,7 +84,7 @@ function TransactionsTableHeader({
   orderParameter: ITransactionsOrdering["parameter"];
   children: string;
 }) {
-  // State and context
+  // Context
   const transactionsStore = React.useContext(RootContext).transactionStore;
 
   // Render
@@ -111,10 +111,11 @@ function TransactionsTableHeader({
 
 // COMPONENT
 function CreateTransactionForm() {
-  // State and context
+  // Context
   const transactionsStore = React.useContext(RootContext).transactionStore;
   const configurationStore = React.useContext(RootContext).configurationStore;
 
+  // State
   const [formData, setFormData] = React.useState({
     date: "2021-01-01",
     description: "",
@@ -123,7 +124,7 @@ function CreateTransactionForm() {
   });
 
   // Helper
-  const handleChange = function (event: React.FormEvent<HTMLInputElement>) {
+  const handleFormUpdate = function (event: React.FormEvent<HTMLInputElement>) {
     setFormData({
       ...formData,
       [event.currentTarget.name]: event.currentTarget.value,
@@ -133,12 +134,11 @@ function CreateTransactionForm() {
   // Helper
   const processForm = function (event: React.FormEvent) {
     event.preventDefault();
-    // ??? Add data sanity checks here
     transactionsStore.createTransactionInDB({
       date: formData.date,
       description: formData.description,
       category: formData.category,
-      amount: parseInt(formData.amount) ?? 0,
+      amount: parseInt(formData.amount),
     });
   };
 
@@ -150,7 +150,7 @@ function CreateTransactionForm() {
         name="date"
         type="date"
         value={formData.date}
-        onChange={handleChange}
+        onChange={handleFormUpdate}
         required
       />
       <input
@@ -159,7 +159,7 @@ function CreateTransactionForm() {
         type="text"
         placeholder="Description"
         value={formData.description}
-        onChange={handleChange}
+        onChange={handleFormUpdate}
         required
       />
       <input
@@ -168,7 +168,7 @@ function CreateTransactionForm() {
         type="text"
         placeholder="Category"
         value={formData.category}
-        onChange={handleChange}
+        onChange={handleFormUpdate}
         required
       />
       <input
@@ -177,11 +177,17 @@ function CreateTransactionForm() {
         type="number"
         placeholder="Amount"
         value={formData.amount}
-        onChange={handleChange}
+        onChange={handleFormUpdate}
         required
       />
       <button
-        disabled={configurationStore.isLoadingData}
+        disabled={
+          configurationStore.isLoadingData ||
+          formData.date === "" ||
+          formData.description === "" ||
+          formData.category === "" ||
+          formData.amount === ""
+        }
         className="p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Create transaction
@@ -192,14 +198,16 @@ function CreateTransactionForm() {
 
 // MAIN
 export default observer(function TransactionsList() {
-  // State and context
+  // Context
   const transactionsStore = React.useContext(RootContext).transactionStore;
   const messageStore = React.useContext(RootContext).messageStore;
   const configurationStore = React.useContext(RootContext).configurationStore;
+
+  // State
   const [selectAll, setSelectAll] = React.useState(false);
 
   // Helper
-  const toggleSelectAll = function () {
+  const handleSelectAll = function () {
     if (!selectAll) {
       transactionsStore.selectAllTransactions();
     } else {
@@ -222,7 +230,7 @@ export default observer(function TransactionsList() {
                     name="select-all-transactions"
                     className="text-mblue"
                     checked={selectAll}
-                    onChange={toggleSelectAll}
+                    onChange={handleSelectAll}
                   />
                 </label>
               </td>
