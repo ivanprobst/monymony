@@ -140,6 +140,9 @@ export const TransactionStore = types
         self.selectedTransactions.set(transaction.id, transaction.id),
       );
     },
+    unselectAllTransactions() {
+      self.selectedTransactions.clear();
+    },
     toggleLoading() {
       self.isLoading = !self.isLoading;
     },

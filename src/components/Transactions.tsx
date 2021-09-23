@@ -196,6 +196,17 @@ export default observer(function TransactionsList() {
   const transactionsStore = React.useContext(RootContext).transactionStore;
   const messageStore = React.useContext(RootContext).messageStore;
   const configurationStore = React.useContext(RootContext).configurationStore;
+  const [selectAll, setSelectAll] = React.useState(false);
+
+  // Helper
+  const toggleSelectAll = function () {
+    if (!selectAll) {
+      transactionsStore.selectAllTransactions();
+    } else {
+      transactionsStore.unselectAllTransactions();
+    }
+    setSelectAll(!selectAll);
+  };
 
   // Render
   return (
@@ -210,7 +221,8 @@ export default observer(function TransactionsList() {
                     type="checkbox"
                     name="select-all-transactions"
                     className="text-mblue"
-                    onChange={transactionsStore.selectAllTransactions}
+                    checked={selectAll}
+                    onChange={toggleSelectAll}
                   />
                 </label>
               </td>
