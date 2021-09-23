@@ -4,10 +4,6 @@
 
 @layer components {
   .nav-button {
-    @apply p-2 mr-1 bg-white text-mred hover:bg-mred-light hover:text-white;
-  }
-  ,
-  .section-title {
-    @apply mb-4 text-2xl;
+    @apply inline-block p-2 mr-2 bg-mred-light text-white;
   }
 }

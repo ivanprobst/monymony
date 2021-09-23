@@ -140,43 +140,45 @@ export default observer(function App() {
   return (
     <>
       <RootContext.Provider value={rootStore}>
-        <header className="grid grid-cols-2 p-4 bg-mred">
-          <h1 className="self-center text-3xl text-white">
+        <header className="grid grid-cols-2 px-4 bg-mred">
+          <h1 className="self-center py-4 text-3xl text-white">
             <a href="/">Mony mony</a>
           </h1>
+
           {currentUserAccount.userLoggedIn ? (
-            <nav className="self-center text-right">
+            <nav className="self-end text-right">
               <button
-                className="p-2 text-white hover:text-mred-light"
+                className="inline-block mr-3 text-white hover:text-mred-light"
                 onClick={transactionsStore.loadAllTransactionsFromDB}
               >
                 <RefreshIcon
-                  className={`inline h-6 w-6 ${
+                  className={`h-6 w-6 ${
                     configurationStore.isLoadingData ? "animate-spin-slow" : ""
                   }`}
                 />
               </button>
               <NavLink
                 className="nav-button"
-                activeClassName="bg-mred-light text-white"
+                activeClassName="bg-white text-mred"
                 to="/transactions"
               >
                 Transactions
               </NavLink>
               <NavLink
                 className="nav-button"
-                activeClassName="bg-mred-light text-white"
+                activeClassName="bg-white text-mred"
                 to="/grid"
               >
                 Grid
               </NavLink>
               <NavLink
                 className="nav-button"
-                activeClassName="bg-mred-light text-white"
+                activeClassName="bg-white text-mred"
                 to="/chart"
               >
                 Chart
               </NavLink>
+
               <button
                 className="p-2 text-white hover:text-mred-light"
                 onClick={processSignout}
@@ -196,15 +198,12 @@ export default observer(function App() {
                 <TransactionsList />
               </Route>
               <Route path="/grid">
-                <h2 className="section-title">Grid</h2>
                 <GridFull />
               </Route>
               <Route path="/chart">
-                <h2 className="section-title">Chart</h2>
                 <ChartViewer />
               </Route>
               <Route path="/">
-                <h2 className="section-title">Chart</h2>
                 <ChartViewer />
               </Route>
             </Switch>
