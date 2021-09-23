@@ -101,16 +101,6 @@ export const ConfigurationStore = types
         (groupConfiguration) => group === groupConfiguration.group,
       )?.categories;
     },
-    groupFromCategory(category: string) {
-      return self.groupConfigurations.find((groupConfiguration) => {
-        return groupConfiguration.categories.includes(category);
-      })?.group;
-    },
-    typeFromCategory(category: string) {
-      return self.groupConfigurations.find((groupConfiguration) =>
-        groupConfiguration.categories.includes(category),
-      )?.type;
-    },
     colorThemeFromGroup(group: string) {
       return self.groupConfigurations.find(
         (groupConfiguration) => group === groupConfiguration.group,

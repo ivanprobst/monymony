@@ -15,14 +15,15 @@ import MessageBox from "./MessageBox";
 
 // COMPONENT
 const TransactionRow = observer(function ({
-  transaction: { id, date, description, type, category, amount },
+  transaction: { id, date, description, category, group, type, amount },
 }: {
   transaction: {
     id: ITransaction["id"];
     date: ITransaction["date"];
     description: ITransaction["description"];
-    type: ITransaction["type"];
     category: ITransaction["category"];
+    group: ITransaction["group"];
+    type: ITransaction["type"];
     amount: ITransaction["amount"];
   };
 }) {
@@ -58,7 +59,7 @@ const TransactionRow = observer(function ({
           ) : (
             <ChevronDoubleUpIcon className="inline h-4 w-4 text-green-500" />
           ))}
-        &nbsp;{category}
+        &nbsp;{group}
       </td>
       <td className="p-2">{amount.toLocaleString("en")}</td>
     </tr>
@@ -182,12 +183,13 @@ export default observer(function TransactionsList() {
   // State and context
   const transactionsStore = React.useContext(RootContext).transactionStore;
   const messageStore = React.useContext(RootContext).messageStore;
+  const configurationStore = React.useContext(RootContext).configurationStore;
 
   // Render
   return (
     <section className="grid grid-cols-6">
       <div className="col-span-5 pl-2 pr-2">
-        <table className="w-full">
+        <table className="w-full table-auto">
           <thead className="border-b-2 font-bold text-base">
             <tr className="cursor-pointer">
               <td>
@@ -208,6 +210,9 @@ export default observer(function TransactionsList() {
               </TransactionsTableHeader>
               <TransactionsTableHeader orderParameter={"category"}>
                 Category
+              </TransactionsTableHeader>
+              <TransactionsTableHeader orderParameter={"group"}>
+                Group
               </TransactionsTableHeader>
               <TransactionsTableHeader orderParameter={"amount"}>
                 Amount

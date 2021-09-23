@@ -4,7 +4,6 @@ import { types, Instance, getRoot } from "mobx-state-tree";
 // Import: components and models
 import { IRootStore } from "./root";
 import { IMessageNoID } from "./message";
-import { IConfigurationStore } from "./configuration";
 
 // MODEL
 const Transaction = types
@@ -19,15 +18,23 @@ const Transaction = types
     get month() {
       return parseInt(self.date.split("-")[1]);
     },
-    get group(): string | undefined {
-      const config: IConfigurationStore =
-        getRoot<IRootStore>(self).configurationStore;
-      return config.groupFromCategory(self.category);
+    get group(): string {
+      const groupConfigurations =
+        getRoot<IRootStore>(self).configurationStore.groupConfigurations;
+
+      const group = groupConfigurations.find((groupConfiguration) =>
+        groupConfiguration.categories.includes(self.category),
+      );
+      return group ? group.group : "";
     },
-    get type(): string | undefined {
-      const config: IConfigurationStore =
-        getRoot<IRootStore>(self).configurationStore;
-      return config.typeFromCategory(self.category);
+    get type(): string {
+      const groupConfigurations =
+        getRoot<IRootStore>(self).configurationStore.groupConfigurations;
+
+      const group = groupConfigurations.find((groupConfiguration) =>
+        groupConfiguration.categories.includes(self.category),
+      );
+      return group ? group.type : "";
     },
   }));
 export interface ITransaction extends Instance<typeof Transaction> {}
@@ -38,6 +45,7 @@ const TransactionsOrdering = types.model("TransactionsOrdering", {
     types.literal("date"),
     types.literal("description"),
     types.literal("category"),
+    types.literal("group"),
     types.literal("amount"),
   ),
   way: types.union(types.literal("up"), types.literal("down")),
