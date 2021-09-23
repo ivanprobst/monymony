@@ -42,7 +42,8 @@ module.exports = {
     extend: {
       backgroundColor: ['even'],
       opacity: ['disabled'],
-      cursor: ['disabled']
+      cursor: ['disabled'],
+      visibility: ['group-hover']
     },
   },
   plugins: [

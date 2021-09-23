@@ -31,27 +31,36 @@ const TransactionRow = observer(function ({
   const transactionsStore = React.useContext(RootContext).transactionStore;
 
   // Helper
-  const toggleSelection = function (event: React.FormEvent<HTMLInputElement>) {
-    transactionsStore.toggleSelectedTransaction(event.currentTarget.name);
+  const toggleSelection = function (
+    event: React.MouseEvent<HTMLTableRowElement>,
+  ) {
+    transactionsStore.toggleSelectedTransaction(event.currentTarget.id);
   };
 
   // Render
   return (
-    <tr className="h-8 even:bg-gray-100 hover:bg-mblue-light">
-      <td>
+    <tr
+      id={id}
+      className="h-8 even:bg-gray-100 hover:bg-mblue-light"
+      onClick={toggleSelection}
+    >
+      <td className="group relative">
         <label className="block pl-2">
           <input
             type="checkbox"
             name={id}
             className="text-mblue"
-            onChange={toggleSelection}
+            onChange={() => {}}
             checked={transactionsStore.isTransactionSelected(id)}
           />
-          <span className="ml-1 text-xs">{id}</span>
         </label>
+        <span className="invisible absolute top-0 left-7 z-10 p-1 bg-white text-gray-700 border-2 border-gray-100 rounded group-hover:visible">
+          {id}
+        </span>
       </td>
       <td className="p-2">{date}</td>
       <td className="p-2">{description}</td>
+      <td className="p-2">{category}</td>
       <td className="p-2">
         {type &&
           (type === "costs" ? (
