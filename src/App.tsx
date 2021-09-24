@@ -106,11 +106,6 @@ export default observer(function App() {
   const user = React.useContext(UserContext);
 
   // Helper
-  const reloadDatafromDB = function () {
-    transactionsStore.loadTransactionsFromDB();
-  };
-
-  // Helper
   const processSignout = function () {
     const auth = getAuth();
     signOut(auth)
@@ -123,7 +118,6 @@ export default observer(function App() {
   };
 
   // Loading
-  React.useEffect(reloadDatafromDB, [transactionsStore]); // TODO: move out of app to limit re-renders
   React.useEffect(() => {
     console.log("app init: ", app);
     const auth = getAuth();
@@ -142,7 +136,7 @@ export default observer(function App() {
             <nav className="self-center text-right">
               <button
                 className="p-2 text-white hover:text-mred-light"
-                onClick={reloadDatafromDB}
+                onClick={transactionsStore.loadTransactionsFromDB}
               >
                 <RefreshIcon
                   className={`inline h-6 w-6 ${

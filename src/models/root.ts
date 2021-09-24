@@ -2,28 +2,25 @@
 import * as React from "react";
 import { types, Instance, castToSnapshot } from "mobx-state-tree";
 
-// Import: components and models
+// Import: models
 import { TransactionStore } from "./transaction";
 import { MessageStore } from "./message";
 import { ConfigurationStore } from "./configuration";
 
-// Stores init
-const transactionStore = TransactionStore.create();
-const messageStore = MessageStore.create();
-const configurationStore = ConfigurationStore.create();
-
-// RootStore init
+// MODEL
 const RootStore = types.model("RootStore", {
-  transactionStore: types.optional(TransactionStore, {}),
-  messageStore: types.optional(MessageStore, {}),
-  configurationStore: types.optional(ConfigurationStore, {}),
+  transactionStore: TransactionStore,
+  messageStore: MessageStore,
+  configurationStore: ConfigurationStore,
 });
 export interface IRootStore extends Instance<typeof RootStore> {}
 
+// Rootstore init
 const rootStore = RootStore.create({
-  transactionStore: castToSnapshot(transactionStore),
-  messageStore: castToSnapshot(messageStore),
-  configurationStore: castToSnapshot(configurationStore),
+  transactionStore: castToSnapshot(TransactionStore.create()),
+  messageStore: castToSnapshot(MessageStore.create()),
+  configurationStore: castToSnapshot(ConfigurationStore.create()),
 });
 
+// Context init
 export const RootContext = React.createContext(rootStore);

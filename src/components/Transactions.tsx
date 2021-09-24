@@ -216,6 +216,11 @@ export default observer(function TransactionsList() {
     setSelectAll(!selectAll);
   };
 
+  // Loading
+  React.useEffect(() => {
+    transactionsStore.loadTransactionsFromDB();
+  }, [transactionsStore]);
+
   // Render
   return (
     <section className="grid grid-cols-6">
