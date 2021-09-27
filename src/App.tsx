@@ -13,7 +13,6 @@ import { RefreshIcon } from "@heroicons/react/solid";
 
 // Import: components and models
 import { RootContext } from "./models/root";
-import { UserContext } from "./models/user";
 import ChartViewer from "./components/Charts";
 import GridFull from "./components/Grids";
 import TransactionsList from "./components/Transactions";
@@ -103,7 +102,7 @@ export default observer(function App() {
   const rootStore = React.useContext(RootContext);
   const transactionsStore = rootStore.transactionStore;
   const configurationStore = rootStore.configurationStore;
-  const user = React.useContext(UserContext);
+  const currentUserAccount = rootStore.currentUserAccount;
 
   // Helper
   const processSignout = function () {
@@ -124,6 +123,18 @@ export default observer(function App() {
     connectAuthEmulator(auth, "http://localhost:9099");
   }, []);
 
+  // Loading
+  React.useEffect(() => {
+    const auth = getAuth();
+    auth.onAuthStateChanged((authUser) => {
+      if (authUser?.email) {
+        currentUserAccount.logUserIn(authUser.email);
+      } else {
+        currentUserAccount.logUserOut();
+      }
+    });
+  }, [currentUserAccount]);
+
   // Render
   return (
     <>
@@ -132,7 +143,7 @@ export default observer(function App() {
           <h1 className="self-center text-3xl text-white">
             <a href="/">Mony mony</a>
           </h1>
-          {user ? (
+          {currentUserAccount.userLoggedIn ? (
             <nav className="self-center text-right">
               <button
                 className="p-2 text-white hover:text-mred-light"
@@ -169,7 +180,7 @@ export default observer(function App() {
                 className="p-2 text-white hover:text-mred-light"
                 onClick={processSignout}
               >
-                Sign out {user.email}
+                Sign out {currentUserAccount.email}
               </button>
             </nav>
           ) : (
@@ -177,7 +188,7 @@ export default observer(function App() {
           )}
         </header>
 
-        {user ? (
+        {currentUserAccount.userLoggedIn ? (
           <main className="flex-auto p-8 text-sm text-gray-700">
             <Switch>
               <Route path="/transactions">

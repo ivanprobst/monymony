@@ -1,6 +1,20 @@
 // Import: libs
-import * as React from "react";
-import { User } from "firebase/auth";
+import { types, Instance } from "mobx-state-tree";
 
-// Context init
-export const UserContext = React.createContext<User | null>(null);
+// MODEL
+export const UserAccount = types
+  .model("UserAccount", {
+    userLoggedIn: types.optional(types.boolean, false),
+    email: types.optional(types.string, ""),
+  })
+  .actions((self) => ({
+    logUserIn(email: string) {
+      self.email = email;
+      self.userLoggedIn = true;
+    },
+    logUserOut() {
+      self.email = "";
+      self.userLoggedIn = false;
+    },
+  }));
+export interface IUserAccount extends Instance<typeof UserAccount> {}
