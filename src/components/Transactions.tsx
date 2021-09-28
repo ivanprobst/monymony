@@ -216,6 +216,13 @@ export default observer(function TransactionsList() {
     setSelectAll(!selectAll);
   };
 
+  // Helper
+  const handleDeleteSelected = function () {
+    transactionsStore.selectedTransactions.forEach((id) =>
+      transactionsStore.deleteTransactionInDB(id),
+    );
+  };
+
   // Loading
   React.useEffect(() => {
     transactionsStore.loadTransactionsFromDB();
@@ -274,7 +281,7 @@ export default observer(function TransactionsList() {
             transactionsStore.selectedTransactions.size === 0
           }
           className="w-4/5 p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={transactionsStore.deleteSelectedTransactionsInDB}
+          onClick={handleDeleteSelected}
         >
           Delete transaction(s)
         </button>

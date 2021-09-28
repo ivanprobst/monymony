@@ -9,6 +9,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { RefreshIcon } from "@heroicons/react/solid";
 
 // Import: components and models
@@ -107,20 +108,20 @@ export default observer(function App() {
   // Helper
   const processSignout = function () {
     const auth = getAuth();
-    signOut(auth)
-      .then(() => {
-        console.log("signed out");
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    signOut(auth).catch((error) => {
+      console.error(error);
+    });
   };
 
   // Loading
   React.useEffect(() => {
     console.log("app init: ", app);
+
     const auth = getAuth();
     connectAuthEmulator(auth, "http://localhost:9099");
+
+    const db = getFirestore();
+    connectFirestoreEmulator(db, "localhost", 8080);
   }, []);
 
   // Loading

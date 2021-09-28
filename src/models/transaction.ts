@@ -1,9 +1,19 @@
 // Import: libs
 import { types, Instance, getRoot } from "mobx-state-tree";
+import {
+  collection,
+  getDocs,
+  getFirestore,
+  QuerySnapshot,
+  setDoc,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
 
 // Import: components and models
 import { IRootStore } from "./root";
-import { IMessageNoID } from "./message";
+import { flow } from "mobx";
 
 // MODEL
 const Transaction = types
@@ -146,56 +156,60 @@ export const TransactionStore = types
     toggleLoading() {
       self.isLoading = !self.isLoading;
     },
-    loadTransactionsFromDB() {
-      getRoot<IRootStore>(self).configurationStore.callAPI(
-        { method: "get", collection: "transactions" },
-        (data) => {
-          getRoot<IRootStore>(self).transactionStore.setTransactions(
-            data.transactions,
-          );
-        },
-      );
-    },
-    createTransactionInDB(transaction: {
+    loadTransactionsFromDB: flow(function* loadTransactionsFromDB() {
+      try {
+        const db = getFirestore();
+
+        const transactionsSnapshot: QuerySnapshot<ITransaction> = yield getDocs(
+          collection(db, "transactions"),
+        );
+
+        const data = transactionsSnapshot.docs.map((transactionSnapshot) => ({
+          ...transactionSnapshot.data(),
+          id: transactionSnapshot.id,
+        }));
+
+        getRoot<IRootStore>(self).transactionStore.setTransactions(data);
+      } catch (error) {
+        // ??? Error handling: failed to load
+        console.error("Error: ", error);
+      }
+    }),
+    createTransactionInDB: flow(function* createTransactionInDB(transaction: {
       date: ITransaction["date"];
       description: ITransaction["description"];
       category: ITransaction["category"];
       amount: ITransaction["amount"];
     }) {
-      getRoot<IRootStore>(self).configurationStore.callAPI(
-        {
-          method: "post",
-          collection: "transactions",
-          body: transaction,
-        },
-        (data) => {
-          getRoot<IRootStore>(self).transactionStore.addTransaction(
-            data.transaction,
-          );
+      const db = getFirestore();
 
-          getRoot<IRootStore>(self).messageStore.addMessage({
-            type: "confirmation",
-            text: `New transaction created.`,
-          } as IMessageNoID);
-        },
-      );
-    },
-    deleteSelectedTransactionsInDB() {
-      const ids = Array.from(self.selectedTransactions).map(([id]) => id);
+      try {
+        const newtransaction = Transaction.create({
+          ...transaction,
+          id: uuidv4(),
+        });
+        yield setDoc(doc(db, "transactions", newtransaction.id), transaction);
 
-      getRoot<IRootStore>(self).configurationStore.callAPI(
-        { method: "delete", collection: "transactions", body: ids },
-        () => {
-          ids.forEach((id) =>
-            getRoot<IRootStore>(self).transactionStore.deleteTransaction(id),
-          );
+        getRoot<IRootStore>(self).transactionStore.addTransaction(
+          newtransaction,
+        );
+      } catch (error) {
+        // ??? Error handling: failed to create
+        console.error("Error: ", error);
+      }
+    }),
+    deleteTransactionInDB: flow(function* deleteSelectedTransactionsInDB(
+      id: string,
+    ) {
+      const db = getFirestore();
 
-          getRoot<IRootStore>(self).messageStore.addMessage({
-            type: "confirmation",
-            text: `Transaction(s) deleted.`,
-          } as IMessageNoID);
-        },
-      );
-    },
+      try {
+        yield deleteDoc(doc(db, "transactions", id));
+        getRoot<IRootStore>(self).transactionStore.deleteTransaction(id);
+      } catch (error) {
+        // ??? Error handling: no doc found
+        console.error("Error: ", error);
+      }
+    }),
   }));
 export interface ITransactionsStore extends Instance<typeof TransactionStore> {}
