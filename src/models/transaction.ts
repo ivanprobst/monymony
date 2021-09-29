@@ -125,6 +125,7 @@ export const TransactionStore = types
         self.ordering.way = self.ordering.way === "up" ? "down" : "up";
       } else {
         self.ordering.parameter = transactionOrder;
+        self.ordering.way = "up";
       }
     },
     toggleSelectedTransaction(id: ITransaction["id"]) {
