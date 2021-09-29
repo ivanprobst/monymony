@@ -1,5 +1,7 @@
 // Import: libs
 import { types, Instance, getRoot } from "mobx-state-tree";
+
+// Import: components and models
 import { IRootStore } from "./root";
 
 // MODEL

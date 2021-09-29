@@ -155,13 +155,14 @@ export const TransactionStore = types
         const db = getFirestore();
         const auth = getAuth(); // TODO should pull from user MST
 
-        const q = query(
-          collection(db, "transactions"),
-          where("ownerUID", "==", auth.currentUser?.uid ?? ""),
-        );
+        getRoot<IRootStore>(self).configurationStore.toggleIsLoadingData();
         const transactionsSnapshot: QuerySnapshot<ITransaction> = yield getDocs(
-          q,
+          query(
+            collection(db, "transactions"),
+            where("ownerUID", "==", auth.currentUser?.uid ?? ""),
+          ),
         );
+        getRoot<IRootStore>(self).configurationStore.toggleIsLoadingData();
 
         self.transactions.clear();
         transactionsSnapshot.forEach((transactionSnapshot) =>
@@ -187,10 +188,12 @@ export const TransactionStore = types
           const auth = getAuth(); // TODO should pull from user MST
           const transactionID = uuidv4();
 
+          getRoot<IRootStore>(self).configurationStore.toggleIsLoadingData();
           yield setDoc(doc(db, "transactions", transactionID), {
             ...transaction,
             ownerUID: auth.currentUser?.uid,
           });
+          getRoot<IRootStore>(self).configurationStore.toggleIsLoadingData();
 
           self.transactions.put({
             ...transaction,
@@ -207,7 +210,9 @@ export const TransactionStore = types
       try {
         const db = getFirestore();
 
+        getRoot<IRootStore>(self).configurationStore.toggleIsLoadingData();
         yield deleteDoc(doc(db, "transactions", id));
+        getRoot<IRootStore>(self).configurationStore.toggleIsLoadingData();
 
         self.transactions.delete(id);
       } catch (error) {

@@ -118,10 +118,10 @@ export default observer(function App() {
     console.log("app init: ", app);
 
     const auth = getAuth();
-    connectAuthEmulator(auth, "http://localhost:9099");
+    connectAuthEmulator(auth, "http://localhost:9099"); // TODO: escape emulator stuff for production
 
     const db = getFirestore();
-    connectFirestoreEmulator(db, "localhost", 8080);
+    connectFirestoreEmulator(db, "localhost", 8080); // TODO: escape emulator stuff for production
   }, []);
 
   // Loading
