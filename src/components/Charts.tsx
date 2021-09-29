@@ -13,8 +13,7 @@ import {
 } from "recharts";
 
 // Models
-import { TransactionContext } from "../models/transaction";
-import { ConfigurationContext } from "../models/configuration";
+import { RootContext } from "../models/root";
 
 // Types
 interface GroupCurveToDisplayMap {
@@ -44,7 +43,7 @@ function Chart({
   chartDataset: ChartDataset;
   chartTrendSet: ChartTrendSet;
 }) {
-  const config = React.useContext(ConfigurationContext);
+  const configurationStore = React.useContext(RootContext).configurationStore;
 
   return (
     <ResponsiveContainer width="95%" minHeight={500}>
@@ -64,12 +63,16 @@ function Chart({
                 key={`amount_${group}`}
                 type="monotone"
                 dataKey={`dataset.${group}`}
-                stroke={config.colorThemeFromGroup(group)?.colorCode}
+                stroke={
+                  configurationStore.colorThemeFromGroup(group)?.colorCode
+                }
               ></Line>,
 
               <ReferenceLine
                 key={`average_${group}`}
-                stroke={config.colorThemeFromGroup(group)?.colorCode}
+                stroke={
+                  configurationStore.colorThemeFromGroup(group)?.colorCode
+                }
                 strokeDasharray="1 5"
                 y={chartTrendSet[group]["average"]}
               />,
@@ -77,17 +80,21 @@ function Chart({
               <ReferenceLine
                 label="Trend"
                 key={`trend_${group}`}
-                stroke={config.colorThemeFromGroup(group)?.colorCode}
+                stroke={
+                  configurationStore.colorThemeFromGroup(group)?.colorCode
+                }
                 strokeDasharray="4 4"
                 segment={[
                   {
-                    x: config.monthsList[0],
+                    x: configurationStore.monthsList[0],
                     y: chartTrendSet[group]["regressionA"],
                   },
                   {
-                    x: config.monthsList[config.numberOfMonths - 1],
+                    x: configurationStore.monthsList[
+                      configurationStore.numberOfMonths - 1
+                    ],
                     y:
-                      config.numberOfMonths *
+                      configurationStore.numberOfMonths *
                         chartTrendSet[group]["regressionB"] +
                       chartTrendSet[group]["regressionA"],
                   },
@@ -108,14 +115,16 @@ function CurveController({
   groupCurvesToDisplay: GroupCurveToDisplayMap;
   curveToggler: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
-  const config = React.useContext(ConfigurationContext);
+  const configurationStore = React.useContext(RootContext).configurationStore;
 
   return (
     <>
       {Object.entries(groupCurvesToDisplay).map(([group, displayCurves]) => (
         <label key={group} className="block mb-2">
           <input
-            className={`text-${config.colorThemeFromGroup(group)?.colorClass}`}
+            className={`text-${
+              configurationStore.colorThemeFromGroup(group)?.colorClass
+            }`}
             name={group}
             type="checkbox"
             onChange={curveToggler}
@@ -131,12 +140,14 @@ function CurveController({
 // Render
 export default observer(function ChartViewer() {
   // Definitions
-  const transactionsStore = React.useContext(TransactionContext);
-  const config = React.useContext(ConfigurationContext);
+  const transactionsStore = React.useContext(RootContext).transactionStore;
+  const configurationStore = React.useContext(RootContext).configurationStore;
 
   const [groupCurvesToDisplay, setCurvesToDisplay] =
     React.useState<GroupCurveToDisplayMap>(
-      Object.fromEntries(config.groupsList.map((group) => [[group], true])),
+      Object.fromEntries(
+        configurationStore.groupsList.map((group) => [[group], true]),
+      ),
     );
 
   // Helpers
@@ -149,9 +160,9 @@ export default observer(function ChartViewer() {
 
   // Build standard dataset
   const chartDataset: ChartDataset = [];
-  config.monthsList.forEach((month, monthIndex) => {
+  configurationStore.monthsList.forEach((month, monthIndex) => {
     const dataset = Object.fromEntries(
-      config.groupsList.map((group) => [
+      configurationStore.groupsList.map((group) => [
         [group],
         transactionsStore.totalFromCategoryOrGroup(
           "group",
@@ -169,13 +180,13 @@ export default observer(function ChartViewer() {
 
   // Build trends dataset
   const chartTrendSet: ChartTrendSet = {};
-  config.groupsList.forEach((group) => {
+  configurationStore.groupsList.forEach((group) => {
     let sumX = 0;
     let sumY = 0;
     let sumX2 = 0;
     let sumXY = 0;
 
-    config.monthsList.forEach((month, monthIndex) => {
+    configurationStore.monthsList.forEach((month, monthIndex) => {
       sumX += monthIndex;
       sumX2 += monthIndex * monthIndex;
       sumY += chartDataset[monthIndex]["dataset"][group];
@@ -183,13 +194,13 @@ export default observer(function ChartViewer() {
     });
 
     chartTrendSet[group] = {
-      average: sumY / config.numberOfMonths,
+      average: sumY / configurationStore.numberOfMonths,
       regressionA:
         (sumY * sumX2 - sumX * sumXY) /
-        (config.numberOfMonths * sumX2 - sumX * sumX),
+        (configurationStore.numberOfMonths * sumX2 - sumX * sumX),
       regressionB:
-        (config.numberOfMonths * sumXY - sumX * sumY) /
-        (config.numberOfMonths * sumX2 - sumX * sumX),
+        (configurationStore.numberOfMonths * sumXY - sumX * sumY) /
+        (configurationStore.numberOfMonths * sumX2 - sumX * sumX),
     };
   });
 

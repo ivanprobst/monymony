@@ -1,71 +1,13 @@
 // Libs
-import * as React from "react";
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, getRoot } from "mobx-state-tree";
+import { flow } from "mobx";
+import axios, { Method } from "axios";
 
-// Default configurations
-export const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+// Import: components and models
+import { IRootStore } from "./root";
 
-export const GROUP_STRUCTURE: Array<{
-  group: string;
-  type: "costs" | "revenues";
-  categories: Array<string>;
-  colorTheme: { colorClass: string; colorCode: string }; // ??? Type shouldn't be manual, issues with MST types.array (IGroupConfiguration)
-}> = [
-  {
-    group: "Revenues",
-    type: "revenues",
-    categories: ["Revenue 1", "Revenue 2", "Other revenue"],
-    colorTheme: { colorClass: "green-500", colorCode: "#10B981" },
-  },
-  {
-    group: "Costs of living",
-    type: "costs",
-    categories: [
-      "Home",
-      "Health",
-      "Meal",
-      "Transport",
-      "Interests",
-      "Other living",
-    ],
-    colorTheme: { colorClass: "mred", colorCode: "#AC3931" },
-  },
-  {
-    group: "Costs of fun",
-    type: "costs",
-    categories: [
-      "Restaurants and bars",
-      "Media",
-      "Gift",
-      "Holiday",
-      "Stuff",
-      "Other fun",
-    ],
-    colorTheme: { colorClass: "mred", colorCode: "#AC3931" },
-  },
-  {
-    group: "Investments",
-    type: "costs",
-    categories: ["3a", "Home investments", "Other investments"],
-    colorTheme: { colorClass: "mred", colorCode: "#AC3931" },
-  },
-];
-
-// Models
-export const GroupConfiguration = types.model("GroupConfiguration", {
+// MODEL
+const GroupConfiguration = types.model("GroupConfiguration", {
   group: types.string,
   type: types.union(types.literal("costs"), types.literal("revenues")),
   categories: types.array(types.string),
@@ -74,71 +16,126 @@ export const GroupConfiguration = types.model("GroupConfiguration", {
     colorCode: types.string,
   }),
 });
-
 export interface IGroupConfiguration
   extends Instance<typeof GroupConfiguration> {}
 
+// MODEL
 export const ConfigurationStore = types
   .model("ConfigurationStore", {
-    groupsConfigurations: types.array(GroupConfiguration),
-    monthsConfiguration: types.array(types.string),
+    groupConfigurations: types.optional(types.array(GroupConfiguration), [
+      {
+        group: "Revenues",
+        type: "revenues",
+        categories: ["Revenue 1", "Revenue 2", "Other revenue"],
+        colorTheme: { colorClass: "green-500", colorCode: "#10B981" },
+      },
+      {
+        group: "Costs of living",
+        type: "costs",
+        categories: [
+          "Home",
+          "Health",
+          "Meal",
+          "Transport",
+          "Interests",
+          "Other living",
+        ],
+        colorTheme: { colorClass: "mred", colorCode: "#AC3931" },
+      },
+      {
+        group: "Costs of fun",
+        type: "costs",
+        categories: [
+          "Restaurants and bars",
+          "Media",
+          "Gift",
+          "Holiday",
+          "Stuff",
+          "Other fun",
+        ],
+        colorTheme: { colorClass: "mred", colorCode: "#AC3931" },
+      },
+      {
+        group: "Investments",
+        type: "costs",
+        categories: ["3a", "Home investments", "Other investments"],
+        colorTheme: { colorClass: "mred", colorCode: "#AC3931" },
+      },
+    ]),
+    monthConfigurations: types.optional(types.array(types.string), [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ]),
+    APIurl: "https://europe-west1-mony-mony-314909.cloudfunctions.net",
+    isLoadingData: false,
   })
   .views((self) => ({
     get monthsList() {
-      return self.monthsConfiguration;
+      return self.monthConfigurations;
     },
     get numberOfMonths() {
-      return self.monthsConfiguration.length;
+      return self.monthConfigurations.length;
     },
     get groupsList() {
-      return self.groupsConfigurations.map(
+      return self.groupConfigurations.map(
         (groupConfiguration) => groupConfiguration.group,
       );
     },
     get categoriesList() {
-      return self.groupsConfigurations.flatMap(
+      return self.groupConfigurations.flatMap(
         (groupConfiguration) => groupConfiguration.categories,
       );
     },
     categoriesFromGroup(group: string) {
-      return self.groupsConfigurations.find(
+      return self.groupConfigurations.find(
         (groupConfiguration) => group === groupConfiguration.group,
-      )?.categories; // ??? Fix the potential undefined return
-    },
-    groupFromCategory(category: string) {
-      return self.groupsConfigurations.find((groupConfiguration) =>
-        groupConfiguration.categories.includes(category),
-      )?.group; // ??? Fix the potential undefined return
-    },
-    typeFromCategory(category: string) {
-      return self.groupsConfigurations.find((groupConfiguration) =>
-        groupConfiguration.categories.includes(category),
-      )?.type; // ??? Fix the potential undefined return
+      )?.categories;
     },
     colorThemeFromGroup(group: string) {
-      return self.groupsConfigurations.find(
+      return self.groupConfigurations.find(
         (groupConfiguration) => group === groupConfiguration.group,
-      )?.colorTheme; // ??? Fix the potential undefined return
+      )?.colorTheme;
     },
   }))
   .actions((self) => ({
-    addGroupConfiguration(groupConfiguration: IGroupConfiguration) {
-      self.groupsConfigurations.push(groupConfiguration);
+    toggleIsLoadingData() {
+      self.isLoadingData = !self.isLoadingData;
     },
-    setMonthsConfiguration(monthsConfiguration: Array<string>) {
-      self.monthsConfiguration.clear();
-      monthsConfiguration.forEach((month) =>
-        self.monthsConfiguration.push(month),
-      ); // ??? Loop seems overkill, check how to directly assign
-    },
-  }));
 
-// Context creation
-const configurationStore = ConfigurationStore.create();
-configurationStore.setMonthsConfiguration(MONTHS);
-GROUP_STRUCTURE.forEach((groupConfiguration) => {
-  configurationStore.addGroupConfiguration(
-    GroupConfiguration.create(groupConfiguration),
-  );
-});
-export const ConfigurationContext = React.createContext(configurationStore);
+    callAPI: flow(function* callAPI(
+      callParams: {
+        method: Method;
+        collection: string;
+        param?: string;
+        body?: {};
+      },
+      cb: (data: any) => void,
+    ) {
+      getRoot<IRootStore>(self).configurationStore.toggleIsLoadingData();
+
+      const response = yield axios({
+        method: callParams.method,
+        url: `${self.APIurl}/${callParams.collection}/${
+          callParams.param === undefined ? "" : callParams.param
+        }`,
+        data: callParams.body === undefined ? {} : { data: callParams.body },
+      });
+
+      getRoot<IRootStore>(self).configurationStore.toggleIsLoadingData();
+
+      // ??? add logic if status === error / fail?
+      cb(response.data.data);
+    }),
+  }));
+export interface IConfigurationStore
+  extends Instance<typeof ConfigurationStore> {}
