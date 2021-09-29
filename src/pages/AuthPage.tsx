@@ -6,8 +6,6 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 
-// Import: components and models
-
 export default function AuthPage() {
   // Init
   const auth = getAuth();
@@ -18,69 +16,82 @@ export default function AuthPage() {
     password: "",
   });
 
-  // Helper
-  const handleFormUpdate = function (event: React.FormEvent<HTMLInputElement>) {
+  // Handler
+  const handleInputUpdate = function (
+    event: React.FormEvent<HTMLInputElement>,
+  ) {
     setLoginData({
       ...loginData,
       [event.currentTarget.name]: event.currentTarget.value,
     });
   };
 
-  // Helper
-  const processLogin = function (event: React.FormEvent) {
+  // Handler
+  const handleLogin = function (event: React.FormEvent) {
     event.preventDefault();
 
     signInWithEmailAndPassword(auth, loginData.email, loginData.password).catch(
+      // TODO: handle login error
       (err) => console.error(err),
     );
   };
 
-  // Helper
-  const processSignup = function (event: React.FormEvent) {
+  // Handler
+  const handleSignup = function (event: React.FormEvent) {
     event.preventDefault();
 
     createUserWithEmailAndPassword(
       auth,
       loginData.email,
       loginData.password,
-    ).catch((err) => console.error(err));
+    ).catch(
+      // TODO: handle signup error
+      (err) => console.error(err),
+    );
   };
 
+  // Render
   return (
-    <form className="p-2">
-      <input
-        className="block mb-4 shadow text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        name="email"
-        type="email"
-        placeholder="Email"
-        value={loginData.email}
-        onChange={handleFormUpdate}
-        required
-      />
-      <input
-        className="block mb-4 shadow text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        name="password"
-        type="password"
-        placeholder="Password"
-        value={loginData.password}
-        onChange={handleFormUpdate}
-        required
-      />
+    <div className="text-center">
+      <h2 className="pb-4 text-xl">Welcome to Mony mony</h2>
+      <p className="pb-4">Please log in or create a new account.</p>
 
-      <button
-        disabled={loginData.email === "" || loginData.password === ""}
-        onClick={processLogin}
-        className="block p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Login
-      </button>
-      <button
-        disabled={loginData.email === "" || loginData.password === ""}
-        onClick={processSignup}
-        className="block p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Sign up
-      </button>
-    </form>
+      <form className="inline-block w-72">
+        <input
+          className="w-full mb-4 shadow"
+          name="email"
+          type="email"
+          placeholder="Email"
+          value={loginData.email}
+          onChange={handleInputUpdate}
+          required
+        />
+        <input
+          className="w-full mb-4 shadow"
+          name="password"
+          type="password"
+          placeholder="Password"
+          value={loginData.password}
+          onChange={handleInputUpdate}
+          required
+        />
+
+        <button
+          disabled={loginData.email === "" || loginData.password === ""}
+          onClick={handleLogin}
+          className="w-full mb-4 p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Log in
+        </button>
+
+        <button
+          disabled={loginData.email === "" || loginData.password === ""}
+          onClick={handleSignup}
+          className="w-full mb-4 p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Sign up
+        </button>
+      </form>
+    </div>
   );
 }

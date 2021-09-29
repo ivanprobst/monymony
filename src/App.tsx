@@ -13,7 +13,7 @@ import TransactionsPage from "./pages/TransactionsPage";
 import GridPage from "./pages/GridPage";
 import ChartPage from "./pages/ChartPage";
 
-// Import: components and models
+// Import: models
 import { RootContext } from "./models/root";
 
 // MAIN
@@ -110,8 +110,8 @@ export default observer(function App() {
           )}
         </header>
 
-        {currentUserAccount.userLoggedIn ? (
-          <main className="flex-auto p-8 text-sm text-gray-700">
+        <main className="flex-auto p-8 text-sm text-gray-700">
+          {currentUserAccount.userLoggedIn ? (
             <Switch>
               <Route path="/transactions">
                 <TransactionsPage />
@@ -126,12 +126,10 @@ export default observer(function App() {
                 <ChartPage />
               </Route>
             </Switch>
-          </main>
-        ) : (
-          <main>
+          ) : (
             <AuthPage />
-          </main>
-        )}
+          )}
+        </main>
 
         <footer className="p-4 text-white bg-mred">
           © 2021 by ivanprobst (
