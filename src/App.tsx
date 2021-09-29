@@ -2,100 +2,19 @@
 import * as React from "react";
 import { observer } from "mobx-react-lite";
 import { Switch, Route, NavLink } from "react-router-dom";
-import {
-  getAuth,
-  connectAuthEmulator,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
+import { app } from "./firebase";
+import { getAuth, connectAuthEmulator, signOut } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { RefreshIcon } from "@heroicons/react/solid";
 
+// Import: pages
+import AuthPage from "./pages/AuthPage";
+import TransactionsPage from "./pages/TransactionsPage";
+import GridPage from "./pages/GridPage";
+import ChartPage from "./pages/ChartPage";
+
 // Import: components and models
 import { RootContext } from "./models/root";
-import ChartViewer from "./components/Charts";
-import GridFull from "./components/Grids";
-import TransactionsList from "./components/Transactions";
-import { app } from "./firebase";
-
-// COMPONENT
-function LoginForm() {
-  // Init
-  const auth = getAuth();
-
-  // State
-  const [loginData, setLoginData] = React.useState({
-    email: "",
-    password: "",
-  });
-
-  // Helper
-  const handleFormUpdate = function (event: React.FormEvent<HTMLInputElement>) {
-    setLoginData({
-      ...loginData,
-      [event.currentTarget.name]: event.currentTarget.value,
-    });
-  };
-
-  // Helper
-  const processLogin = function (event: React.FormEvent) {
-    event.preventDefault();
-
-    signInWithEmailAndPassword(auth, loginData.email, loginData.password).catch(
-      (err) => console.error(err),
-    );
-  };
-
-  // Helper
-  const processSignup = function (event: React.FormEvent) {
-    event.preventDefault();
-
-    createUserWithEmailAndPassword(
-      auth,
-      loginData.email,
-      loginData.password,
-    ).catch((err) => console.error(err));
-  };
-
-  return (
-    <form className="p-2">
-      <input
-        className="block mb-4 shadow text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        name="email"
-        type="email"
-        placeholder="Email"
-        value={loginData.email}
-        onChange={handleFormUpdate}
-        required
-      />
-      <input
-        className="block mb-4 shadow text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        name="password"
-        type="password"
-        placeholder="Password"
-        value={loginData.password}
-        onChange={handleFormUpdate}
-        required
-      />
-
-      <button
-        disabled={loginData.email === "" || loginData.password === ""}
-        onClick={processLogin}
-        className="block p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Login
-      </button>
-      <button
-        disabled={loginData.email === "" || loginData.password === ""}
-        onClick={processSignup}
-        className="block p-2 text-mred border-2 border-mred disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Sign up
-      </button>
-    </form>
-  );
-}
 
 // MAIN
 export default observer(function App() {
@@ -195,22 +114,22 @@ export default observer(function App() {
           <main className="flex-auto p-8 text-sm text-gray-700">
             <Switch>
               <Route path="/transactions">
-                <TransactionsList />
+                <TransactionsPage />
               </Route>
               <Route path="/grid">
-                <GridFull />
+                <GridPage />
               </Route>
               <Route path="/chart">
-                <ChartViewer />
+                <ChartPage />
               </Route>
               <Route path="/">
-                <ChartViewer />
+                <ChartPage />
               </Route>
             </Switch>
           </main>
         ) : (
           <main>
-            <LoginForm></LoginForm>
+            <AuthPage />
           </main>
         )}
 
