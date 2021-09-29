@@ -134,7 +134,7 @@ function CreateTransactionForm() {
   // Helper
   const processForm = function (event: React.FormEvent) {
     event.preventDefault();
-    transactionsStore.createTransactionInDB({
+    transactionsStore.createNewTransactionInDB({
       date: formData.date,
       description: formData.description,
       category: formData.category,
@@ -222,11 +222,6 @@ export default observer(function TransactionsList() {
       transactionsStore.deleteTransactionInDB(id),
     );
   };
-
-  // Loading
-  React.useEffect(() => {
-    transactionsStore.loadTransactionsFromDB();
-  }, [transactionsStore]);
 
   // Render
   return (

@@ -136,6 +136,11 @@ export default observer(function App() {
     });
   }, [currentUserAccount]);
 
+  // Loading
+  React.useEffect(() => {
+    transactionsStore.loadAllTransactionsFromDB();
+  }, [transactionsStore]);
+
   // Render
   return (
     <>
@@ -148,7 +153,7 @@ export default observer(function App() {
             <nav className="self-center text-right">
               <button
                 className="p-2 text-white hover:text-mred-light"
-                onClick={transactionsStore.loadTransactionsFromDB}
+                onClick={transactionsStore.loadAllTransactionsFromDB}
               >
                 <RefreshIcon
                   className={`inline h-6 w-6 ${

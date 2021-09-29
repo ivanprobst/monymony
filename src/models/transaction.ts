@@ -1,5 +1,5 @@
 // Import: libs
-import { types, Instance, getRoot } from "mobx-state-tree";
+import { types, Instance, getRoot, flow } from "mobx-state-tree";
 import {
   collection,
   getDocs,
@@ -13,7 +13,6 @@ import { v4 as uuidv4 } from "uuid";
 
 // Import: components and models
 import { IRootStore } from "./root";
-import { flow } from "mobx";
 
 // MODEL
 const Transaction = types
@@ -117,20 +116,6 @@ export const TransactionStore = types
     },
   }))
   .actions((self) => ({
-    setTransactions(transactions: Array<ITransaction>) {
-      const mappedTransactions = transactions.map((transaction) => [
-        transaction.id,
-        transaction,
-      ]);
-      self.transactions.clear();
-      self.transactions.merge(mappedTransactions);
-    },
-    addTransaction(transaction: ITransaction) {
-      self.transactions.set(transaction.id, transaction);
-    },
-    deleteTransaction(id: string) {
-      self.transactions.delete(id);
-    },
     setOrdering(transactionOrder: ITransactionsOrdering["parameter"]) {
       if (transactionOrder === self.ordering.parameter) {
         self.ordering.way = self.ordering.way === "up" ? "down" : "up";
@@ -156,7 +141,7 @@ export const TransactionStore = types
     toggleLoading() {
       self.isLoading = !self.isLoading;
     },
-    loadTransactionsFromDB: flow(function* loadTransactionsFromDB() {
+    loadAllTransactionsFromDB: flow(function* loadAllTransactionsFromDB() {
       try {
         const db = getFirestore();
 
@@ -164,48 +149,45 @@ export const TransactionStore = types
           collection(db, "transactions"),
         );
 
-        const data = transactionsSnapshot.docs.map((transactionSnapshot) => ({
-          ...transactionSnapshot.data(),
-          id: transactionSnapshot.id,
-        }));
-
-        getRoot<IRootStore>(self).transactionStore.setTransactions(data);
+        self.transactions.clear();
+        transactionsSnapshot.forEach((transactionSnapshot) =>
+          self.transactions.put({
+            ...transactionSnapshot.data(),
+            id: transactionSnapshot.id,
+          }),
+        );
       } catch (error) {
         // ??? Error handling: failed to load
         console.error("Error: ", error);
       }
     }),
-    createTransactionInDB: flow(function* createTransactionInDB(transaction: {
-      date: ITransaction["date"];
-      description: ITransaction["description"];
-      category: ITransaction["category"];
-      amount: ITransaction["amount"];
-    }) {
-      const db = getFirestore();
+    createNewTransactionInDB: flow(
+      function* createNewTransactionInDB(transaction: {
+        date: ITransaction["date"];
+        description: ITransaction["description"];
+        category: ITransaction["category"];
+        amount: ITransaction["amount"];
+      }) {
+        try {
+          const db = getFirestore();
+          const transactionID = uuidv4();
 
+          yield setDoc(doc(db, "transactions", transactionID), transaction);
+
+          self.transactions.put({ ...transaction, id: transactionID });
+        } catch (error) {
+          // ??? Error handling: failed to create
+          console.error("Error: ", error);
+        }
+      },
+    ),
+    deleteTransactionInDB: flow(function* deleteTransactionInDB(id: string) {
       try {
-        const newtransaction = Transaction.create({
-          ...transaction,
-          id: uuidv4(),
-        });
-        yield setDoc(doc(db, "transactions", newtransaction.id), transaction);
+        const db = getFirestore();
 
-        getRoot<IRootStore>(self).transactionStore.addTransaction(
-          newtransaction,
-        );
-      } catch (error) {
-        // ??? Error handling: failed to create
-        console.error("Error: ", error);
-      }
-    }),
-    deleteTransactionInDB: flow(function* deleteSelectedTransactionsInDB(
-      id: string,
-    ) {
-      const db = getFirestore();
-
-      try {
         yield deleteDoc(doc(db, "transactions", id));
-        getRoot<IRootStore>(self).transactionStore.deleteTransaction(id);
+
+        self.transactions.delete(id);
       } catch (error) {
         // ??? Error handling: no doc found
         console.error("Error: ", error);
