@@ -1,143 +1,94 @@
-// Assets
-import { iTransaction } from "../utils/types";
-import { CONFIG_MONTHS, CONFIG_GROUP_STRUCTURE } from "../utils/configurations";
+// Libs
+import * as React from "react";
+import { observer } from "mobx-react-lite";
 
-// Types
-interface iGridData {
-  [groupName: string]: {
-    [categoryName: string]: Array<number>;
-  };
-}
+// Models
+import { TransactionContext, ITransaction } from "../models/transaction";
+import { ConfigurationContext } from "../models/configuration";
 
-// COMP: GridCell
-function GridCell({
+// Component
+function GridDataCell({
   value,
-  type,
-  isLast,
+  isTotal,
 }: {
   value: number;
-  type: string;
-  isLast: boolean;
+  isTotal?: boolean;
 }) {
   return (
     <td
       className={`p-2 text-right ${value === 0 ? "text-gray-300" : ""} ${
-        type === "Profit"
-          ? value < 0
-            ? "bg-mred-light"
-            : "bg-mgreen-light"
-          : ""
-      } ${isLast ? "border-l" : ""}`}
+        isTotal ? "border-l" : ""
+      }`}
     >
       {value.toLocaleString("en")}
     </td>
   );
 }
 
-// COMP: GridGroupSection
-function GridGroupSection({
-  groupName,
-  groupData,
+// Component
+const GridDataRow = observer(function GridDataRow({
+  category,
+  group,
 }: {
-  groupName: string;
-  groupData: { [categoryName: string]: Array<number> };
+  category?: ITransaction["category"];
+  group?: ITransaction["group"];
 }) {
+  const transactionsStore = React.useContext(TransactionContext);
+  const config = React.useContext(ConfigurationContext);
+
+  return (
+    <tr>
+      <td className={`p-2 pl-4 ${category ? "" : "font-bold"}`}>
+        {category ? category : "Total"}
+      </td>
+      {config.monthsList.map((month, index) => (
+        <GridDataCell
+          key={(category ? category : group ? group : "") + index}
+          value={transactionsStore.totalFromCategoryOrGroup(
+            category ? "category" : "group",
+            category ? category : group ? group : "",
+            index + 1,
+          )}
+        ></GridDataCell>
+      ))}
+      <GridDataCell
+        value={transactionsStore.totalFromCategoryOrGroup(
+          category ? "category" : "group",
+          category ? category : group ? group : "",
+        )}
+        isTotal={true}
+      ></GridDataCell>
+    </tr>
+  );
+});
+
+// Component
+function GridGroupSection({ group }: { group: string }) {
+  const config = React.useContext(ConfigurationContext);
+
   return (
     <>
       <tr className="border-t-4">
-        <td className="p-2 pt-4 font-bold text-base">{groupName}</td>
+        <td className="p-2 pt-4 font-bold text-base">{group}</td>
       </tr>
-      {Object.entries(groupData).map(([categoryName, categoryData]) => (
-        <tr
-          key={categoryName}
-          className={categoryName === "Total" ? "border-t" : ""}
-        >
-          <td
-            className={`p-2 pl-4 ${
-              categoryName === "Profit" || categoryName === "Total"
-                ? "font-bold"
-                : ""
-            }`}
-          >
-            {categoryName}
-          </td>
-          {categoryData.map((amount, index) => (
-            <GridCell
-              key={index}
-              value={amount}
-              type={categoryName}
-              isLast={index === categoryData.length - 1 ? true : false}
-            ></GridCell>
-          ))}
-        </tr>
+      {config.categoriesFromGroup(group)?.map((category) => (
+        <GridDataRow key={category} category={category}></GridDataRow>
       ))}
+      <GridDataRow group={group}></GridDataRow>
     </>
   );
 }
 
 // RENDER
-export default function GridViewer({
-  cleanTransactions,
-}: {
-  cleanTransactions: Array<iTransaction>;
-}) {
-  // Definitions
-  let gridData: iGridData = {};
-
-  // Build empty grid
-  for (const group of CONFIG_GROUP_STRUCTURE) {
-    gridData[group.name] = {};
-    for (const category of group.categories) {
-      gridData[group.name][category] = new Array(CONFIG_MONTHS.length + 1).fill(
-        0,
-      );
-    }
-    gridData[group.name]["Total"] = new Array(CONFIG_MONTHS.length + 1).fill(0);
-    gridData[group.name]["Profit"] = new Array(CONFIG_MONTHS.length + 1).fill(
-      0,
-    );
-  }
-
-  // Fill in category rows
-  for (const transaction of cleanTransactions) {
-    gridData[transaction.groupName][transaction.category][
-      transaction.monthIndex
-    ] += transaction.amount;
-  }
-
-  // Fill in total and profit for each group
-  for (let month = 0; month < CONFIG_MONTHS.length; month++) {
-    let currentProfit = 0;
-    for (const group of CONFIG_GROUP_STRUCTURE) {
-      let currentTotal = 0;
-      for (const category of group.categories) {
-        currentTotal += gridData[group.name][category][month];
-      }
-      group.type === "revenues"
-        ? (currentProfit += currentTotal)
-        : (currentProfit -= currentTotal);
-      gridData[group.name]["Total"][month] = currentTotal;
-      gridData[group.name]["Profit"][month] = currentProfit;
-    }
-  }
-
-  // Fill in total for each row
-  for (const group of Object.keys(gridData)) {
-    for (const rowKey of Object.keys(gridData[group])) {
-      let totalRow = 0;
-      for (let i = 0; i < CONFIG_MONTHS.length; i++) {
-        totalRow += gridData[group][rowKey][i];
-      }
-      gridData[group][rowKey][CONFIG_MONTHS.length] = totalRow;
-    }
-  }
+export default function GridFull() {
+  const config = React.useContext(ConfigurationContext);
 
   return (
     <table className="w-full">
       <thead className="font-bold">
         <tr className="text-right">
           <td></td>
-          {CONFIG_MONTHS.map((month) => (
+          {config.monthsList.map((month) => (
             <td key={month} className="p-2 text-base">
               {month}
             </td>
@@ -147,12 +98,8 @@ export default function GridViewer({
       </thead>
 
       <tbody>
-        {Object.entries(gridData).map(([groupName, groupData]) => (
-          <GridGroupSection
-            key={groupName}
-            groupName={groupName}
-            groupData={groupData}
-          ></GridGroupSection>
+        {config.groupsList.map((group) => (
+          <GridGroupSection key={group} group={group}></GridGroupSection>
         ))}
       </tbody>
     </table>
