@@ -128,18 +128,13 @@ export default observer(function App() {
   React.useEffect(() => {
     const auth = getAuth();
     auth.onAuthStateChanged((authUser) => {
-      if (authUser?.email) {
-        currentUserAccount.logUserIn(authUser.email);
+      if (authUser) {
+        currentUserAccount.logUserIn(authUser);
       } else {
         currentUserAccount.logUserOut();
       }
     });
-  }, [currentUserAccount]);
-
-  // Loading
-  React.useEffect(() => {
-    transactionsStore.loadAllTransactionsFromDB();
-  }, [transactionsStore]);
+  }, [currentUserAccount, transactionsStore]);
 
   // Render
   return (

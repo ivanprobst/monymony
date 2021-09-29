@@ -8,7 +8,10 @@ import {
   setDoc,
   doc,
   deleteDoc,
+  query,
+  where,
 } from "firebase/firestore";
+import { getAuth } from "@firebase/auth";
 import { v4 as uuidv4 } from "uuid";
 
 // Import: components and models
@@ -22,6 +25,7 @@ const Transaction = types
     description: "",
     category: "No category",
     amount: 0,
+    ownerUID: "",
   })
   .views((self) => ({
     get month() {
@@ -141,12 +145,22 @@ export const TransactionStore = types
     toggleLoading() {
       self.isLoading = !self.isLoading;
     },
+    clearAllTransactions() {
+      // TODO: replace by proper Store reset
+      self.transactions.clear();
+      self.selectedTransactions.clear();
+    },
     loadAllTransactionsFromDB: flow(function* loadAllTransactionsFromDB() {
       try {
         const db = getFirestore();
+        const auth = getAuth(); // TODO should pull from user MST
 
-        const transactionsSnapshot: QuerySnapshot<ITransaction> = yield getDocs(
+        const q = query(
           collection(db, "transactions"),
+          where("ownerUID", "==", auth.currentUser?.uid ?? ""),
+        );
+        const transactionsSnapshot: QuerySnapshot<ITransaction> = yield getDocs(
+          q,
         );
 
         self.transactions.clear();
@@ -170,11 +184,19 @@ export const TransactionStore = types
       }) {
         try {
           const db = getFirestore();
+          const auth = getAuth(); // TODO should pull from user MST
           const transactionID = uuidv4();
 
-          yield setDoc(doc(db, "transactions", transactionID), transaction);
+          yield setDoc(doc(db, "transactions", transactionID), {
+            ...transaction,
+            ownerUID: auth.currentUser?.uid,
+          });
 
-          self.transactions.put({ ...transaction, id: transactionID });
+          self.transactions.put({
+            ...transaction,
+            id: transactionID,
+            ownerUID: auth.currentUser?.uid,
+          });
         } catch (error) {
           // ??? Error handling: failed to create
           console.error("Error: ", error);
