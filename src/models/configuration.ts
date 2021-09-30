@@ -1,5 +1,7 @@
 // Libs
 import { types, Instance } from "mobx-state-tree";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 
 // MODEL
 const GroupConfiguration = types.model("GroupConfiguration", {
@@ -104,6 +106,13 @@ export const ConfigurationStore = types
   .actions((self) => ({
     toggleIsLoadingData() {
       self.isLoadingData = !self.isLoadingData;
+    },
+    launchEmulator() {
+      const auth = getAuth();
+      connectAuthEmulator(auth, "http://localhost:9099"); // TODO: escape emulator stuff for production
+
+      const db = getFirestore();
+      connectFirestoreEmulator(db, "localhost", 8080); // TODO: escape emulator stuff for production
     },
   }));
 export interface IConfigurationStore

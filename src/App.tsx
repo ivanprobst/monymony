@@ -3,8 +3,7 @@ import * as React from "react";
 import { observer } from "mobx-react-lite";
 import { Switch, Route, NavLink } from "react-router-dom";
 import { app } from "./firebase";
-import { getAuth, connectAuthEmulator, signOut } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getAuth, signOut } from "firebase/auth";
 import { RefreshIcon } from "@heroicons/react/solid";
 
 // Import: pages
@@ -35,13 +34,8 @@ export default observer(function App() {
   // Init
   React.useEffect(() => {
     console.log("app init: ", app);
-
-    const auth = getAuth();
-    connectAuthEmulator(auth, "http://localhost:9099"); // TODO: escape emulator stuff for production
-
-    const db = getFirestore();
-    connectFirestoreEmulator(db, "localhost", 8080); // TODO: escape emulator stuff for production
-  }, []);
+    //configurationStore.launchEmulator();
+  }, [configurationStore]);
 
   // Render
   return (
