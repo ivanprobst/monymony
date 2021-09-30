@@ -32,7 +32,7 @@ export default observer(function App() {
     });
   };
 
-  // Loading
+  // Init
   React.useEffect(() => {
     console.log("app init: ", app);
 
@@ -43,18 +43,6 @@ export default observer(function App() {
     connectFirestoreEmulator(db, "localhost", 8080); // TODO: escape emulator stuff for production
   }, []);
 
-  // Loading
-  React.useEffect(() => {
-    const auth = getAuth();
-    auth.onAuthStateChanged((authUser) => {
-      if (authUser) {
-        currentUserAccount.logUserIn(authUser);
-      } else {
-        currentUserAccount.logUserOut();
-      }
-    });
-  }, [currentUserAccount, transactionsStore]);
-
   // Render
   return (
     <>
@@ -64,7 +52,7 @@ export default observer(function App() {
             <a href="/">Mony mony</a>
           </h1>
 
-          {currentUserAccount.userLoggedIn ? (
+          {currentUserAccount.uid && (
             <nav className="self-end text-right">
               <button
                 className="inline-block mr-3 text-white hover:text-mred-light"
@@ -105,13 +93,11 @@ export default observer(function App() {
                 Sign out {currentUserAccount.email}
               </button>
             </nav>
-          ) : (
-            <></>
           )}
         </header>
 
         <main className="flex-auto p-8 text-sm text-gray-700">
-          {currentUserAccount.userLoggedIn ? (
+          {currentUserAccount.uid ? (
             <Switch>
               <Route path="/transactions">
                 <TransactionsPage />
